@@ -1,29 +1,40 @@
 # autoware_scenario_selector/scenario_selector.launch.xml
 # Namespace: /planning/scenario_planning
-# 1 node
+#
+# Sources:
+#   launch:  /opt/autoware/1.5.0/share/autoware_scenario_selector/launch/scenario_selector.launch.xml
+#   source:  autoware_universe/planning/autoware_scenario_selector/src/node.cpp (line 455-495)
 version: 1
 
 nodes:
+  # Regular node — timer-based, selects between lane_driving and parking trajectories
   scenario_selector:
     sub:
-      lane_driving_trajectory:
+      lane_driving_trajectory:      # input/lane_driving/trajectory — QoS(1)
         min_rate_hz: 10
-      parking_trajectory:
+      parking_trajectory:           # input/parking/trajectory — QoS(1)
         state: true
-      odometry:
+      odometry:                     # input/odometry — QoS(100) polling subscriber
         state: true
-      route:
+      route:                        # input/route — QoS(1).transient_local()
         state: true
         required: true
+      lanelet_map:                  # input/lanelet_map — QoS(1).transient_local()
+        state: true
+        required: true
+      operation_mode:               # input/operation_mode_state — QoS(1).transient_local()
+        state: true
+      is_parking_completed:         # is_parking_completed — QoS(1) polling
+        state: true
     pub:
-      output_trajectory:
+      output_trajectory:            # output/trajectory — QoS(1)
         min_rate_hz: 10
-      scenario: {}
+      scenario: {}                  # output/scenario — QoS(1)
     paths:
       main:
         input: lane_driving_trajectory
         output: [output_trajectory]
-        max_latency_ms: 5
+        max_latency_ms: 5           # simple selection, no computation
 
 imports:
   lane_driving_trajectory:
@@ -34,6 +45,10 @@ imports:
     - scenario_selector/odometry
   route:
     - scenario_selector/route
+  lanelet_map:
+    - scenario_selector/lanelet_map
+  operation_mode:
+    - scenario_selector/operation_mode
 
 exports:
   planning_trajectory:

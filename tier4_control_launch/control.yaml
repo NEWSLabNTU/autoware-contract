@@ -1,103 +1,128 @@
 # tier4_control_launch/control.launch.xml
-# Namespace: /control (via push-ros-namespace)
-# 5 composable nodes in 2 containers
+# Namespace: / (push-ros-namespace: control)
+#
+# Sources:
+#   launch: /opt/autoware/1.5.0/share/tier4_control_launch/launch/control.launch.xml
+#   controller: autoware_universe/control/autoware_trajectory_follower_node/src/controller_node.cpp
+#   validator:  autoware_universe/control/autoware_control_validator/src/control_validator.cpp
+#   aeb:        autoware_universe/control/autoware_autonomous_emergency_braking/include/.../node.hpp
+#   lane_dep:   autoware_universe/control/autoware_lane_departure_checker/include/.../lane_departure_checker_node.hpp
+#   collision:  autoware_universe/control/autoware_collision_detector/include/.../node.hpp
 version: 1
 
 nodes:
+  # --- Controller (trajectory follower) ---
+  # plugin: autoware::motion::control::trajectory_follower_node::Controller
+  # ns: trajectory_follower (in control.launch.xml line 159)
   controller_node_exe:
     sub:
       trajectory:
-        min_rate_hz: 10
+        min_rate_hz: 10     # /planning/trajectory — remap ~/input/reference_trajectory
       kinematic_state:
-        min_rate_hz: 50
+        min_rate_hz: 50     # /localization/kinematic_state — remap ~/input/current_odometry
       steering_status:
-        min_rate_hz: 30
+        min_rate_hz: 30     # /vehicle/status/steering_status — remap ~/input/current_steering
       acceleration:
-        min_rate_hz: 50
-      operation_mode:
-        state: true
+        min_rate_hz: 50     # /localization/acceleration — remap ~/input/current_accel
+      operation_mode:       # /system/operation_mode/state — remap ~/input/current_operation_mode
+        state: true         # QoS(1).transient_local() in source — polled, not causal
+        required: true      # node won't operate without operation mode
     pub:
-      control_cmd:
-        min_rate_hz: 30
-      predicted_trajectory:
+      control_cmd:          # /control/trajectory_follower/control_cmd — remap ~/output/control_cmd
+        min_rate_hz: 30     # driven by controller timer (30 Hz default, param: ctrl_period)
+      predicted_trajectory:   # /control/trajectory_follower/lateral/predicted_trajectory
         min_rate_hz: 30
     paths:
       main:
         input: trajectory
         output: [control_cmd]
-        max_latency_ms: 10
+        max_latency_ms: 10    # single timer cycle at 30 Hz ≈ 33ms budget, target <10ms
       prediction:
         input: trajectory
         output: [predicted_trajectory]
         max_latency_ms: 10
 
+  # --- Control Validator ---
+  # plugin: autoware::control_validator::ControlValidator
+  # control.launch.xml line 231
   control_validator:
     sub:
-      control_cmd: {}
-      kinematic_state:
+      control_cmd: {}             # /control/command/control_cmd — remap ~/input/control_cmd
+      kinematic_state:            # /localization/kinematic_state — remap ~/input/kinematics
+        state: true               # InterProcessPollingSubscriber in source
+      operation_mode:             # /api/operation_mode/state — remap ~/input/operational_mode_state
         state: true
-      operation_mode:
+      measured_acceleration:      # /localization/acceleration — remap ~/input/measured_acceleration
         state: true
-      acceleration:
+      reference_trajectory:       # /planning/trajectory — remap ~/input/reference_trajectory
         state: true
-      reference_trajectory:
-        state: true
-      predicted_trajectory: {}
+      predicted_trajectory: {}    # /control/trajectory_follower/lateral/predicted_trajectory
     pub:
-      validation_status: {}
+      validation_status: {}       # ~/output/validation_status — QoS(1)
 
+  # --- AEB (Autonomous Emergency Braking) ---
+  # plugin: autoware::motion::control::autonomous_emergency_braking::AEB
+  # control.launch.xml line 204
   autonomous_emergency_braking:
     sub:
-      pointcloud: {}
-      velocity_status:
+      pointcloud: {}              # $(var input_pointcloud_topic_name) — sensor data
+      velocity_status:            # /vehicle/status/velocity_status
         state: true
-      imu:
+      imu:                        # /sensing/imu/imu_data
         state: true
-      predicted_objects:
+      predicted_objects:          # $(var input_objects_topic_name)
         state: true
-      predicted_trajectory: {}
-      autoware_state:
-        state: true
-    pub: []
+      predicted_trajectory: {}    # /control/trajectory_follower/lateral/predicted_trajectory
+    pub: []                       # only debug/marker publishers
 
+  # --- Lane Departure Checker ---
+  # plugin: autoware::lane_departure_checker::LaneDepartureCheckerNode
+  # control.launch.xml line 186
   lane_departure_checker:
     sub:
-      kinematic_state:
+      kinematic_state:            # /localization/kinematic_state
         state: true
-      vector_map:
+      vector_map:                 # /map/vector_map — QoS transient_local in source
+        state: true
+        required: true            # needs map to check lane boundaries
+      route:                      # /planning/mission_planning/route — QoS transient_local
         state: true
         required: true
-      route:
+      reference_trajectory:       # /planning/trajectory
         state: true
-        required: true
-      reference_trajectory:
+      predicted_trajectory: {}    # /control/trajectory_follower/lateral/predicted_trajectory
+      operation_mode:             # /api/operation_mode/state
         state: true
-      predicted_trajectory: {}
-      operation_mode:
-        state: true
-    pub: []
+    pub: []                       # only debug publishers
 
+  # --- Collision Detector ---
+  # plugin: autoware::collision_detector::CollisionDetectorNode
+  # control.launch.xml line 247
   collision_detector:
     sub:
-      kinematic_state:
+      kinematic_state:            # /localization/kinematic_state
         state: true
-      pointcloud:
+      pointcloud:                 # $(var input_pointcloud_topic_name)
         state: true
-      predicted_objects:
+      predicted_objects:          # $(var input_objects_topic_name) — QoS transient_local
         state: true
-      operation_mode:
+      operation_mode:             # /api/operation_mode/state — QoS transient_local
         state: true
-    pub: []
+    pub: []                       # only debug_markers
 
 topics:
+  # Controller → Validator (and downstream gate)
   control_cmd:
     type: autoware_control_msgs/msg/Control
     pub: [controller_node_exe/control_cmd]
     sub: [control_validator/control_cmd]
     rate_hz: 30
     qos:
-      reliability: reliable
+      reliability: reliable       # QoS(1).transient_local() — controller_node.cpp pub
+      durability: transient_local
+      depth: 1
 
+  # Controller → Validator, AEB, Lane Departure Checker
   predicted_trajectory:
     type: autoware_planning_msgs/msg/Trajectory
     pub: [controller_node_exe/predicted_trajectory]
@@ -107,45 +132,56 @@ topics:
       - lane_departure_checker/predicted_trajectory
     rate_hz: 30
     qos:
-      reliability: reliable
+      reliability: reliable       # QoS(1) — controller_node.cpp pub
+      depth: 1
 
 imports:
+  # /planning/trajectory — from scenario_planning output
   trajectory_input:
     - controller_node_exe/trajectory
+  # /localization/kinematic_state — from EKF
   kinematic_state:
     - controller_node_exe/kinematic_state
     - control_validator/kinematic_state
     - lane_departure_checker/kinematic_state
     - collision_detector/kinematic_state
+  # /vehicle/status/steering_status — from vehicle interface
   steering_status:
     - controller_node_exe/steering_status
+  # /localization/acceleration — from EKF
   acceleration:
     - controller_node_exe/acceleration
-    - control_validator/acceleration
+    - control_validator/measured_acceleration
+  # /system/operation_mode/state or /api/operation_mode/state
   operation_mode:
     - controller_node_exe/operation_mode
     - control_validator/operation_mode
     - lane_departure_checker/operation_mode
     - collision_detector/operation_mode
+  # /vehicle/status/velocity_status — from vehicle interface
   velocity_status:
     - autonomous_emergency_braking/velocity_status
+  # /sensing/imu/imu_data
   imu:
     - autonomous_emergency_braking/imu
+  # Pointcloud — $(var input_pointcloud_topic_name)
   pointcloud:
     - autonomous_emergency_braking/pointcloud
     - collision_detector/pointcloud
+  # Predicted objects — $(var input_objects_topic_name)
   predicted_objects:
     - autonomous_emergency_braking/predicted_objects
     - collision_detector/predicted_objects
+  # /map/vector_map — transient_local
   vector_map:
     - lane_departure_checker/vector_map
+  # /planning/mission_planning/route — transient_local
   route:
     - lane_departure_checker/route
+  # /planning/trajectory (same as trajectory_input, consumed as state by checkers)
   reference_trajectory:
     - control_validator/reference_trajectory
     - lane_departure_checker/reference_trajectory
-  autoware_state:
-    - autonomous_emergency_braking/autoware_state
 
 exports:
   control_output:
@@ -155,4 +191,4 @@ paths:
   control:
     input: trajectory_input
     output: [control_output]
-    max_latency_ms: 15
+    max_latency_ms: 15          # controller cycle (33ms) budget target

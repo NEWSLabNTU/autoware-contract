@@ -1,12 +1,21 @@
+# autoware_hazard_status_converter/hazard_status_converter.launch.xml
+# Namespace: /system
+#
+# Sources:
+#   source: autoware_universe/system/autoware_hazard_status_converter/src/converter.cpp
 version: 1
+
 nodes:
   hazard_status_converter:
     sub:
-      diagnostic_graph:
+      diagnostic_graph:                         # internal DiagGraph subscription
+        state: true
+      emergency_holding:                        # ~/input/emergency_holding — polling subscriber
         state: true
     pub:
-      hazard_status: {}
+      hazard_status: {}                         # ~/hazard_status — QoS(1)
 imports:
   diagnostic_graph: [hazard_status_converter/diagnostic_graph]
+  emergency_holding: [hazard_status_converter/emergency_holding]
 exports:
   hazard_status: [hazard_status_converter/hazard_status]

@@ -1,117 +1,143 @@
 # tier4_planning_launch/behavior_planning.launch.xml
 # Namespace: /planning/scenario_planning/lane_driving/behavior_planning
-# 3 composable nodes in behavior_planning_container (+ glog_component skipped)
+#
+# Sources:
+#   launch:   /opt/autoware/1.5.0/share/tier4_planning_launch/launch/scenario_planning/lane_driving/behavior_planning/behavior_planning.launch.xml
+#   path_planner: autoware_universe/planning/behavior_path_planner/autoware_behavior_path_planner/src/behavior_path_planner_node.cpp
+#   vel_planner:  autoware_core/planning/behavior_velocity_planner/autoware_behavior_velocity_planner/src/node.cpp
 version: 1
 
 nodes:
+  # --- Behavior Path Planner ---
+  # plugin: autoware::behavior_path_planner::BehaviorPathPlannerNode
+  # Execution: timer-based periodic (planning_hz param), all subs are InterProcessPollingSubscriber
   behavior_path_planner:
     sub:
-      route:
+      route:                        # /planning/mission_planning/route — QoS(1).transient_local()
         state: true
         required: true
-      vector_map:
+      vector_map:                   # /map/vector_map — QoS(1).transient_local()
         state: true
         required: true
-      predicted_objects:
+      predicted_objects:            # $(input_objects_topic_name) — InterProcessPollingSubscriber, QoS(1)
         state: true
-      costmap:
+      costmap:                      # /planning/scenario_planning/parking/costmap_generator/occupancy_grid — QoS(1)
         state: true
-      odometry:
+      odometry:                     # /localization/kinematic_state — InterProcessPollingSubscriber, QoS(1)
         state: true
-      acceleration:
+      acceleration:                 # /localization/acceleration — InterProcessPollingSubscriber, QoS(1)
         state: true
-      scenario:
+      scenario:                     # /planning/scenario_planning/scenario — InterProcessPollingSubscriber, QoS(1)
         state: true
-      traffic_signals:
+      traffic_signals:              # $(input_traffic_light_topic_name) — InterProcessPollingSubscriber, QoS(1)
         state: true
-      occupancy_grid:
+      occupancy_grid:               # /perception/occupancy_grid_map/map — InterProcessPollingSubscriber, QoS(1)
         state: true
     pub:
-      path_with_lane_id:
-        min_rate_hz: 10
-      turn_indicators_cmd: {}
-      hazard_lights_cmd: {}
-      modified_goal: {}
+      path_with_lane_id:            # path_with_lane_id (intra-container to velocity planner) — QoS(1)
+        min_rate_hz: 10             # driven by planning_hz timer param
+      turn_indicators_cmd: {}       # /planning/turn_indicators_cmd — QoS(1)
+      hazard_lights_cmd: {}         # /planning/behavior_path_planner/hazard_lights_cmd — QoS(1)
+      modified_goal: {}             # /planning/scenario_planning/modified_goal — QoS(1).transient_local()
     paths:
-      periodic:
+      periodic:                     # timer-driven — rate independent of upstream
         input: []
         output: [path_with_lane_id]
-        max_latency_ms: 50
+        max_latency_ms: 50          # planning cycle budget
 
+  # --- Behavior Velocity Planner ---
+  # plugin: autoware::behavior_velocity_planner::experimental::BehaviorVelocityPlannerNode
+  # Execution: event-driven (triggered by path_with_lane_id callback), not timer
   behavior_velocity_planner:
     sub:
-      path_with_lane_id:
+      path_with_lane_id:            # path_with_lane_id — TRIGGER subscription (callback-based), QoS(1)
         min_rate_hz: 10
-      vector_map:
+      vector_map:                   # $(input_vector_map_topic_name) — QoS(1).transient_local()
         state: true
         required: true
-      odometry:
+      odometry:                     # /localization/kinematic_state — InterProcessPollingSubscriber, QoS(1)
         state: true
-      acceleration:
+      acceleration:                 # /localization/acceleration — InterProcessPollingSubscriber, QoS(1)
         state: true
-      predicted_objects:
+      predicted_objects:            # $(input_objects_topic_name) — InterProcessPollingSubscriber, QoS(1)
         state: true
-      pointcloud:
+      pointcloud:                   # $(input_pointcloud_topic_name) — single_depth_sensor_qos()
         state: true
-      traffic_signals:
+      traffic_signals:              # $(input_traffic_light_topic_name) — InterProcessPollingSubscriber, QoS(1)
         state: true
-      occupancy_grid:
+      occupancy_grid:               # /perception/occupancy_grid_map/map — InterProcessPollingSubscriber, QoS(1)
         state: true
-      external_velocity_limit:
+      external_velocity_limit:      # /planning/scenario_planning/max_velocity_default — QoS(1).transient_local()
         state: true
     pub:
-      output_path:
+      output_path:                  # path (remapped ~/output/path) — QoS(1)
         min_rate_hz: 10
     paths:
-      main:
+      main:                         # event-driven: triggered by path_with_lane_id arrival
         input: path_with_lane_id
         output: [output_path]
-        max_latency_ms: 30
+        max_latency_ms: 30          # velocity planning + scene module processing
 
 topics:
+  # Path Planner → Velocity Planner (intra-container)
   path_with_lane_id:
     type: autoware_internal_planning_msgs/msg/PathWithLaneId
     pub: [behavior_path_planner/path_with_lane_id]
     sub: [behavior_velocity_planner/path_with_lane_id]
     rate_hz: 10
+    qos:                            # intra-container — may bypass DDS
+      depth: 1
 
 imports:
+  # /planning/mission_planning/route — QoS(1).transient_local()
   route:
     - behavior_path_planner/route
+  # /map/vector_map — QoS(1).transient_local()
   vector_map:
     - behavior_path_planner/vector_map
     - behavior_velocity_planner/vector_map
+  # Predicted objects — from perception/prediction pipeline
   predicted_objects:
     - behavior_path_planner/predicted_objects
     - behavior_velocity_planner/predicted_objects
+  # /localization/kinematic_state
   odometry:
     - behavior_path_planner/odometry
     - behavior_velocity_planner/odometry
+  # /localization/acceleration
   acceleration:
     - behavior_path_planner/acceleration
     - behavior_velocity_planner/acceleration
+  # Traffic light recognition
   traffic_signals:
     - behavior_path_planner/traffic_signals
     - behavior_velocity_planner/traffic_signals
+  # /perception/occupancy_grid_map/map
   occupancy_grid:
     - behavior_path_planner/occupancy_grid
     - behavior_velocity_planner/occupancy_grid
+  # No-ground pointcloud — sensor data
   pointcloud:
     - behavior_velocity_planner/pointcloud
+  # Parking costmap
   costmap:
     - behavior_path_planner/costmap
+  # Scenario selection
   scenario:
     - behavior_path_planner/scenario
+  # External velocity limit — QoS(1).transient_local()
   external_velocity_limit:
     - behavior_velocity_planner/external_velocity_limit
 
 exports:
+  # Output path → elastic_band_smoother in motion_planning scope
   behavior_path:
     - behavior_velocity_planner/output_path
 
 paths:
+  # Full behavior planning: periodic path gen → event-driven velocity planning
   behavior:
-    input: route
+    input: route                    # periodic node reads route as state, not causal trigger
     output: [behavior_path]
-    max_latency_ms: 100
-    max_age_ms: 300
+    max_latency_ms: 100             # path planner (50ms) + velocity planner (30ms) + margin
+    max_age_ms: 300                 # includes upstream route + perception latency

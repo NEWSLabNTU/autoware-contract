@@ -1,11 +1,17 @@
+# autoware_mission_planner_universe/goal_pose_visualizer.launch.xml
+# Namespace: /planning/mission_planning
+#
+# Sources:
+#   source: autoware_universe/planning/autoware_mission_planner_universe/src/goal_pose_visualizer/
 version: 1
+
 nodes:
   goal_pose_visualizer:
     sub:
-      route:
+      route:                                    # state: reads route to extract goal pose — QoS transient_local
         state: true
     pub:
-      goal_pose: {}
+      goal_pose: {}                             # visualization marker
 imports:
   route: [goal_pose_visualizer/route]
 exports:

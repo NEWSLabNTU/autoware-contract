@@ -1,18 +1,32 @@
+# autoware_external_cmd_selector/external_cmd_selector.launch.py
+# Namespace: /control
+#
+# Sources:
+#   source: autoware_universe/control/autoware_external_cmd_selector/src/external_cmd_selector/external_cmd_selector_node.cpp
 version: 1
+
 nodes:
+  # Selects between local and remote manual control inputs
   external_cmd_selector:
     sub:
-      remote_control_cmd:
+      local_pedals_cmd:                         # ~/input/local/pedals_cmd — QoS(1)
         state: true
-      local_control_cmd:
+      local_steering_cmd:                       # ~/input/local/steering_cmd — QoS(1)
         state: true
-      current_gate_mode:
+      local_heartbeat:                          # ~/input/local/heartbeat — QoS(1)
+        state: true
+      remote_pedals_cmd:                        # ~/input/remote/pedals_cmd — QoS(1)
+        state: true
+      remote_steering_cmd:                      # ~/input/remote/steering_cmd — QoS(1)
+        state: true
+      remote_heartbeat:                         # ~/input/remote/heartbeat — QoS(1)
         state: true
     pub:
-      selected_external_control_cmd: {}
-imports:
-  remote_cmd: [external_cmd_selector/remote_control_cmd]
-  local_cmd: [external_cmd_selector/local_control_cmd]
-  gate_mode: [external_cmd_selector/current_gate_mode]
+      current_selector_mode: {}                 # ~/output/current_selector_mode — QoS(1)
+      selected_pedals_cmd: {}                   # ~/output/pedals_cmd — QoS(1)
+      selected_steering_cmd: {}                 # ~/output/steering_cmd — QoS(1)
+      selected_heartbeat: {}                    # ~/output/heartbeat — QoS(1)
+    srv:
+      select_external_command: {}               # ~/service/select_external_command
 exports:
-  external_cmd: [external_cmd_selector/selected_external_control_cmd]
+  selector_mode: [external_cmd_selector/current_selector_mode]

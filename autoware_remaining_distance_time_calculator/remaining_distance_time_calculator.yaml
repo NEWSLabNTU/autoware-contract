@@ -1,13 +1,19 @@
+# autoware_remaining_distance_time_calculator/remaining_distance_time_calculator.launch.xml
+# Namespace: /planning
+#
+# Sources:
+#   source: autoware_universe/planning/autoware_remaining_distance_time_calculator/
 version: 1
+
 nodes:
   remaining_distance_time_calculator:
     sub:
-      route:
+      route:                                    # state: reads current route
         state: true
-      kinematic_state:
+      kinematic_state:                          # state: reads current pose/velocity
         state: true
     pub:
-      remaining_distance_time: {}
+      remaining_distance_time: {}               # publishes remaining dist/time to goal
 imports:
   route: [remaining_distance_time_calculator/route]
   kinematic_state: [remaining_distance_time_calculator/kinematic_state]

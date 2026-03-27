@@ -1,27 +1,34 @@
+# autoware_diagnostic_graph_aggregator/aggregator.launch.xml
+# Namespace: /system
+#
+# Sources:
+#   source (agg): autoware_universe/system/autoware_diagnostic_graph_aggregator/src/node/aggregator.cpp
+#   source (conv): autoware_universe/system/autoware_diagnostic_graph_aggregator/src/node/converter.cpp
 version: 1
+
 nodes:
   aggregator_node:
     sub:
-      diagnostics:
+      diagnostics:                              # /diagnostics — QoS(input_qos_depth param)
         state: true
     pub:
-      diagnostic_graph: {}
+      diag_graph_struct: {}                     # ~/struct — QoS(1).transient_local()
+      diag_graph_status: {}                     # ~/status — QoS(graph_qos_depth param)
+      unknowns: {}                              # ~/unknowns — QoS(1)
+    srv:
+      reset: {}                                 # ~/reset — ResetDiagGraph
+      set_initializing: {}                      # ~/set_initializing — SetBool
 
   converter_node:
     sub:
-      diagnostic_graph: {}
+      command_mode_availability:                # ~/command_mode/availability — QoS(1)
+        state: true
     pub:
-      diagnostics_agg: {}
-
-topics:
-  diagnostic_graph:
-    type: autoware_diagnostic_graph_msgs/msg/DiagnosticGraph
-    pub: [aggregator_node/diagnostic_graph]
-    sub: [converter_node/diagnostic_graph]
-    qos:
-      reliability: reliable
+      operation_mode_availability: {}           # ~/operation_mode/availability — QoS(1)
 
 imports:
   diagnostics: [aggregator_node/diagnostics]
 exports:
-  diagnostics_agg: [converter_node/diagnostics_agg]
+  operation_mode_availability: [converter_node/operation_mode_availability]
+  diag_graph_struct: [aggregator_node/diag_graph_struct]
+  diag_graph_status: [aggregator_node/diag_graph_status]

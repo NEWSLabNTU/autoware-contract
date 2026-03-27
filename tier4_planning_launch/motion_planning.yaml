@@ -1,107 +1,144 @@
 # tier4_planning_launch/motion_planning.launch.xml
 # Namespace: /planning/scenario_planning/lane_driving/motion_planning
-# 4 composable nodes in motion_planning_container (+ glog_component skipped)
+#
+# Sources:
+#   launch:    /opt/autoware/1.5.0/share/tier4_planning_launch/launch/scenario_planning/lane_driving/motion_planning/motion_planning.launch.xml
+#   smoother:  autoware_universe/planning/autoware_path_smoother/src/elastic_band_smoother.cpp
+#   optimizer: autoware_universe/planning/autoware_path_optimizer/src/node.cpp
+#   velocity:  autoware_core/planning/motion_velocity_planner/autoware_motion_velocity_planner/src/node.cpp
 version: 1
 
 nodes:
+  # --- Elastic Band Smoother ---
+  # plugin: autoware::path_smoother::ElasticBandSmoother
+  # Remaps: ~/input/path → $(var interface_input_topic), ~/input/odometry → /localization/kinematic_state
+  #         ~/output/path → path_smoother/path
   elastic_band_smoother:
     sub:
-      input_path:
-        min_rate_hz: 10
-      odometry:
+      input_path:               # behavior_planning/path — remap ~/input/path
+        min_rate_hz: 10         # triggered by upstream behavior planner
+      odometry:                 # /localization/kinematic_state — InterProcessPollingSubscriber
         state: true
     pub:
-      output_path:
+      output_path:              # path_smoother/path — remap ~/output/path
         min_rate_hz: 10
     paths:
       main:
         input: input_path
         output: [output_path]
-        max_latency_ms: 10
+        max_latency_ms: 10      # elastic band optimization is iterative but fast
 
+  # --- Path Optimizer ---
+  # plugin: autoware::path_optimizer::PathOptimizer
+  # Remaps: ~/input/path → path_smoother/path, ~/input/odometry → /localization/kinematic_state
+  #         ~/output/path → path_optimizer/trajectory
   path_optimizer:
     sub:
-      input_path:
+      input_path:               # path_smoother/path — chained from smoother
         min_rate_hz: 10
-      odometry:
+      odometry:                 # /localization/kinematic_state — InterProcessPollingSubscriber
         state: true
     pub:
-      output_trajectory:
+      output_trajectory:        # path_optimizer/trajectory — remap ~/output/path (note: Path→Trajectory)
         min_rate_hz: 10
     paths:
       main:
         input: input_path
         output: [output_trajectory]
-        max_latency_ms: 15
+        max_latency_ms: 15      # quadratic optimization
 
+  # --- Motion Velocity Planner ---
+  # plugin: autoware::motion_velocity_planner::MotionVelocityPlannerNode
+  # Remaps: ~/input/trajectory → path_optimizer/trajectory
+  #         ~/output/trajectory → $(var interface_output_topic) = lane_driving/trajectory
   motion_velocity_planner:
     sub:
-      input_trajectory:
+      input_trajectory:         # path_optimizer/trajectory — create_subscription QoS(1)
         min_rate_hz: 10
-      vector_map:
+      vector_map:               # /map/vector_map — QoS(10).transient_local()
         state: true
         required: true
-      odometry:
+      odometry:                 # /localization/kinematic_state — InterProcessPollingSubscriber
         state: true
-      acceleration:
+      acceleration:             # /localization/acceleration — InterProcessPollingSubscriber
         state: true
-      predicted_objects:
+      predicted_objects:        # $(var input_objects_topic_name) — InterProcessPollingSubscriber
         state: true
-      pointcloud:
+      pointcloud:               # $(var input_pointcloud_topic_name) — single_depth_sensor_qos()
         state: true
-      traffic_signals:
+      traffic_signals:          # /perception/traffic_light_recognition/traffic_signals
         state: true
-      occupancy_grid:
+      occupancy_grid:           # /perception/occupancy_grid_map/map
         state: true
     pub:
-      output_trajectory:
+      output_trajectory:        # /planning/scenario_planning/lane_driving/trajectory — QoS(1)
         min_rate_hz: 10
+      velocity_limit: {}        # /planning/scenario_planning/max_velocity_candidates — QoS(1).transient_local()
+      clear_velocity_limit: {}  # /planning/scenario_planning/clear_velocity_limit — QoS(1).transient_local()
     paths:
       main:
         input: input_trajectory
         output: [output_trajectory]
-        max_latency_ms: 20
+        max_latency_ms: 20      # includes velocity planning + collision avoidance modules
 
 topics:
+  # Smoother → Optimizer (intra-container)
   smoothed_path:
     type: autoware_planning_msgs/msg/Path
     pub: [elastic_band_smoother/output_path]
     sub: [path_optimizer/input_path]
     rate_hz: 10
+    qos:
+      reliability: best_effort  # create_publisher/subscription with QoS(1) — default best_effort
+      depth: 1
 
+  # Optimizer → Velocity Planner (intra-container)
   optimized_trajectory:
     type: autoware_planning_msgs/msg/Trajectory
     pub: [path_optimizer/output_trajectory]
     sub: [motion_velocity_planner/input_trajectory]
     rate_hz: 10
+    qos:
+      reliability: best_effort  # QoS(1)
+      depth: 1
 
 imports:
+  # From behavior_planning scope — /planning/.../behavior_planning/path
   behavior_path:
     - elastic_band_smoother/input_path
+  # /localization/kinematic_state — shared by all nodes (polled)
   odometry:
     - elastic_band_smoother/odometry
     - path_optimizer/odometry
     - motion_velocity_planner/odometry
+  # /map/vector_map — QoS(10).transient_local(), needed for velocity planning modules
   vector_map:
     - motion_velocity_planner/vector_map
+  # /localization/acceleration
   acceleration:
     - motion_velocity_planner/acceleration
+  # Predicted objects — from perception/prediction pipeline
   predicted_objects:
     - motion_velocity_planner/predicted_objects
+  # No-ground pointcloud — from perception pipeline
   pointcloud:
     - motion_velocity_planner/pointcloud
+  # Traffic light recognition results
   traffic_signals:
     - motion_velocity_planner/traffic_signals
+  # Occupancy grid map
   occupancy_grid:
     - motion_velocity_planner/occupancy_grid
 
 exports:
+  # /planning/scenario_planning/lane_driving/trajectory → scenario_selector
   lane_driving_trajectory:
     - motion_velocity_planner/output_trajectory
 
 paths:
+  # Full motion planning pipeline: path → smooth → optimize → velocity plan
   motion_planning:
     input: behavior_path
     output: [lane_driving_trajectory]
-    max_latency_ms: 50
-    max_age_ms: 200
+    max_latency_ms: 50          # sum: 10 (smooth) + 15 (optimize) + 20 (velocity) = 45ms + margin
+    max_age_ms: 200             # includes upstream behavior planning latency

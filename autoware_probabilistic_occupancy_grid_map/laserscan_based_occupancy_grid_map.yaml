@@ -1,10 +1,17 @@
+# autoware_probabilistic_occupancy_grid_map/laserscan_based_occupancy_grid_map.launch.py
+# Namespace: /occupancy_grid_map
+#
+# Sources:
+#   source (ogm):  autoware_universe/perception/autoware_probabilistic_occupancy_grid_map/src/laserscan_based_occupancy_grid_map/laserscan_based_occupancy_grid_map_node.cpp
+#   source (p2ls): pointcloud_to_laserscan package (ROS 2 standard)
 version: 1
+
 nodes:
   pointcloud_to_laserscan:
     sub:
-      pointcloud: {}
+      pointcloud: {}                            # ~/input/pointcloud — SensorDataQoS().keep_last(1)
     pub:
-      laserscan: {}
+      laserscan: {}                             # ~/output/laserscan
     paths:
       main:
         input: pointcloud
@@ -13,27 +20,30 @@ nodes:
 
   occupancy_grid_map:
     sub:
-      laserscan: {}
-      odometry:
-        state: true
+      laserscan: {}                             # ~/input/laserscan — SensorDataQoS().keep_last(1)
+      obstacle_pointcloud: {}                   # ~/input/obstacle_pointcloud — SensorDataQoS().keep_last(1)
+      raw_pointcloud: {}                        # ~/input/raw_pointcloud — SensorDataQoS().keep_last(1)
     pub:
-      occupancy_grid: {}
+      occupancy_grid: {}                        # ~/output/occupancy_grid_map — QoS(1)
     paths:
       main:
         input: laserscan
         output: [occupancy_grid]
-        max_latency_ms: 20
+        max_latency_ms: 20                      # ExactTime sync + grid computation
 
 topics:
   laserscan:
     type: sensor_msgs/msg/LaserScan
     pub: [pointcloud_to_laserscan/laserscan]
     sub: [occupancy_grid_map/laserscan]
-    rate_hz: 10
+    qos:
+      reliability: best_effort                  # SensorDataQoS
+      depth: 1
 
 imports:
   pointcloud: [pointcloud_to_laserscan/pointcloud]
-  odometry: [occupancy_grid_map/odometry]
+  obstacle_pointcloud: [occupancy_grid_map/obstacle_pointcloud]
+  raw_pointcloud: [occupancy_grid_map/raw_pointcloud]
 exports:
   occupancy_grid: [occupancy_grid_map/occupancy_grid]
 paths:

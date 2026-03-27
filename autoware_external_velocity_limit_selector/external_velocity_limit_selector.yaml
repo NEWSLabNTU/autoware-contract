@@ -1,15 +1,21 @@
+# autoware_external_velocity_limit_selector/external_velocity_limit_selector.launch.xml
+# Namespace: /planning/scenario_planning
+#
+# Sources:
+#   source: autoware_universe/planning/autoware_external_velocity_limit_selector/src/external_velocity_limit_selector_node.cpp (line 122-138)
 version: 1
+
 nodes:
   external_velocity_limit_selector:
     sub:
-      velocity_limit_from_api:
+      velocity_limit_from_api:                  # /planning/scenario_planning/max_velocity_default — QoS(1).transient_local()
         state: true
-      velocity_limit_from_internal:
+      velocity_limit_from_internal:             # /planning/scenario_planning/max_velocity_candidates — QoS(10).transient_local()
         state: true
-      velocity_limit_clear_command_from_internal:
+      velocity_limit_clear_command_from_internal:  # /planning/scenario_planning/clear_velocity_limit — QoS(10).transient_local()
         state: true
     pub:
-      external_velocity_limit: {}
+      external_velocity_limit: {}               # /planning/scenario_planning/max_velocity — QoS(1)
 imports:
   api_limit: [external_velocity_limit_selector/velocity_limit_from_api]
   internal_limit: [external_velocity_limit_selector/velocity_limit_from_internal]

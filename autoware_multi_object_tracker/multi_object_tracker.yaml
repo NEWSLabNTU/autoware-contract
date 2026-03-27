@@ -1,30 +1,39 @@
 # autoware_multi_object_tracker/multi_object_tracker.launch.xml
 # Namespace: /perception/object_recognition/tracking
-# 1 node
+#
+# Sources:
+#   launch:  /opt/autoware/1.5.0/share/autoware_multi_object_tracker/launch/multi_object_tracker.launch.xml
+#   source:  autoware_universe/perception/autoware_multi_object_tracker/src/multi_object_tracker_node.cpp
 version: 1
 
 nodes:
+  # --- Multi Object Tracker ---
+  # Regular node (not composable)
+  # Execution: timer-based (publish_rate param × 10 internal rate), with delay compensation
   multi_object_tracker:
     sub:
-      detected_objects:
-        min_rate_hz: 10
-      odometry:
+      detected_objects:             # input/objects01..12 — up to 12 detection channels, QoS(1)
+        min_rate_hz: 10             # from upstream detectors (lidar, camera, radar)
+      odometry:                     # not explicitly remapped — /localization/kinematic_state
         state: true
     pub:
-      tracked_objects:
-        min_rate_hz: 10
+      tracked_objects:              # output/objects — QoS(1)
+        min_rate_hz: 10             # publish_rate param (default ~10 Hz)
     paths:
       main:
         input: detected_objects
         output: [tracked_objects]
-        max_latency_ms: 20
+        max_latency_ms: 20          # tracking association + state estimation
 
 imports:
+  # Detected objects from upstream (lidar/camera/radar detectors)
   detected_objects:
     - multi_object_tracker/detected_objects
+  # /localization/kinematic_state
   odometry:
     - multi_object_tracker/odometry
 
 exports:
+  # /perception/object_recognition/tracking/objects → map_based_prediction
   tracked_objects:
     - multi_object_tracker/tracked_objects

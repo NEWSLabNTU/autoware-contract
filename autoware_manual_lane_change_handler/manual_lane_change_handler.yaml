@@ -1,13 +1,19 @@
+# autoware_manual_lane_change_handler/manual_lane_change_handler.launch.xml
+# Namespace: /planning/mission_planning
+#
+# Sources:
+#   source: autoware_universe/planning/autoware_manual_lane_change_handler/
 version: 1
+
 nodes:
   manual_lane_change_handler:
     sub:
-      lane_change_command:
+      lane_change_command:                      # from ADAPI — state: waits for user request
         state: true
-      route:
+      route:                                    # state: reads current route — QoS transient_local
         state: true
     pub:
-      lane_change_request: {}
+      lane_change_request: {}                   # request to behavior path planner
 imports:
   lane_change_cmd: [manual_lane_change_handler/lane_change_command]
   route: [manual_lane_change_handler/route]

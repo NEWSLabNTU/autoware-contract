@@ -1,24 +1,36 @@
+# autoware_mrm_handler/mrm_handler.launch.xml
+# Namespace: /system
+#
+# Sources:
+#   source: autoware_universe/system/autoware_mrm_handler/src/mrm_handler/mrm_handler_core.cpp
 version: 1
+
 nodes:
+  # Subscribes to MRM behavior statuses, publishes MRM state and vehicle commands
   mrm_handler:
     sub:
-      operation_mode:
+      operation_mode_availability:              # ~/input/operation_mode_availability — QoS(1), callback trigger
         state: true
-      mrm_comfortable_stop_state:
+      odometry:                                 # ~/input/odometry — polling
         state: true
-      mrm_emergency_stop_state:
+      control_mode:                             # ~/input/control_mode — polling
         state: true
-      hazard_status:
+      comfortable_stop_status:                  # ~/input/mrm/comfortable_stop/status — polling
+        state: true
+      emergency_stop_status:                    # ~/input/mrm/emergency_stop/status — polling
+        state: true
+      operation_mode_state:                     # ~/input/api/operation_mode/state — polling
         state: true
     pub:
-      mrm_request: {}
-      gear_cmd: {}
-      turn_indicators_cmd: {}
-      hazard_lights_cmd: {}
+      mrm_state: {}                             # ~/output/mrm/state — QoS(1)
+      turn_indicators: {}                       # ~/output/turn_indicators — QoS(1)
+      hazard_lights: {}                         # ~/output/hazard — QoS(1)
+      gear_cmd: {}                              # ~/output/gear — QoS(1)
 imports:
-  operation_mode: [mrm_handler/operation_mode]
-  comfortable_stop_state: [mrm_handler/mrm_comfortable_stop_state]
-  emergency_stop_state: [mrm_handler/mrm_emergency_stop_state]
-  hazard_status: [mrm_handler/hazard_status]
+  operation_mode_availability: [mrm_handler/operation_mode_availability]
+  odometry: [mrm_handler/odometry]
+  comfortable_stop_status: [mrm_handler/comfortable_stop_status]
+  emergency_stop_status: [mrm_handler/emergency_stop_status]
+  operation_mode_state: [mrm_handler/operation_mode_state]
 exports:
-  mrm_request: [mrm_handler/mrm_request]
+  mrm_state: [mrm_handler/mrm_state]

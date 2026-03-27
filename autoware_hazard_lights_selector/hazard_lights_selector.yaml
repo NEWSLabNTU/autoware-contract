@@ -1,13 +1,20 @@
+# autoware_hazard_lights_selector/hazard_lights_selector.launch.xml
+# Namespace: /planning/scenario_planning
+#
+# Sources:
+#   source: autoware_universe/planning/autoware_hazard_lights_selector/src/node.cpp (line 29-45)
 version: 1
+
 nodes:
+  # Timer-based (10 Hz) — selects between planning and system hazard light commands
   hazard_lights_selector:
     sub:
-      hazard_lights_from_planning:
+      hazard_lights_from_planning:              # /planning/behavior_path_planner/hazard_lights_cmd — QoS(1)
         state: true
-      hazard_lights_from_system:
+      hazard_lights_from_system:                # /system/hazard_lights_cmd — QoS(1)
         state: true
     pub:
-      hazard_lights_cmd: {}
+      hazard_lights_cmd: {}                     # /planning/hazard_lights_cmd — QoS(1)
 imports:
   planning_hazard: [hazard_lights_selector/hazard_lights_from_planning]
   system_hazard: [hazard_lights_selector/hazard_lights_from_system]

@@ -1,48 +1,57 @@
 # autoware_simple_planning_simulator/simple_planning_simulator.launch.py
-# Namespace: / (node at /simulation/autoware_simple_planning_simulator_node)
-# 1 node — simulates vehicle dynamics for planning_simulator
+# Namespace: / (node at /simulation/...)
+#
+# Sources:
+#   source: autoware_universe/simulator/autoware_simple_planning_simulator/src/simple_planning_simulator_core.cpp (line 118-194)
 version: 1
 
 nodes:
+  # Timer-driven (40 Hz default) — simulates vehicle dynamics
   simple_planning_simulator:
     sub:
-      control_cmd:
+      control_cmd:                              # /control/command/control_cmd — QoS(1)
         min_rate_hz: 30
-      gear_cmd:
+      gear_cmd:                                 # /control/command/gear_cmd — QoS(1)
         state: true
-      turn_indicators_cmd:
+      turn_indicators_cmd:                      # /control/command/turn_indicators_cmd — QoS(1)
         state: true
-      hazard_lights_cmd:
+      hazard_lights_cmd:                        # /control/command/hazard_lights_cmd — QoS(1)
         state: true
-      initial_pose:
+      initial_pose:                             # /initialpose3d — QoS(1)
+        state: true
+      vector_map:                               # /map/vector_map — QoS(10).transient_local()
+        state: true
+      trajectory:                               # /planning/trajectory — QoS(1)
+        state: true
+      engage:                                   # /vehicle/engage — QoS(1)
         state: true
     pub:
-      kinematic_state:
-        min_rate_hz: 50
-      velocity_status:
-        min_rate_hz: 50
-      steering_status:
-        min_rate_hz: 50
-      acceleration:
-        min_rate_hz: 50
-      control_mode:
-        min_rate_hz: 50
+      odometry:                                 # output/odometry → /localization/kinematic_state — QoS(1)
+        min_rate_hz: 40                         # timer-driven at sim_hz (default 40)
+      velocity_status:                          # output/twist → /vehicle/status/velocity_status — QoS(1)
+        min_rate_hz: 40
+      steering_status:                          # output/steering → /vehicle/status/steering_status — QoS(1)
+        min_rate_hz: 40
+      acceleration:                             # output/acceleration — QoS(1)
+        min_rate_hz: 40
+      imu:                                      # output/imu → /sensing/imu/imu_data — QoS(1)
+        min_rate_hz: 40
+      control_mode:                             # output/control_mode_report — QoS(1)
+        min_rate_hz: 40
+      gear_status: {}                           # output/gear_report — QoS(1)
+      turn_indicators_status: {}                # output/turn_indicators_report — QoS(1)
+      hazard_lights_status: {}                  # output/hazard_lights_report — QoS(1)
     paths:
-      periodic:
+      periodic:                                 # timer-driven — rate independent of upstream
         input: []
-        output: [kinematic_state, velocity_status, steering_status, acceleration]
+        output: [odometry, velocity_status, steering_status, acceleration]
         max_latency_ms: 5
 
 imports:
-  control_cmd:
-    - simple_planning_simulator/control_cmd
-
+  control_cmd: [simple_planning_simulator/control_cmd]
 exports:
-  kinematic_state:
-    - simple_planning_simulator/kinematic_state
-  velocity_status:
-    - simple_planning_simulator/velocity_status
-  steering_status:
-    - simple_planning_simulator/steering_status
-  acceleration:
-    - simple_planning_simulator/acceleration
+  odometry: [simple_planning_simulator/odometry]
+  velocity_status: [simple_planning_simulator/velocity_status]
+  steering_status: [simple_planning_simulator/steering_status]
+  acceleration: [simple_planning_simulator/acceleration]
+  imu: [simple_planning_simulator/imu]

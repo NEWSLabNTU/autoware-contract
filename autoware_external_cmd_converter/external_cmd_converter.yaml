@@ -1,19 +1,33 @@
+# autoware_external_cmd_converter/external_cmd_converter.launch.py
+# Namespace: /control
+#
+# Sources:
+#   source: autoware_universe/vehicle/autoware_external_cmd_converter/src/node.cpp
 version: 1
+
 nodes:
+  # Converts external pedals+steering commands to autoware_control_msgs/Control
   external_cmd_converter:
     sub:
-      external_control_cmd: {}
-      velocity_status:
+      pedals_cmd: {}                            # in/pedals_cmd — QoS(1), callback trigger
+      heartbeat: {}                             # in/heartbeat — QoS(1), callback
+      steering_cmd:                             # in/steering_cmd — polling
+        state: true
+      odometry:                                 # in/odometry — polling
+        state: true
+      gear_cmd:                                 # in/gear_cmd — polling
+        state: true
+      current_gate_mode:                        # in/current_gate_mode — polling
         state: true
     pub:
-      control_cmd: {}
+      control_cmd: {}                           # out/control_cmd — QoS(1)
     paths:
       main:
-        input: external_control_cmd
+        input: pedals_cmd
         output: [control_cmd]
-        max_latency_ms: 5
+        max_latency_ms: 5                       # simple conversion, no heavy computation
 imports:
-  external_cmd: [external_cmd_converter/external_control_cmd]
-  velocity_status: [external_cmd_converter/velocity_status]
+  pedals_cmd: [external_cmd_converter/pedals_cmd]
+  odometry: [external_cmd_converter/odometry]
 exports:
   control_cmd: [external_cmd_converter/control_cmd]

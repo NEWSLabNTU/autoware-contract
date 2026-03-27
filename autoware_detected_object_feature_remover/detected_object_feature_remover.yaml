@@ -1,17 +1,23 @@
+# autoware_detected_object_feature_remover/detected_object_feature_remover.launch.xml
+# Namespace: /simulation
+#
+# Sources:
+#   source: autoware_universe/perception/autoware_detected_object_feature_remover/
 version: 1
+
 nodes:
   detected_object_feature_remover:
     sub:
-      detected_objects:
+      detected_objects:                         # input detected objects — QoS(1)
         min_rate_hz: 10
     pub:
-      objects_without_features:
+      objects_without_features:                 # strips features for simulated objects — QoS(1)
         min_rate_hz: 10
     paths:
       main:
         input: detected_objects
         output: [objects_without_features]
-        max_latency_ms: 5
+        max_latency_ms: 5                       # simple field removal, no computation
 imports:
   detected_objects: [detected_object_feature_remover/detected_objects]
 exports:

@@ -1,17 +1,23 @@
+# autoware_shape_estimation/shape_estimation.launch.xml
+# Namespace: /simulation
+#
+# Sources:
+#   source: autoware_universe/perception/autoware_shape_estimation/
 version: 1
+
 nodes:
   shape_estimation:
     sub:
-      detected_objects:
+      detected_objects:                         # input detected objects — QoS(1)
         min_rate_hz: 10
     pub:
-      objects_with_shape:
+      objects_with_shape:                       # adds shape estimates — QoS(1)
         min_rate_hz: 10
     paths:
       main:
         input: detected_objects
         output: [objects_with_shape]
-        max_latency_ms: 10
+        max_latency_ms: 10                      # shape fitting per object
 imports:
   detected_objects: [shape_estimation/detected_objects]
 exports:

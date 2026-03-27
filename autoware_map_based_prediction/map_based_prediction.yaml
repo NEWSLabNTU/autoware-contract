@@ -1,35 +1,45 @@
 # autoware_map_based_prediction/map_based_prediction.launch.xml
 # Namespace: /perception/object_recognition/prediction
-# 1 node
+#
+# Sources:
+#   launch:  /opt/autoware/1.5.0/share/autoware_map_based_prediction/launch/map_based_prediction.launch.xml
+#   source:  autoware_universe/perception/autoware_map_based_prediction/src/map_based_prediction_node.cpp
 version: 1
 
 nodes:
+  # --- Map Based Prediction ---
+  # Regular node (not composable)
+  # Execution: callback-driven (triggered by tracked_objects arrival)
   map_based_prediction:
     sub:
-      tracked_objects:
-        min_rate_hz: 10
-      vector_map:
+      tracked_objects:              # ~/input/objects ← /perception/.../tracking/objects — QoS(1)
+        min_rate_hz: 10             # from multi_object_tracker
+      vector_map:                   # /vector_map ← /map/vector_map — QoS(1).transient_local()
         state: true
         required: true
-      odometry:
+      traffic_signals:              # /traffic_signals — InterProcessPollingSubscriber (on-demand)
         state: true
     pub:
-      predicted_objects:
+      predicted_objects:            # ~/output/objects — QoS(1)
         min_rate_hz: 10
     paths:
       main:
         input: tracked_objects
         output: [predicted_objects]
-        max_latency_ms: 30
+        max_latency_ms: 30          # trajectory prediction for each tracked object
 
 imports:
+  # /perception/object_recognition/tracking/objects
   tracked_objects:
     - map_based_prediction/tracked_objects
+  # /map/vector_map — QoS(1).transient_local()
   vector_map:
     - map_based_prediction/vector_map
-  odometry:
-    - map_based_prediction/odometry
+  # /perception/traffic_light_recognition/traffic_signals — polled
+  traffic_signals:
+    - map_based_prediction/traffic_signals
 
 exports:
+  # /perception/object_recognition/prediction/objects → behavior planners, motion planners
   predicted_objects:
     - map_based_prediction/predicted_objects
