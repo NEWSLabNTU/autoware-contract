@@ -1,15 +1,27 @@
+# autoware_pose_initializer/pose_initializer.launch.xml
+# Namespace: /
+#
+# Sources:
+#   source: autoware_core/localization/autoware_pose_initializer/src/pose_initializer_core.cpp
 version: 1
+
 nodes:
   pose_initializer:
     sub:
-      gnss_pose:
+      gnss_pose:                                # state: optional GNSS input for initial pose
         state: true
-      point_cloud_map:
+      point_cloud_map:                          # state: for NDT-based initialization
         state: true
     pub:
-      initialpose3d: {}
+      initialpose3d: {}                         # /initialpose3d — published after initialization
     srv:
-      initialize: {}
+      initialize: {}                            # autoware component_interface_specs::localization::Initialize — SERVER
+
+services:
+  initialize:
+    type: autoware_component_interface_specs/localization/Initialize
+    server: [pose_initializer/initialize]
+
 imports:
   gnss_pose: [pose_initializer/gnss_pose]
   point_cloud_map: [pose_initializer/point_cloud_map]

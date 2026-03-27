@@ -1,13 +1,29 @@
+# autoware_vehicle_door_simulator/vehicle_door_simulator.launch.xml
+# Namespace: /
+#
+# Sources:
+#   source: autoware_universe/simulator/autoware_vehicle_door_simulator/src/dummy_doors.cpp
 version: 1
+
 nodes:
   vehicle_door_simulator:
     sub:
-      door_command:
+      door_command:                             # door command input
         state: true
     pub:
-      door_status: {}
+      door_status: {}                           # door status output
     srv:
-      get_door_layout: {}
+      doors_command: {}                         # ~/doors/command — autoware_adapi_v1_msgs/srv/SetDoorCommand — SERVER
+      doors_layout: {}                          # ~/doors/layout — autoware_adapi_v1_msgs/srv/GetDoorLayout — SERVER
+
+services:
+  doors_command:
+    type: autoware_adapi_v1_msgs/srv/SetDoorCommand
+    server: [vehicle_door_simulator/doors_command]
+  doors_layout:
+    type: autoware_adapi_v1_msgs/srv/GetDoorLayout
+    server: [vehicle_door_simulator/doors_layout]
+
 imports:
   door_command: [vehicle_door_simulator/door_command]
 exports:

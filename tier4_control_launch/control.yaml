@@ -62,6 +62,7 @@ nodes:
 
   # --- AEB (Autonomous Emergency Braking) ---
   # plugin: autoware::motion::control::autonomous_emergency_braking::AEB
+  # Note: no ROS 2 services — topics and subscribers only
   # control.launch.xml line 204
   autonomous_emergency_braking:
     sub:

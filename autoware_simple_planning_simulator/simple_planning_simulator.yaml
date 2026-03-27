@@ -41,11 +41,22 @@ nodes:
       gear_status: {}                           # output/gear_report — QoS(1)
       turn_indicators_status: {}                # output/turn_indicators_report — QoS(1)
       hazard_lights_status: {}                  # output/hazard_lights_report — QoS(1)
+    srv:
+      control_mode_request: {}                  # input/control_mode_request — autoware_vehicle_msgs/srv/ControlModeCommand — SERVER
+      set_pose: {}                              # /api/simulator/set/pose — tier4_external_api_msgs/srv/InitializePose — SERVER
     paths:
       periodic:                                 # timer-driven — rate independent of upstream
         input: []
         output: [odometry, velocity_status, steering_status, acceleration]
         max_latency_ms: 5
+
+services:
+  control_mode_request:
+    type: autoware_vehicle_msgs/srv/ControlModeCommand
+    server: [simple_planning_simulator/control_mode_request]
+  set_pose:
+    type: tier4_external_api_msgs/srv/InitializePose
+    server: [simple_planning_simulator/set_pose]
 
 imports:
   control_cmd: [simple_planning_simulator/control_cmd]

@@ -26,6 +26,10 @@ nodes:
       turn_indicators: {}                       # ~/output/turn_indicators — QoS(1)
       hazard_lights: {}                         # ~/output/hazard — QoS(1)
       gear_cmd: {}                              # ~/output/gear — QoS(1)
+    cli:                                        # service clients — calls MRM operators
+      pull_over_operate: {}                     # ~/output/mrm/pull_over/operate — tier4_system_msgs/srv/OperateMrm
+      comfortable_stop_operate: {}              # ~/output/mrm/comfortable_stop/operate — tier4_system_msgs/srv/OperateMrm
+      emergency_stop_operate: {}                # ~/output/mrm/emergency_stop/operate — tier4_system_msgs/srv/OperateMrm
 imports:
   operation_mode_availability: [mrm_handler/operation_mode_availability]
   odometry: [mrm_handler/odometry]
