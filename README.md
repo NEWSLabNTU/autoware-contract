@@ -1,32 +1,134 @@
-# Autoware Contract Manifests
+# Autoware Communication Contracts
 
-Per-launch-file manifest YAML files describing the expected communication graph
-for Autoware planning_simulator. Used with `play_launch check` for static
-contract verification.
+Topic manifest files describing the expected communication graph for
+[Autoware](https://github.com/autowarefoundation/autoware) — topics, services,
+QoS settings, rate constraints, and timing budgets per launch file.
 
-## Usage
+These contracts enable **static verification** of Autoware's inter-node
+communication without running the system. Errors like QoS mismatches, rate
+hierarchy violations, missing wiring, infeasible drop budgets, and causal
+cycles are caught at authoring time.
+
+## Quick Start
 
 ```bash
-# Check all manifests against the Autoware launch tree
-play_launch check --manifest-dir ~/repos/autoware-contract/ \
+# Install play_launch (the checker tool)
+pip install play_launch
+
+# Check contracts against Autoware planning_simulator
+play_launch check --manifest-dir . \
     autoware_launch planning_simulator.launch.xml
 
 # With launch arguments
-play_launch check --manifest-dir ~/repos/autoware-contract/ \
+play_launch check --manifest-dir . \
     autoware_launch planning_simulator.launch.xml \
     vehicle_model:=sample_vehicle sensor_model:=sample_sensor_kit
 ```
 
-## Layout
+The checker parses the launch file to build the scope table (which launch file
+includes which, under what namespace), loads manifest files for each scope,
+applies namespace prefixes, and runs 9 static validation rules with
+source-annotated diagnostics.
+
+## Repository Layout
 
 ```
 <package_name>/<stem>.yaml
 ```
 
-Where `<stem>` is the launch file name with `.launch.xml`/`.launch.py` stripped.
-This matches play_launch's `resolve_manifest_path()` convention.
+Each manifest corresponds to one Autoware launch file. `<stem>` is the launch
+file name with `.launch.xml` or `.launch.py` stripped. For example:
 
-## Source
+- `tier4_control_launch/control.yaml` ← `control.launch.xml`
+- `tier4_planning_launch/motion_planning.yaml` ← `motion_planning.launch.xml`
 
-Autoware Universe 1.5.0 (`~/repos/autoware/1.5.0-ws/`).
-Scope inventory: `play_launch/docs/roadmap/phase-31b-autoware_contract.md`.
+Scopes without entities (pass-through includes, parameter loaders) don't need
+manifest files — they are silently skipped by the checker.
+
+## Manifest Format
+
+Each manifest is a YAML file describing the nodes, topics, services, and
+timing contracts for a single launch file scope. See [docs/format.md](docs/format.md)
+for the full specification.
+
+Quick example:
+
+```yaml
+version: 1
+
+nodes:
+  controller_node_exe:
+    sub:
+      trajectory:                    # /planning/trajectory — QoS(1)
+        min_rate_hz: 10
+      kinematic_state:               # /localization/kinematic_state
+        state: true                  # polled, not causal
+    pub:
+      control_cmd:                   # QoS(1).transient_local()
+        min_rate_hz: 30
+    paths:
+      main:
+        input: trajectory
+        output: [control_cmd]
+        max_latency_ms: 10
+
+topics:
+  control_cmd:
+    type: autoware_control_msgs/msg/Control
+    pub: [controller_node_exe/control_cmd]
+    sub: [control_validator/control_cmd]
+    rate_hz: 30
+    qos:
+      reliability: reliable
+      durability: transient_local
+      depth: 1
+```
+
+## What Gets Checked
+
+| Rule | What it catches |
+|------|----------------|
+| **endpoint-unique** | Duplicate endpoint names within a node |
+| **wiring** | Path endpoints not connected by any topic |
+| **qos-compat** | Invalid QoS values (reliability, durability) |
+| **rate-hierarchy** | Publisher rate < topic rate < subscriber rate |
+| **rate-chain** | Export rate unachievable from upstream |
+| **scope-budget** | Scope latency < sum of node latencies; age < latency |
+| **causal-dag** | Cycles in the dataflow graph (state endpoints break cycles) |
+| **drop-rate** | Scope drop budget tighter than chain delivery rate |
+| **drop-consecutive** | Consecutive drop bound statistically infeasible |
+
+## Autoware Version
+
+Autoware Universe **1.5.0**. Contracts are authored from source code in
+`~/repos/autoware/1.5.0-ws/` and installed binaries in `/opt/autoware/1.5.0/`.
+
+## Coverage
+
+36 manifests covering all launch file scopes with entities in
+`planning_simulator.launch.xml` (119 entities across 48 packages).
+See [docs/roadmap.md](docs/roadmap.md) for per-file status.
+
+## Contributing
+
+### Authoring Practices
+
+- **Source traceability**: every requirement must cite its origin in an inline
+  `#` comment — source file path, launch XML remap, QoS constructor call.
+- **Design notes**: issues discovered during authoring go in
+  [docs/notes.md](docs/notes.md) and feed back into the manifest format design.
+
+### Refinement Stages
+
+| Stage | What to add |
+|-------|-------------|
+| Skeleton | Nodes, imports/exports, paths (from launch entity list) |
+| Topics | Actual remapped topic names + message types (from launch XML) |
+| QoS | reliability, durability, depth (from source `create_publisher`/`create_subscription`) |
+| Rates | `min_rate_hz`, `max_rate_hz` (from timers, config params) |
+| Timing | `max_latency_ms`, `max_age_ms` (from CARET measurements or design specs) |
+| Services | `srv:` / `cli:` on nodes + `services:` at scope level |
+
+## License
+
+Apache-2.0
