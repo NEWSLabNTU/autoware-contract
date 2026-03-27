@@ -1,0 +1,24 @@
+version: 1
+nodes:
+  mrm_handler:
+    sub:
+      operation_mode:
+        state: true
+      mrm_comfortable_stop_state:
+        state: true
+      mrm_emergency_stop_state:
+        state: true
+      hazard_status:
+        state: true
+    pub:
+      mrm_request: {}
+      gear_cmd: {}
+      turn_indicators_cmd: {}
+      hazard_lights_cmd: {}
+imports:
+  operation_mode: [mrm_handler/operation_mode]
+  comfortable_stop_state: [mrm_handler/mrm_comfortable_stop_state]
+  emergency_stop_state: [mrm_handler/mrm_emergency_stop_state]
+  hazard_status: [mrm_handler/hazard_status]
+exports:
+  mrm_request: [mrm_handler/mrm_request]

@@ -1,0 +1,7 @@
+version: 1
+nodes:
+  duplicated_node_checker:
+    pub:
+      diagnostic: {}
+exports:
+  diagnostic: [duplicated_node_checker/diagnostic]

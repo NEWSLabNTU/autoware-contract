@@ -1,0 +1,17 @@
+version: 1
+nodes:
+  pose_initializer:
+    sub:
+      gnss_pose:
+        state: true
+      point_cloud_map:
+        state: true
+    pub:
+      initialpose3d: {}
+    srv:
+      initialize: {}
+imports:
+  gnss_pose: [pose_initializer/gnss_pose]
+  point_cloud_map: [pose_initializer/point_cloud_map]
+exports:
+  initialpose: [pose_initializer/initialpose3d]

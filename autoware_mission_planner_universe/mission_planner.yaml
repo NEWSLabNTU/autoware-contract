@@ -1,0 +1,54 @@
+# autoware_mission_planner_universe/mission_planner.launch.xml
+# Namespace: /planning/mission_planning
+# 3 composable nodes in mission_planner_container (+ glog_component skipped)
+version: 1
+
+nodes:
+  mission_planner:
+    sub:
+      vector_map:
+        state: true
+        required: true
+      modified_goal:
+        state: true
+      odometry:
+        state: true
+    pub:
+      route: {}
+    srv:
+      set_route: {}
+      set_route_points: {}
+      clear_route: {}
+
+  route_selector:
+    sub:
+      main_route: {}
+      mrm_route: {}
+      odometry:
+        state: true
+    pub:
+      selected_route: {}
+
+topics:
+  main_route:
+    type: autoware_planning_msgs/msg/LaneletRoute
+    pub: [mission_planner/route]
+    sub: [route_selector/main_route]
+    qos:
+      reliability: reliable
+      durability: transient_local
+
+imports:
+  vector_map:
+    - mission_planner/vector_map
+  odometry:
+    - mission_planner/odometry
+    - route_selector/odometry
+  modified_goal:
+    - mission_planner/modified_goal
+  mrm_route:
+    - route_selector/mrm_route
+
+exports:
+  route:
+    - route_selector/selected_route

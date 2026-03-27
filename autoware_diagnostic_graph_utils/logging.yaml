@@ -1,0 +1,9 @@
+version: 1
+nodes:
+  logging_diag_graph:
+    sub:
+      diagnostic_graph:
+        state: true
+    pub: []
+imports:
+  diagnostic_graph: [logging_diag_graph/diagnostic_graph]

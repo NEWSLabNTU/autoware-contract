@@ -1,0 +1,17 @@
+version: 1
+nodes:
+  mrm_emergency_stop_operator:
+    sub:
+      mrm_request:
+        state: true
+      kinematic_state:
+        state: true
+    pub:
+      mrm_control_cmd: {}
+      mrm_state: {}
+imports:
+  mrm_request: [mrm_emergency_stop_operator/mrm_request]
+  kinematic_state: [mrm_emergency_stop_operator/kinematic_state]
+exports:
+  mrm_control_cmd: [mrm_emergency_stop_operator/mrm_control_cmd]
+  mrm_state: [mrm_emergency_stop_operator/mrm_state]

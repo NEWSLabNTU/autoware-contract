@@ -1,0 +1,18 @@
+version: 1
+nodes:
+  external_velocity_limit_selector:
+    sub:
+      velocity_limit_from_api:
+        state: true
+      velocity_limit_from_internal:
+        state: true
+      velocity_limit_clear_command_from_internal:
+        state: true
+    pub:
+      external_velocity_limit: {}
+imports:
+  api_limit: [external_velocity_limit_selector/velocity_limit_from_api]
+  internal_limit: [external_velocity_limit_selector/velocity_limit_from_internal]
+  clear_cmd: [external_velocity_limit_selector/velocity_limit_clear_command_from_internal]
+exports:
+  velocity_limit: [external_velocity_limit_selector/external_velocity_limit]

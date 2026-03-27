@@ -1,0 +1,158 @@
+# tier4_control_launch/control.launch.xml
+# Namespace: /control (via push-ros-namespace)
+# 5 composable nodes in 2 containers
+version: 1
+
+nodes:
+  controller_node_exe:
+    sub:
+      trajectory:
+        min_rate_hz: 10
+      kinematic_state:
+        min_rate_hz: 50
+      steering_status:
+        min_rate_hz: 30
+      acceleration:
+        min_rate_hz: 50
+      operation_mode:
+        state: true
+    pub:
+      control_cmd:
+        min_rate_hz: 30
+      predicted_trajectory:
+        min_rate_hz: 30
+    paths:
+      main:
+        input: trajectory
+        output: [control_cmd]
+        max_latency_ms: 10
+      prediction:
+        input: trajectory
+        output: [predicted_trajectory]
+        max_latency_ms: 10
+
+  control_validator:
+    sub:
+      control_cmd: {}
+      kinematic_state:
+        state: true
+      operation_mode:
+        state: true
+      acceleration:
+        state: true
+      reference_trajectory:
+        state: true
+      predicted_trajectory: {}
+    pub:
+      validation_status: {}
+
+  autonomous_emergency_braking:
+    sub:
+      pointcloud: {}
+      velocity_status:
+        state: true
+      imu:
+        state: true
+      predicted_objects:
+        state: true
+      predicted_trajectory: {}
+      autoware_state:
+        state: true
+    pub: []
+
+  lane_departure_checker:
+    sub:
+      kinematic_state:
+        state: true
+      vector_map:
+        state: true
+        required: true
+      route:
+        state: true
+        required: true
+      reference_trajectory:
+        state: true
+      predicted_trajectory: {}
+      operation_mode:
+        state: true
+    pub: []
+
+  collision_detector:
+    sub:
+      kinematic_state:
+        state: true
+      pointcloud:
+        state: true
+      predicted_objects:
+        state: true
+      operation_mode:
+        state: true
+    pub: []
+
+topics:
+  control_cmd:
+    type: autoware_control_msgs/msg/Control
+    pub: [controller_node_exe/control_cmd]
+    sub: [control_validator/control_cmd]
+    rate_hz: 30
+    qos:
+      reliability: reliable
+
+  predicted_trajectory:
+    type: autoware_planning_msgs/msg/Trajectory
+    pub: [controller_node_exe/predicted_trajectory]
+    sub:
+      - control_validator/predicted_trajectory
+      - autonomous_emergency_braking/predicted_trajectory
+      - lane_departure_checker/predicted_trajectory
+    rate_hz: 30
+    qos:
+      reliability: reliable
+
+imports:
+  trajectory_input:
+    - controller_node_exe/trajectory
+  kinematic_state:
+    - controller_node_exe/kinematic_state
+    - control_validator/kinematic_state
+    - lane_departure_checker/kinematic_state
+    - collision_detector/kinematic_state
+  steering_status:
+    - controller_node_exe/steering_status
+  acceleration:
+    - controller_node_exe/acceleration
+    - control_validator/acceleration
+  operation_mode:
+    - controller_node_exe/operation_mode
+    - control_validator/operation_mode
+    - lane_departure_checker/operation_mode
+    - collision_detector/operation_mode
+  velocity_status:
+    - autonomous_emergency_braking/velocity_status
+  imu:
+    - autonomous_emergency_braking/imu
+  pointcloud:
+    - autonomous_emergency_braking/pointcloud
+    - collision_detector/pointcloud
+  predicted_objects:
+    - autonomous_emergency_braking/predicted_objects
+    - collision_detector/predicted_objects
+  vector_map:
+    - lane_departure_checker/vector_map
+  route:
+    - lane_departure_checker/route
+  reference_trajectory:
+    - control_validator/reference_trajectory
+    - lane_departure_checker/reference_trajectory
+  autoware_state:
+    - autonomous_emergency_braking/autoware_state
+
+exports:
+  control_output:
+    - controller_node_exe/control_cmd
+
+paths:
+  control:
+    input: trajectory_input
+    output: [control_output]
+    max_latency_ms: 15

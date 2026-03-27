@@ -1,0 +1,12 @@
+version: 1
+nodes:
+  processing_time_checker:
+    sub:
+      processing_times:
+        state: true
+    pub:
+      diagnostic: {}
+imports:
+  processing_times: [processing_time_checker/processing_times]
+exports:
+  diagnostic: [processing_time_checker/diagnostic]

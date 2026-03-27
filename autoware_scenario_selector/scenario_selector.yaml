@@ -1,0 +1,40 @@
+# autoware_scenario_selector/scenario_selector.launch.xml
+# Namespace: /planning/scenario_planning
+# 1 node
+version: 1
+
+nodes:
+  scenario_selector:
+    sub:
+      lane_driving_trajectory:
+        min_rate_hz: 10
+      parking_trajectory:
+        state: true
+      odometry:
+        state: true
+      route:
+        state: true
+        required: true
+    pub:
+      output_trajectory:
+        min_rate_hz: 10
+      scenario: {}
+    paths:
+      main:
+        input: lane_driving_trajectory
+        output: [output_trajectory]
+        max_latency_ms: 5
+
+imports:
+  lane_driving_trajectory:
+    - scenario_selector/lane_driving_trajectory
+  parking_trajectory:
+    - scenario_selector/parking_trajectory
+  odometry:
+    - scenario_selector/odometry
+  route:
+    - scenario_selector/route
+
+exports:
+  planning_trajectory:
+    - scenario_selector/output_trajectory

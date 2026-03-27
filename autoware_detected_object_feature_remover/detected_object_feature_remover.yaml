@@ -1,0 +1,18 @@
+version: 1
+nodes:
+  detected_object_feature_remover:
+    sub:
+      detected_objects:
+        min_rate_hz: 10
+    pub:
+      objects_without_features:
+        min_rate_hz: 10
+    paths:
+      main:
+        input: detected_objects
+        output: [objects_without_features]
+        max_latency_ms: 5
+imports:
+  detected_objects: [detected_object_feature_remover/detected_objects]
+exports:
+  objects: [detected_object_feature_remover/objects_without_features]

@@ -1,0 +1,30 @@
+# autoware_multi_object_tracker/multi_object_tracker.launch.xml
+# Namespace: /perception/object_recognition/tracking
+# 1 node
+version: 1
+
+nodes:
+  multi_object_tracker:
+    sub:
+      detected_objects:
+        min_rate_hz: 10
+      odometry:
+        state: true
+    pub:
+      tracked_objects:
+        min_rate_hz: 10
+    paths:
+      main:
+        input: detected_objects
+        output: [tracked_objects]
+        max_latency_ms: 20
+
+imports:
+  detected_objects:
+    - multi_object_tracker/detected_objects
+  odometry:
+    - multi_object_tracker/odometry
+
+exports:
+  tracked_objects:
+    - multi_object_tracker/tracked_objects

@@ -1,0 +1,24 @@
+# autoware_topic_state_monitor/load_topic_state_monitor.launch.xml
+# Namespace: /system (loaded 10 times with different topic args)
+# Each invocation monitors one topic for liveness
+version: 1
+
+nodes:
+  topic_state_monitor:
+    sub:
+      input_topic: {}
+    pub:
+      diagnostic: {}
+    paths:
+      monitor:
+        input: input_topic
+        output: [diagnostic]
+        max_latency_ms: 100
+
+imports:
+  monitored_topic:
+    - topic_state_monitor/input_topic
+
+exports:
+  diagnostic_output:
+    - topic_state_monitor/diagnostic

@@ -1,0 +1,12 @@
+version: 1
+nodes:
+  component_state_monitor:
+    sub:
+      diagnostics:
+        state: true
+    pub:
+      component_state: {}
+imports:
+  diagnostics: [component_state_monitor/diagnostics]
+exports:
+  state: [component_state_monitor/component_state]

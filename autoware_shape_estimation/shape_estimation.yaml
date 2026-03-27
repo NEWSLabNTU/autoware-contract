@@ -1,0 +1,18 @@
+version: 1
+nodes:
+  shape_estimation:
+    sub:
+      detected_objects:
+        min_rate_hz: 10
+    pub:
+      objects_with_shape:
+        min_rate_hz: 10
+    paths:
+      main:
+        input: detected_objects
+        output: [objects_with_shape]
+        max_latency_ms: 10
+imports:
+  detected_objects: [shape_estimation/detected_objects]
+exports:
+  objects: [shape_estimation/objects_with_shape]

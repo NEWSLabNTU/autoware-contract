@@ -1,0 +1,68 @@
+version: 1
+# 19 composable nodes — all are ADAPI bridge adapters.
+# They translate between internal Autoware topics and the standard ADAPI interface.
+# Grouped as a single scope; individual node contracts are lightweight (state reads + service bridges).
+nodes:
+  interface_node:
+    pub: [interface_version]
+  localization_node:
+    sub: { kinematic_state: { state: true } }
+    pub: [localization_state]
+  routing_node:
+    sub: { route: { state: true } }
+    pub: [routing_state]
+  autoware_state_node:
+    sub:
+      localization_state: { state: true }
+      routing_state: { state: true }
+      operation_mode: { state: true }
+      mrm_state: { state: true }
+    pub: [autoware_state]
+  diagnostics_node:
+    sub: { diagnostic_graph: { state: true } }
+    pub: [diagnostics_status]
+  fail_safe_node:
+    sub: { mrm_state: { state: true } }
+    pub: [fail_safe_state]
+  heartbeat_node:
+    pub: [heartbeat]
+  motion_node:
+    sub: { vehicle_status: { state: true } }
+    pub: [motion_state]
+  operation_mode_node:
+    sub: { operation_mode_internal: { state: true } }
+    pub: [operation_mode]
+  perception_node:
+    sub: { predicted_objects: { state: true } }
+    pub: [perception_state]
+  planning_node:
+    sub: { trajectory: { state: true } }
+    pub: [planning_state]
+  vehicle_status_node:
+    sub:
+      velocity_status: { state: true }
+      steering_status: { state: true }
+      gear_status: { state: true }
+      turn_indicators_status: { state: true }
+      hazard_lights_status: { state: true }
+    pub: [vehicle_status]
+  vehicle_command_node:
+    sub: { control_cmd: { state: true } }
+    pub: [vehicle_command]
+  vehicle_metrics_node:
+    sub: { kinematic_state: { state: true } }
+    pub: [vehicle_metrics]
+  vehicle_info_node:
+    pub: [vehicle_info]
+  vehicle_door_node:
+    sub: { door_status: { state: true } }
+    pub: [door_state]
+  mrm_request_node:
+    sub: { mrm_request: { state: true } }
+    pub: [mrm_state]
+  manual_local_node:
+    sub: { operation_mode: { state: true } }
+    pub: []
+  manual_remote_node:
+    sub: { operation_mode: { state: true } }
+    pub: []

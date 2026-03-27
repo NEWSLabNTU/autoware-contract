@@ -1,0 +1,7 @@
+version: 1
+nodes:
+  service_log_checker:
+    pub:
+      diagnostic: {}
+exports:
+  diagnostic: [service_log_checker/diagnostic]

@@ -1,0 +1,14 @@
+version: 1
+nodes:
+  vehicle_door_simulator:
+    sub:
+      door_command:
+        state: true
+    pub:
+      door_status: {}
+    srv:
+      get_door_layout: {}
+imports:
+  door_command: [vehicle_door_simulator/door_command]
+exports:
+  door_status: [vehicle_door_simulator/door_status]

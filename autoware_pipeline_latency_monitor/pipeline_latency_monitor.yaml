@@ -1,0 +1,12 @@
+version: 1
+nodes:
+  pipeline_latency_monitor:
+    sub:
+      topics_to_monitor:
+        state: true
+    pub:
+      diagnostic: {}
+imports:
+  monitored_topics: [pipeline_latency_monitor/topics_to_monitor]
+exports:
+  diagnostic: [pipeline_latency_monitor/diagnostic]

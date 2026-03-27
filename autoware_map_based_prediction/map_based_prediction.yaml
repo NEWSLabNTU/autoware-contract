@@ -1,0 +1,35 @@
+# autoware_map_based_prediction/map_based_prediction.launch.xml
+# Namespace: /perception/object_recognition/prediction
+# 1 node
+version: 1
+
+nodes:
+  map_based_prediction:
+    sub:
+      tracked_objects:
+        min_rate_hz: 10
+      vector_map:
+        state: true
+        required: true
+      odometry:
+        state: true
+    pub:
+      predicted_objects:
+        min_rate_hz: 10
+    paths:
+      main:
+        input: tracked_objects
+        output: [predicted_objects]
+        max_latency_ms: 30
+
+imports:
+  tracked_objects:
+    - map_based_prediction/tracked_objects
+  vector_map:
+    - map_based_prediction/vector_map
+  odometry:
+    - map_based_prediction/odometry
+
+exports:
+  predicted_objects:
+    - map_based_prediction/predicted_objects

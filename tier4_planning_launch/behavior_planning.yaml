@@ -1,0 +1,117 @@
+# tier4_planning_launch/behavior_planning.launch.xml
+# Namespace: /planning/scenario_planning/lane_driving/behavior_planning
+# 3 composable nodes in behavior_planning_container (+ glog_component skipped)
+version: 1
+
+nodes:
+  behavior_path_planner:
+    sub:
+      route:
+        state: true
+        required: true
+      vector_map:
+        state: true
+        required: true
+      predicted_objects:
+        state: true
+      costmap:
+        state: true
+      odometry:
+        state: true
+      acceleration:
+        state: true
+      scenario:
+        state: true
+      traffic_signals:
+        state: true
+      occupancy_grid:
+        state: true
+    pub:
+      path_with_lane_id:
+        min_rate_hz: 10
+      turn_indicators_cmd: {}
+      hazard_lights_cmd: {}
+      modified_goal: {}
+    paths:
+      periodic:
+        input: []
+        output: [path_with_lane_id]
+        max_latency_ms: 50
+
+  behavior_velocity_planner:
+    sub:
+      path_with_lane_id:
+        min_rate_hz: 10
+      vector_map:
+        state: true
+        required: true
+      odometry:
+        state: true
+      acceleration:
+        state: true
+      predicted_objects:
+        state: true
+      pointcloud:
+        state: true
+      traffic_signals:
+        state: true
+      occupancy_grid:
+        state: true
+      external_velocity_limit:
+        state: true
+    pub:
+      output_path:
+        min_rate_hz: 10
+    paths:
+      main:
+        input: path_with_lane_id
+        output: [output_path]
+        max_latency_ms: 30
+
+topics:
+  path_with_lane_id:
+    type: autoware_internal_planning_msgs/msg/PathWithLaneId
+    pub: [behavior_path_planner/path_with_lane_id]
+    sub: [behavior_velocity_planner/path_with_lane_id]
+    rate_hz: 10
+
+imports:
+  route:
+    - behavior_path_planner/route
+  vector_map:
+    - behavior_path_planner/vector_map
+    - behavior_velocity_planner/vector_map
+  predicted_objects:
+    - behavior_path_planner/predicted_objects
+    - behavior_velocity_planner/predicted_objects
+  odometry:
+    - behavior_path_planner/odometry
+    - behavior_velocity_planner/odometry
+  acceleration:
+    - behavior_path_planner/acceleration
+    - behavior_velocity_planner/acceleration
+  traffic_signals:
+    - behavior_path_planner/traffic_signals
+    - behavior_velocity_planner/traffic_signals
+  occupancy_grid:
+    - behavior_path_planner/occupancy_grid
+    - behavior_velocity_planner/occupancy_grid
+  pointcloud:
+    - behavior_velocity_planner/pointcloud
+  costmap:
+    - behavior_path_planner/costmap
+  scenario:
+    - behavior_path_planner/scenario
+  external_velocity_limit:
+    - behavior_velocity_planner/external_velocity_limit
+
+exports:
+  behavior_path:
+    - behavior_velocity_planner/output_path
+
+paths:
+  behavior:
+    input: route
+    output: [behavior_path]
+    max_latency_ms: 100
+    max_age_ms: 300

@@ -1,0 +1,48 @@
+# autoware_simple_planning_simulator/simple_planning_simulator.launch.py
+# Namespace: / (node at /simulation/autoware_simple_planning_simulator_node)
+# 1 node — simulates vehicle dynamics for planning_simulator
+version: 1
+
+nodes:
+  simple_planning_simulator:
+    sub:
+      control_cmd:
+        min_rate_hz: 30
+      gear_cmd:
+        state: true
+      turn_indicators_cmd:
+        state: true
+      hazard_lights_cmd:
+        state: true
+      initial_pose:
+        state: true
+    pub:
+      kinematic_state:
+        min_rate_hz: 50
+      velocity_status:
+        min_rate_hz: 50
+      steering_status:
+        min_rate_hz: 50
+      acceleration:
+        min_rate_hz: 50
+      control_mode:
+        min_rate_hz: 50
+    paths:
+      periodic:
+        input: []
+        output: [kinematic_state, velocity_status, steering_status, acceleration]
+        max_latency_ms: 5
+
+imports:
+  control_cmd:
+    - simple_planning_simulator/control_cmd
+
+exports:
+  kinematic_state:
+    - simple_planning_simulator/kinematic_state
+  velocity_status:
+    - simple_planning_simulator/velocity_status
+  steering_status:
+    - simple_planning_simulator/steering_status
+  acceleration:
+    - simple_planning_simulator/acceleration

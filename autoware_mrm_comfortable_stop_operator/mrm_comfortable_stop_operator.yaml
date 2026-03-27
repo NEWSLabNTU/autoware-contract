@@ -1,0 +1,20 @@
+version: 1
+nodes:
+  mrm_comfortable_stop_operator:
+    sub:
+      control_cmd:
+        state: true
+      kinematic_state:
+        state: true
+      mrm_request:
+        state: true
+    pub:
+      mrm_control_cmd: {}
+      mrm_state: {}
+imports:
+  control_cmd: [mrm_comfortable_stop_operator/control_cmd]
+  kinematic_state: [mrm_comfortable_stop_operator/kinematic_state]
+  mrm_request: [mrm_comfortable_stop_operator/mrm_request]
+exports:
+  mrm_control_cmd: [mrm_comfortable_stop_operator/mrm_control_cmd]
+  mrm_state: [mrm_comfortable_stop_operator/mrm_state]

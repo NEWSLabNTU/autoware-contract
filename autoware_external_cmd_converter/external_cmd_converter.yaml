@@ -1,0 +1,19 @@
+version: 1
+nodes:
+  external_cmd_converter:
+    sub:
+      external_control_cmd: {}
+      velocity_status:
+        state: true
+    pub:
+      control_cmd: {}
+    paths:
+      main:
+        input: external_control_cmd
+        output: [control_cmd]
+        max_latency_ms: 5
+imports:
+  external_cmd: [external_cmd_converter/external_control_cmd]
+  velocity_status: [external_cmd_converter/velocity_status]
+exports:
+  control_cmd: [external_cmd_converter/control_cmd]

@@ -1,0 +1,11 @@
+version: 1
+nodes:
+  topic_state_monitor_tf:
+    sub:
+      input_topic: {}
+    pub:
+      diagnostic: {}
+imports:
+  monitored_topic: [topic_state_monitor_tf/input_topic]
+exports:
+  diagnostic: [topic_state_monitor_tf/diagnostic]

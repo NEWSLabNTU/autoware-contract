@@ -1,0 +1,13 @@
+version: 1
+nodes:
+  map_projection_loader:
+    pub:
+      map_projector_info:
+        required: true
+    paths:
+      startup:
+        input: []
+        output: [map_projector_info]
+        max_latency_ms: 1000
+exports:
+  map_projector_info: [map_projection_loader/map_projector_info]

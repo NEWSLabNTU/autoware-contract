@@ -1,0 +1,18 @@
+version: 1
+nodes:
+  external_cmd_selector:
+    sub:
+      remote_control_cmd:
+        state: true
+      local_control_cmd:
+        state: true
+      current_gate_mode:
+        state: true
+    pub:
+      selected_external_control_cmd: {}
+imports:
+  remote_cmd: [external_cmd_selector/remote_control_cmd]
+  local_cmd: [external_cmd_selector/local_control_cmd]
+  gate_mode: [external_cmd_selector/current_gate_mode]
+exports:
+  external_cmd: [external_cmd_selector/selected_external_control_cmd]

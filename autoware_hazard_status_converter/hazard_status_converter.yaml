@@ -1,0 +1,12 @@
+version: 1
+nodes:
+  hazard_status_converter:
+    sub:
+      diagnostic_graph:
+        state: true
+    pub:
+      hazard_status: {}
+imports:
+  diagnostic_graph: [hazard_status_converter/diagnostic_graph]
+exports:
+  hazard_status: [hazard_status_converter/hazard_status]

@@ -1,0 +1,12 @@
+version: 1
+nodes:
+  goal_pose_visualizer:
+    sub:
+      route:
+        state: true
+    pub:
+      goal_pose: {}
+imports:
+  route: [goal_pose_visualizer/route]
+exports:
+  goal_pose: [goal_pose_visualizer/goal_pose]

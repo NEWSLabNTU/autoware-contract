@@ -1,0 +1,27 @@
+version: 1
+nodes:
+  aggregator_node:
+    sub:
+      diagnostics:
+        state: true
+    pub:
+      diagnostic_graph: {}
+
+  converter_node:
+    sub:
+      diagnostic_graph: {}
+    pub:
+      diagnostics_agg: {}
+
+topics:
+  diagnostic_graph:
+    type: autoware_diagnostic_graph_msgs/msg/DiagnosticGraph
+    pub: [aggregator_node/diagnostic_graph]
+    sub: [converter_node/diagnostic_graph]
+    qos:
+      reliability: reliable
+
+imports:
+  diagnostics: [aggregator_node/diagnostics]
+exports:
+  diagnostics_agg: [converter_node/diagnostics_agg]

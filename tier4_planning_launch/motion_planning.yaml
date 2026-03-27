@@ -1,0 +1,107 @@
+# tier4_planning_launch/motion_planning.launch.xml
+# Namespace: /planning/scenario_planning/lane_driving/motion_planning
+# 4 composable nodes in motion_planning_container (+ glog_component skipped)
+version: 1
+
+nodes:
+  elastic_band_smoother:
+    sub:
+      input_path:
+        min_rate_hz: 10
+      odometry:
+        state: true
+    pub:
+      output_path:
+        min_rate_hz: 10
+    paths:
+      main:
+        input: input_path
+        output: [output_path]
+        max_latency_ms: 10
+
+  path_optimizer:
+    sub:
+      input_path:
+        min_rate_hz: 10
+      odometry:
+        state: true
+    pub:
+      output_trajectory:
+        min_rate_hz: 10
+    paths:
+      main:
+        input: input_path
+        output: [output_trajectory]
+        max_latency_ms: 15
+
+  motion_velocity_planner:
+    sub:
+      input_trajectory:
+        min_rate_hz: 10
+      vector_map:
+        state: true
+        required: true
+      odometry:
+        state: true
+      acceleration:
+        state: true
+      predicted_objects:
+        state: true
+      pointcloud:
+        state: true
+      traffic_signals:
+        state: true
+      occupancy_grid:
+        state: true
+    pub:
+      output_trajectory:
+        min_rate_hz: 10
+    paths:
+      main:
+        input: input_trajectory
+        output: [output_trajectory]
+        max_latency_ms: 20
+
+topics:
+  smoothed_path:
+    type: autoware_planning_msgs/msg/Path
+    pub: [elastic_band_smoother/output_path]
+    sub: [path_optimizer/input_path]
+    rate_hz: 10
+
+  optimized_trajectory:
+    type: autoware_planning_msgs/msg/Trajectory
+    pub: [path_optimizer/output_trajectory]
+    sub: [motion_velocity_planner/input_trajectory]
+    rate_hz: 10
+
+imports:
+  behavior_path:
+    - elastic_band_smoother/input_path
+  odometry:
+    - elastic_band_smoother/odometry
+    - path_optimizer/odometry
+    - motion_velocity_planner/odometry
+  vector_map:
+    - motion_velocity_planner/vector_map
+  acceleration:
+    - motion_velocity_planner/acceleration
+  predicted_objects:
+    - motion_velocity_planner/predicted_objects
+  pointcloud:
+    - motion_velocity_planner/pointcloud
+  traffic_signals:
+    - motion_velocity_planner/traffic_signals
+  occupancy_grid:
+    - motion_velocity_planner/occupancy_grid
+
+exports:
+  lane_driving_trajectory:
+    - motion_velocity_planner/output_trajectory
+
+paths:
+  motion_planning:
+    input: behavior_path
+    output: [lane_driving_trajectory]
+    max_latency_ms: 50
+    max_age_ms: 200

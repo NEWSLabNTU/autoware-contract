@@ -1,0 +1,15 @@
+version: 1
+nodes:
+  remaining_distance_time_calculator:
+    sub:
+      route:
+        state: true
+      kinematic_state:
+        state: true
+    pub:
+      remaining_distance_time: {}
+imports:
+  route: [remaining_distance_time_calculator/route]
+  kinematic_state: [remaining_distance_time_calculator/kinematic_state]
+exports:
+  remaining: [remaining_distance_time_calculator/remaining_distance_time]

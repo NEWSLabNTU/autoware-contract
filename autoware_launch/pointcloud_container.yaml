@@ -1,0 +1,4 @@
+version: 1
+# Container-only scope — hosts composable nodes from other scopes.
+# glog_component is the only direct load; actual perception nodes are loaded by child scopes.
+nodes: {}

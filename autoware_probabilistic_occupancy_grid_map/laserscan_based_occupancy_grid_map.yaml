@@ -1,0 +1,43 @@
+version: 1
+nodes:
+  pointcloud_to_laserscan:
+    sub:
+      pointcloud: {}
+    pub:
+      laserscan: {}
+    paths:
+      main:
+        input: pointcloud
+        output: [laserscan]
+        max_latency_ms: 5
+
+  occupancy_grid_map:
+    sub:
+      laserscan: {}
+      odometry:
+        state: true
+    pub:
+      occupancy_grid: {}
+    paths:
+      main:
+        input: laserscan
+        output: [occupancy_grid]
+        max_latency_ms: 20
+
+topics:
+  laserscan:
+    type: sensor_msgs/msg/LaserScan
+    pub: [pointcloud_to_laserscan/laserscan]
+    sub: [occupancy_grid_map/laserscan]
+    rate_hz: 10
+
+imports:
+  pointcloud: [pointcloud_to_laserscan/pointcloud]
+  odometry: [occupancy_grid_map/odometry]
+exports:
+  occupancy_grid: [occupancy_grid_map/occupancy_grid]
+paths:
+  grid_map:
+    input: pointcloud
+    output: [occupancy_grid]
+    max_latency_ms: 30

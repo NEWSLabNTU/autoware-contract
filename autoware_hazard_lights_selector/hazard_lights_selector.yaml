@@ -1,0 +1,15 @@
+version: 1
+nodes:
+  hazard_lights_selector:
+    sub:
+      hazard_lights_from_planning:
+        state: true
+      hazard_lights_from_system:
+        state: true
+    pub:
+      hazard_lights_cmd: {}
+imports:
+  planning_hazard: [hazard_lights_selector/hazard_lights_from_planning]
+  system_hazard: [hazard_lights_selector/hazard_lights_from_system]
+exports:
+  hazard_cmd: [hazard_lights_selector/hazard_lights_cmd]
