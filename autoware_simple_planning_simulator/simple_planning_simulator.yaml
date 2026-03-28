@@ -42,8 +42,10 @@ nodes:
       turn_indicators_status: {}                # output/turn_indicators_report — QoS(1)
       hazard_lights_status: {}                  # output/hazard_lights_report — QoS(1)
     srv:
-      control_mode_request: {}                  # input/control_mode_request — autoware_vehicle_msgs/srv/ControlModeCommand — SERVER
-      set_pose: {}                              # /api/simulator/set/pose — tier4_external_api_msgs/srv/InitializePose — SERVER
+      control_mode_request:                     # input/control_mode_request — autoware_vehicle_msgs/srv/ControlModeCommand — SERVER
+        max_response_ms: 100                    # mode switch — internal state change only
+      set_pose:                                 # /api/simulator/set/pose — tier4_external_api_msgs/srv/InitializePose — SERVER
+        max_response_ms: 1000                   # teleport vehicle — resets simulation state
     paths:
       periodic:                                 # timer-driven — rate independent of upstream
         input: []

@@ -14,7 +14,8 @@ nodes:
       mrm_status: {}                            # ~/output/mrm/emergency_stop/status — QoS(1)
       mrm_control_cmd: {}                       # ~/output/mrm/emergency_stop/control_cmd — QoS(1)
     srv:
-      operate: {}                               # ~/input/mrm/emergency_stop/operate — OperateMrm
+      operate:                                  # ~/input/mrm/emergency_stop/operate — OperateMrm
+        max_response_ms: 50                     # emergency: must ack faster than comfortable stop
 imports:
   control_cmd: [mrm_emergency_stop_operator/control_cmd]
 exports:

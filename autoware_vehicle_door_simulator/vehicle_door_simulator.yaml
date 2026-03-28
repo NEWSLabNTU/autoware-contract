@@ -13,8 +13,10 @@ nodes:
     pub:
       door_status: {}                           # door status output
     srv:
-      doors_command: {}                         # ~/doors/command — autoware_adapi_v1_msgs/srv/SetDoorCommand — SERVER
-      doors_layout: {}                          # ~/doors/layout — autoware_adapi_v1_msgs/srv/GetDoorLayout — SERVER
+      doors_command:                            # ~/doors/command — autoware_adapi_v1_msgs/srv/SetDoorCommand — SERVER
+        max_response_ms: 1000                   # simulated door actuation
+      doors_layout:                             # ~/doors/layout — autoware_adapi_v1_msgs/srv/GetDoorLayout — SERVER
+        max_response_ms: 100                    # static configuration query
 
 services:
   doors_command:

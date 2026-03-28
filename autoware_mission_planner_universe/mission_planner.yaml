@@ -26,9 +26,12 @@ nodes:
       route: {}                     # route (intra-container to route_selector) — QoS(1).transient_local()
       state: {}                     # state (intra-container to route_selector) — QoS(1).transient_local()
     srv:
-      clear_route: {}               # mission_planner/clear_route — ClearRoute
-      set_lanelet_route: {}         # mission_planner/set_lanelet_route — SetLaneletRoute
-      set_waypoint_route: {}        # mission_planner/set_waypoint_route — SetWaypointRoute
+      clear_route:                  # mission_planner/clear_route — ClearRoute
+        max_response_ms: 500        # route clearing is fast — graph reset only
+      set_lanelet_route:            # mission_planner/set_lanelet_route — SetLaneletRoute
+        max_response_ms: 2000       # route planning on lanelet graph — depends on map size
+      set_waypoint_route:           # mission_planner/set_waypoint_route — SetWaypointRoute
+        max_response_ms: 2000       # similar to lanelet route planning
 
   # --- Route Selector ---
   # plugin: autoware::mission_planner_universe::RouteSelector

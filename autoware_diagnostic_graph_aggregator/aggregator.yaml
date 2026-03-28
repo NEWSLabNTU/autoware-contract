@@ -16,8 +16,10 @@ nodes:
       diag_graph_status: {}                     # ~/status — QoS(graph_qos_depth param)
       unknowns: {}                              # ~/unknowns — QoS(1)
     srv:
-      reset: {}                                 # ~/reset — ResetDiagGraph
-      set_initializing: {}                      # ~/set_initializing — SetBool
+      reset:                                    # ~/reset — ResetDiagGraph
+        max_response_ms: 500                    # graph reset — clears all diagnostic state
+      set_initializing:                         # ~/set_initializing — SetBool
+        max_response_ms: 100                    # flag toggle
 
   converter_node:
     sub:

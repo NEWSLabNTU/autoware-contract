@@ -26,10 +26,13 @@ nodes:
       turn_indicators: {}                       # ~/output/turn_indicators — QoS(1)
       hazard_lights: {}                         # ~/output/hazard — QoS(1)
       gear_cmd: {}                              # ~/output/gear — QoS(1)
-    cli:                                        # service clients — calls MRM operators
-      pull_over_operate: {}                     # ~/output/mrm/pull_over/operate — tier4_system_msgs/srv/OperateMrm
-      comfortable_stop_operate: {}              # ~/output/mrm/comfortable_stop/operate — tier4_system_msgs/srv/OperateMrm
-      emergency_stop_operate: {}                # ~/output/mrm/emergency_stop/operate — tier4_system_msgs/srv/OperateMrm
+    cli:                                        # service clients — calls MRM operators (safety-critical)
+      pull_over_operate:                        # ~/output/mrm/pull_over/operate — tier4_system_msgs/srv/OperateMrm
+        max_response_ms: 100                    # MRM activation target — mrm_handler_core.cpp async call
+      comfortable_stop_operate:                 # ~/output/mrm/comfortable_stop/operate — tier4_system_msgs/srv/OperateMrm
+        max_response_ms: 100
+      emergency_stop_operate:                   # ~/output/mrm/emergency_stop/operate — tier4_system_msgs/srv/OperateMrm
+        max_response_ms: 100
 imports:
   operation_mode_availability: [mrm_handler/operation_mode_availability]
   odometry: [mrm_handler/odometry]
