@@ -14,6 +14,10 @@ args:
   input_pointcloud_topic_name:
   input_objects_topic_name:
   use_multithread:
+  launch_lane_departure_checker:          # control.launch.xml line 214
+  launch_control_validator:               # control.launch.xml line 231
+  launch_autonomous_emergency_braking:    # control.launch.xml line 247
+  launch_collision_detector:              # control.launch.xml line 263
 
 version: 1
 
@@ -51,8 +55,9 @@ nodes:
 
   # --- Control Validator ---
   # plugin: autoware::control_validator::ControlValidator
-  # control.launch.xml line 231
+  # control.launch.xml line 231 — <group if="$(var launch_control_validator)">
   control_validator:
+    if: $(var launch_control_validator)
     sub:
       control_cmd: {}             # /control/command/control_cmd — remap ~/input/control_cmd
       kinematic_state:            # /localization/kinematic_state — remap ~/input/kinematics
@@ -70,8 +75,9 @@ nodes:
   # --- AEB (Autonomous Emergency Braking) ---
   # plugin: autoware::motion::control::autonomous_emergency_braking::AEB
   # Note: no ROS 2 services — topics and subscribers only
-  # control.launch.xml line 204
+  # control.launch.xml line 247 — <group if="$(var launch_autonomous_emergency_braking)">
   autonomous_emergency_braking:
+    if: $(var launch_autonomous_emergency_braking)
     sub:
       pointcloud: {}              # $(var input_pointcloud_topic_name) — sensor data
       velocity_status:            # /vehicle/status/velocity_status
@@ -85,8 +91,9 @@ nodes:
 
   # --- Lane Departure Checker ---
   # plugin: autoware::lane_departure_checker::LaneDepartureCheckerNode
-  # control.launch.xml line 186
+  # control.launch.xml line 214 — <group if="$(var launch_lane_departure_checker)">
   lane_departure_checker:
+    if: $(var launch_lane_departure_checker)
     sub:
       kinematic_state:            # /localization/kinematic_state
         state: true
@@ -105,8 +112,9 @@ nodes:
 
   # --- Collision Detector ---
   # plugin: autoware::collision_detector::CollisionDetectorNode
-  # control.launch.xml line 247
+  # control.launch.xml line 263 — <group if="$(var launch_collision_detector)">
   collision_detector:
+    if: $(var launch_collision_detector)
     sub:
       kinematic_state:            # /localization/kinematic_state
         state: true

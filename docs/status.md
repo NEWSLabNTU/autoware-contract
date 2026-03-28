@@ -22,7 +22,7 @@ contract manifest. See [roadmap/](roadmap/) for feature definitions.
 
 | Manifest | Skel | Topics | QoS | Rates | Timing | Svcs | SvcMs | Args | Cond | Valid |
 |----------|------|--------|-----|-------|--------|------|-------|------|------|-------|
-| `control.yaml` | [x] | [x] | [x] | [x] | [x] | [x] | [ ] | [x] | [ ] | [ ] |
+| `control.yaml` | [x] | [x] | [x] | [x] | [x] | [x] | [ ] | [x] | [x] | [ ] |
 | `external_cmd_converter.yaml` | [x] | [x] | [x] | n/a | [x] | n/a | n/a | [ ] | n/a | [ ] |
 | `external_cmd_selector.yaml` | [x] | [x] | [x] | n/a | n/a | n/a | n/a | n/a | n/a | [ ] |
 

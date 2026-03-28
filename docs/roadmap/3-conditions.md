@@ -7,43 +7,48 @@ Depends on Phase 2 (args must be declared before conditions can reference them).
 
 ## Criteria
 
-- Every conditionally-loaded node in the launch file has a matching `if:` or
+- Every conditionally-loaded **node** in the launch file has a matching `if:` or
   `unless:` in the manifest
 - Condition expressions use `$(var ...)` referencing args from Phase 2
-- When checked with different arg sets, the right entities are included/excluded
+- Plugin-level flags (modules inside a single node) are documented in arg
+  comments but do NOT get `if:` — see Note 7 in `docs/notes.md`
 
 ## Work Items
 
-### 3.1: Motion planning modules
+### 3.1: Control — conditional checker nodes
 
-`motion_planning.launch.xml` conditionally enables velocity planner modules:
+`control.launch.xml` conditionally loads 4 checker nodes via `<group if="...">`:
 
-- [ ] `motion_planning.yaml` — add conditions for velocity planner modules:
-  ```yaml
-  args:
-    launch_obstacle_stop_module: "true"
-    launch_obstacle_cruise_module: "true"
-    launch_out_of_lane_module: "true"
-    # ... other module flags
-  ```
-  (Note: currently all modules are baked into one `motion_velocity_planner` node.
-  Conditions apply to the module list parameter, not separate nodes. May need
-  to model as a single node with variable behavior rather than conditional nodes.)
+- [x] `control.yaml` — add `if:` on 4 nodes:
+  - `control_validator` — `if: $(var launch_control_validator)` (line 231)
+  - `autonomous_emergency_braking` — `if: $(var launch_autonomous_emergency_braking)` (line 247)
+  - `lane_departure_checker` — `if: $(var launch_lane_departure_checker)` (line 214)
+  - `collision_detector` — `if: $(var launch_collision_detector)` (line 263)
+- [x] Add 4 new args for the launch flags
 
-### 3.2: Behavior planning modules
+### ~~3.2: Motion planning modules~~ — Not applicable
 
-- [ ] `behavior_planning.yaml` — similar module flags for behavior path/velocity
-  planner modules
+Module flags (`launch_obstacle_stop_module`, etc.) control plugins loaded
+inside `motion_velocity_planner`, not separate nodes. The node always exists.
+See Note 7. No `if:` needed.
 
-### 3.3: Control gate variant
+### ~~3.3: Behavior planning modules~~ — Not applicable
 
-- [ ] `control.yaml` — `use_control_command_gate` selects plugin variant:
-  ```yaml
-  # This affects which plugin is loaded, not which node exists.
-  # May not need if:/unless: — just document in comments.
-  ```
+Same as 3.2 — behavior path/velocity planner modules are plugins, not nodes.
 
-### 3.4: Simulator output mode
+### ~~3.4: Control gate variant~~ — Not applicable
 
-- [ ] `simple_planning_simulator.yaml` — `motion_publish_mode` changes which
-  output topics are active
+`use_control_command_gate` selects a plugin class, not a node. Documented
+in args comment only.
+
+### ~~3.5: Simulator output mode~~ — Not applicable
+
+`motion_publish_mode` changes which output topics the simulator publishes,
+but the node always exists. No `if:` needed — document in args comment.
+
+## Design Note
+
+Most Autoware "conditional" features are plugin-level, not node-level.
+Only `control.launch.xml` has real conditional `<group if="...">` blocks
+that include/exclude entire composable nodes. The `if:`/`unless:` manifest
+feature is most valuable for these true conditional nodes.
