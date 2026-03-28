@@ -33,6 +33,13 @@ nodes:
         # safety-critical
       emergency_stop_operate:                   # ~/output/mrm/emergency_stop/operate — tier4_system_msgs/srv/OperateMrm
         # safety-critical
+# Service wiring: cli: targets are in other scopes (cross-scope)
+#   pull_over_operate → mrm_pull_over_operator (not in planning_simulator)
+#   comfortable_stop_operate → mrm_comfortable_stop_operator/operate
+#   emergency_stop_operate → mrm_emergency_stop_operator/operate
+# Cross-scope service wiring is not yet supported in the manifest format.
+# The service-wiring rule will warn about these — accepted as known gap.
+
 imports:
   operation_mode_availability: [mrm_handler/operation_mode_availability]
   odometry: [mrm_handler/odometry]

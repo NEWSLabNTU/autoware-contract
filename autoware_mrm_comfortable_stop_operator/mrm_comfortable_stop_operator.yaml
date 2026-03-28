@@ -14,5 +14,11 @@ nodes:
     srv:
       operate:                                  # ~/input/mrm/comfortable_stop/operate — OperateMrm
         # safety-critical — no documented response time requirement
+services:
+  operate:
+    type: tier4_system_msgs/srv/OperateMrm
+    server: [mrm_comfortable_stop_operator/operate]
+    # client is mrm_handler (cross-scope)
+
 exports:
   mrm_status: [mrm_comfortable_stop_operator/mrm_status]

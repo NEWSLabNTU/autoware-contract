@@ -27,6 +27,12 @@ nodes:
       selected_steering_cmd: {}                 # ~/output/steering_cmd — QoS(1)
       selected_heartbeat: {}                    # ~/output/heartbeat — QoS(1)
     srv:
-      select_external_command: {}               # ~/service/select_external_command
+      select_external_command: {}               # ~/service/select_external_command — ExternalCommandSelect
+
+services:
+  select_external_command:
+    type: tier4_control_msgs/srv/ExternalCommandSelect
+    server: [external_cmd_selector/select_external_command]
+
 exports:
   selector_mode: [external_cmd_selector/current_selector_mode]

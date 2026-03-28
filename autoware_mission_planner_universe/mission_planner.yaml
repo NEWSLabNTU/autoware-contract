@@ -47,10 +47,10 @@ nodes:
       main_state: {}                # ~/main/state — QoS(1).transient_local()
       mrm_route: {}                 # ~/mrm/route — QoS(1).transient_local()
       mrm_state: {}                 # ~/mrm/state — QoS(1).transient_local()
-    srv:
-      clear_route: {}               # proxies to mission_planner
-      set_lanelet_route: {}
-      set_waypoint_route: {}
+    cli:
+      clear_route: {}               # ~/planner/clear_route — client, proxies to mission_planner
+      set_lanelet_route: {}         # ~/planner/set_lanelet_route — client
+      set_waypoint_route: {}        # ~/planner/set_waypoint_route — client
 
 topics:
   # Mission Planner → Route Selector (intra-container, transient_local)
@@ -71,6 +71,21 @@ topics:
       reliability: reliable
       durability: transient_local
       depth: 1
+
+services:
+  # Intra-scope: route_selector → mission_planner (same container)
+  clear_route:
+    type: autoware_planning_msgs/srv/ClearRoute
+    server: [mission_planner/clear_route]
+    client: [route_selector/clear_route]
+  set_lanelet_route:
+    type: autoware_planning_msgs/srv/SetLaneletRoute
+    server: [mission_planner/set_lanelet_route]
+    client: [route_selector/set_lanelet_route]
+  set_waypoint_route:
+    type: autoware_planning_msgs/srv/SetWaypointRoute
+    server: [mission_planner/set_waypoint_route]
+    client: [route_selector/set_waypoint_route]
 
 imports:
   # /map/vector_map — QoS(1).transient_local()

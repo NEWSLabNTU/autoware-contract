@@ -16,6 +16,12 @@ nodes:
     srv:
       operate:                                  # ~/input/mrm/emergency_stop/operate — OperateMrm
         # safety-critical (emergency) — no documented response time requirement
+services:
+  operate:
+    type: tier4_system_msgs/srv/OperateMrm
+    server: [mrm_emergency_stop_operator/operate]
+    # client is mrm_handler (cross-scope)
+
 imports:
   control_cmd: [mrm_emergency_stop_operator/control_cmd]
 exports:

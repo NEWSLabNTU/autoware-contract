@@ -28,6 +28,14 @@ nodes:
     pub:
       operation_mode_availability: {}           # ~/operation_mode/availability — QoS(1)
 
+services:
+  reset:
+    type: autoware_system_msgs/srv/ResetDiagGraph
+    server: [aggregator_node/reset]
+  set_initializing:
+    type: std_srvs/srv/SetBool
+    server: [aggregator_node/set_initializing]
+
 imports:
   diagnostics: [aggregator_node/diagnostics]
 exports:
