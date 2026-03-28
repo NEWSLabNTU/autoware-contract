@@ -107,7 +107,8 @@ Autoware Universe **1.5.0**. Contracts are authored from source code in
 
 36 manifests covering all launch file scopes with entities in
 `planning_simulator.launch.xml` (119 entities across 48 packages).
-See [docs/roadmap.md](docs/roadmap.md) for per-file status.
+See [docs/status.md](docs/status.md) for per-file status and
+[docs/roadmap/](docs/roadmap/) for upcoming work items.
 
 ## Contributing
 

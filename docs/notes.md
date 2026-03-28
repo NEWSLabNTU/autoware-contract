@@ -3,12 +3,16 @@
 Issues and observations discovered during manifest authoring. These feed back
 into the manifest format design and checker tool improvements.
 
-## 1. QoS Default Ambiguity
+## 1. QoS Default — Resolved
 
-`rclcpp::QoS(1)` defaults to `reliable` in ROS 2, but some Autoware nodes use
-`InterProcessPollingSubscriber` which may behave differently. The manifest
-format doesn't distinguish polling vs callback subscription patterns — both are
-just `sub:`. Consider whether this matters for runtime monitoring.
+`rclcpp::QoS(1)` defaults to **reliable/volatile/depth1** (from
+`rmw_qos_profile_default`). This is well-defined — no ambiguity.
+`InterProcessPollingSubscriber` is a subscription wrapper pattern, not a
+different QoS profile — the underlying DDS QoS is still whatever the
+constructor specifies.
+
+Early manifests incorrectly marked planning pipeline topics as `best_effort`;
+corrected to `reliable`. Only `SensorDataQoS()` (depth=5) is best_effort.
 
 ## 2. Variable Topic Names
 
