@@ -14,9 +14,9 @@ nodes:
       door_status: {}                           # door status output
     srv:
       doors_command:                            # ~/doors/command — autoware_adapi_v1_msgs/srv/SetDoorCommand — SERVER
-        max_response_ms: 1000                   # simulated door actuation
+        # simulation only — no response time requirement
       doors_layout:                             # ~/doors/layout — autoware_adapi_v1_msgs/srv/GetDoorLayout — SERVER
-        max_response_ms: 100                    # static configuration query
+        # simulation only — no response time requirement
 
 services:
   doors_command:

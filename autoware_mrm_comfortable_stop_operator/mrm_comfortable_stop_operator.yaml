@@ -13,6 +13,6 @@ nodes:
       velocity_limit_clear: {}                  # ~/output/velocity_limit/clear — QoS(1).transient_local()
     srv:
       operate:                                  # ~/input/mrm/comfortable_stop/operate — OperateMrm
-        max_response_ms: 100                    # safety-critical: must ack MRM request quickly
+        # safety-critical — no documented response time requirement
 exports:
   mrm_status: [mrm_comfortable_stop_operator/mrm_status]

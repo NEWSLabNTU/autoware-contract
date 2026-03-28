@@ -17,9 +17,9 @@ nodes:
       unknowns: {}                              # ~/unknowns — QoS(1)
     srv:
       reset:                                    # ~/reset — ResetDiagGraph
-        max_response_ms: 500                    # graph reset — clears all diagnostic state
+        # diagnostic admin — no response time requirement
       set_initializing:                         # ~/set_initializing — SetBool
-        max_response_ms: 100                    # flag toggle
+        # diagnostic admin — no response time requirement
 
   converter_node:
     sub:

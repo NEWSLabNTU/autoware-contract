@@ -16,7 +16,7 @@ nodes:
       initialpose3d: {}                         # /initialpose3d — published after initialization
     srv:
       initialize:                               # autoware component_interface_specs::localization::Initialize — SERVER
-        max_response_ms: 5000                   # NDT scan matching alignment — iterative, map-dependent
+        # no documented response time requirement — NDT alignment is iterative, map-dependent
 
 services:
   initialize:

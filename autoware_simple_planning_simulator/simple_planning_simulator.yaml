@@ -43,9 +43,9 @@ nodes:
       hazard_lights_status: {}                  # output/hazard_lights_report — QoS(1)
     srv:
       control_mode_request:                     # input/control_mode_request — autoware_vehicle_msgs/srv/ControlModeCommand — SERVER
-        max_response_ms: 100                    # mode switch — internal state change only
+        # simulation only — no response time requirement
       set_pose:                                 # /api/simulator/set/pose — tier4_external_api_msgs/srv/InitializePose — SERVER
-        max_response_ms: 1000                   # teleport vehicle — resets simulation state
+        # simulation only — no response time requirement
     paths:
       periodic:                                 # timer-driven — rate independent of upstream
         input: []

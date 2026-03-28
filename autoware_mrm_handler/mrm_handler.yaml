@@ -28,11 +28,11 @@ nodes:
       gear_cmd: {}                              # ~/output/gear — QoS(1)
     cli:                                        # service clients — calls MRM operators (safety-critical)
       pull_over_operate:                        # ~/output/mrm/pull_over/operate — tier4_system_msgs/srv/OperateMrm
-        max_response_ms: 100                    # MRM activation target — mrm_handler_core.cpp async call
+        # safety-critical — no documented response time requirement in Autoware source
       comfortable_stop_operate:                 # ~/output/mrm/comfortable_stop/operate — tier4_system_msgs/srv/OperateMrm
-        max_response_ms: 100
+        # safety-critical
       emergency_stop_operate:                   # ~/output/mrm/emergency_stop/operate — tier4_system_msgs/srv/OperateMrm
-        max_response_ms: 100
+        # safety-critical
 imports:
   operation_mode_availability: [mrm_handler/operation_mode_availability]
   odometry: [mrm_handler/odometry]

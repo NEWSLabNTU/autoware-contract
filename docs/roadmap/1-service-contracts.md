@@ -1,12 +1,18 @@
 # Phase 1: Service Contracts
 
-Add `max_response_ms` to service endpoints. Currently `srv:` and `cli:` declare
-existence only.
+Add `max_response_ms` to service endpoints where requirements exist in
+Autoware source, design docs, or safety standards.
+
+**Status**: On hold — service endpoints have safety/admin comments but no
+concrete `max_response_ms` values. Values will be added when traceable
+requirements are found. See [../notes.md](../notes.md) Note 6.
 
 ## Criteria
 
-- Every `srv:` and `cli:` endpoint with a latency requirement has `max_response_ms`
-- Values sourced from Autoware design specs or measured via CARET/interception
+- `max_response_ms` only added when the requirement can be traced to a
+  specific source (Autoware code, design docs, safety standards)
+- If a service is safety-critical but has no documented requirement,
+  leave a `# safety-critical — no documented requirement` comment
 - Source cited in inline `#` comment
 
 ## Work Items
