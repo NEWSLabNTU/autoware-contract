@@ -89,7 +89,7 @@ topics:
     sub: [path_optimizer/input_path]
     rate_hz: 10
     qos:
-      reliability: best_effort  # create_publisher/subscription with QoS(1) — default best_effort
+      reliability: reliable     # QoS(1) default = reliable (rmw_qos_profile_default)
       depth: 1
 
   # Optimizer → Velocity Planner (intra-container)
@@ -99,7 +99,7 @@ topics:
     sub: [motion_velocity_planner/input_trajectory]
     rate_hz: 10
     qos:
-      reliability: best_effort  # QoS(1)
+      reliability: reliable     # QoS(1) default = reliable
       depth: 1
 
 imports:
