@@ -130,3 +130,23 @@ This is a known gap — for now, we accept that conditional nodes may leave
 dangling topic references. A future improvement would be to support `if:`
 on individual entries in topic pub/sub lists, or to make the wiring rule
 condition-aware.
+
+## 9. Cross-Scope Service Wiring Not Supported
+
+The manifest `services:` section wires `srv:` servers to `cli:` clients
+**within a single scope**. Autoware's MRM system has cross-scope service
+calls: `mrm_handler` (in its own scope) calls `operate` on operators in
+separate scopes (`mrm_comfortable_stop_operator`, `mrm_emergency_stop_operator`).
+
+The manifest format has no mechanism for cross-scope service wiring — there's
+no import/export system for services like there is for topics. The
+`service-wiring` rule will warn about unmatched `cli:` endpoints in this case.
+
+**Options for future work**:
+1. Add `service_imports:`/`service_exports:` analogous to topic imports/exports
+2. Make the checker cross-scope aware (look across loaded manifests)
+3. Accept the gap — cross-scope services are rare and the wiring can be
+   verified at the parent scope level that includes both children
+
+For now, option 3 is adopted. The limitation is documented in each affected
+manifest file.
