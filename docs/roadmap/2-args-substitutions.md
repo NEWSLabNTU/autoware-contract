@@ -17,7 +17,7 @@ names depend on launch arguments.
 
 ### 2.1: Motion planning (highest value — 2 variable topic names)
 
-- [ ] `motion_planning.yaml` — add args:
+- [x] `motion_planning.yaml` — add args:
   ```yaml
   args:
     input_objects_topic_name: /perception/object_recognition/objects
@@ -27,7 +27,7 @@ names depend on launch arguments.
 
 ### 2.2: Behavior planning (4 variable topic names)
 
-- [ ] `behavior_planning.yaml` — add args:
+- [x] `behavior_planning.yaml` — add args:
   ```yaml
   args:
     input_objects_topic_name: /perception/object_recognition/objects
@@ -38,7 +38,7 @@ names depend on launch arguments.
 
 ### 2.3: Control (variable topic names + container config)
 
-- [ ] `control.yaml` — add args:
+- [x] `control.yaml` — add args:
   ```yaml
   args:
     use_multithread: "true"
@@ -48,7 +48,7 @@ names depend on launch arguments.
 
 ### 2.4: Scenario selector (variable trajectory inputs)
 
-- [ ] `scenario_selector.yaml` — add args:
+- [x] `scenario_selector.yaml` — add args:
   ```yaml
   args:
     input_lane_driving_trajectory: /planning/scenario_planning/lane_driving/trajectory
@@ -57,6 +57,6 @@ names depend on launch arguments.
 
 ### 2.5: Remaining manifests with variable topics
 
-- [ ] `simple_planning_simulator.yaml` — `motion_publish_mode`
-- [ ] `multi_object_tracker.yaml` — input channel topic names
-- [ ] `map_based_prediction.yaml` — traffic signal topic
+- [x] `simple_planning_simulator.yaml` — `motion_publish_mode`
+- [x] `multi_object_tracker.yaml` — input channel topic names
+- [x] `map_based_prediction.yaml` — traffic signal topic

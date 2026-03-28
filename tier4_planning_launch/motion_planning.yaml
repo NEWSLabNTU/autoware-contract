@@ -6,6 +6,13 @@
 #   smoother:  autoware_universe/planning/autoware_path_smoother/src/elastic_band_smoother.cpp
 #   optimizer: autoware_universe/planning/autoware_path_optimizer/src/node.cpp
 #   velocity:  autoware_core/planning/motion_velocity_planner/autoware_motion_velocity_planner/src/node.cpp
+
+# Args from motion_planning.launch.xml <arg> declarations
+args:
+  input_objects_topic_name:
+  input_pointcloud_topic_name:
+  use_multithread:
+
 version: 1
 
 nodes:

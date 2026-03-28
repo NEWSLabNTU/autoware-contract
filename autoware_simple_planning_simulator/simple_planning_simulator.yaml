@@ -3,6 +3,11 @@
 #
 # Sources:
 #   source: autoware_universe/simulator/autoware_simple_planning_simulator/src/simple_planning_simulator_core.cpp (line 118-194)
+
+# Args from simple_planning_simulator.launch.py
+args:
+  motion_publish_mode:              # "full_motion" or "pose_only" — changes output topics
+
 version: 1
 
 nodes:

@@ -8,6 +8,13 @@
 #   aeb:        autoware_universe/control/autoware_autonomous_emergency_braking/include/.../node.hpp
 #   lane_dep:   autoware_universe/control/autoware_lane_departure_checker/include/.../lane_departure_checker_node.hpp
 #   collision:  autoware_universe/control/autoware_collision_detector/include/.../node.hpp
+
+# Args from control.launch.xml <arg> declarations
+args:
+  input_pointcloud_topic_name:
+  input_objects_topic_name:
+  use_multithread:
+
 version: 1
 
 nodes:

@@ -22,7 +22,7 @@ contract manifest. See [roadmap/](roadmap/) for feature definitions.
 
 | Manifest | Skel | Topics | QoS | Rates | Timing | Svcs | SvcMs | Args | Cond | Valid |
 |----------|------|--------|-----|-------|--------|------|-------|------|------|-------|
-| `control.yaml` | [x] | [x] | [x] | [x] | [x] | [x] | [ ] | [ ] | [ ] | [ ] |
+| `control.yaml` | [x] | [x] | [x] | [x] | [x] | [x] | [ ] | [x] | [ ] | [ ] |
 | `external_cmd_converter.yaml` | [x] | [x] | [x] | n/a | [x] | n/a | n/a | [ ] | n/a | [ ] |
 | `external_cmd_selector.yaml` | [x] | [x] | [x] | n/a | n/a | n/a | n/a | n/a | n/a | [ ] |
 
@@ -30,7 +30,7 @@ contract manifest. See [roadmap/](roadmap/) for feature definitions.
 
 | Manifest | Skel | Topics | QoS | Rates | Timing | Svcs | SvcMs | Args | Cond | Valid |
 |----------|------|--------|-----|-------|--------|------|-------|------|------|-------|
-| `mission_planner.yaml` | [x] | [x] | [x] | [x] | [x] | [x] | [x] | n/a | n/a | [ ] |
+| `mission_planner.yaml` | [x] | [x] | [x] | [x] | [x] | [x] | [ ] | n/a | n/a | [ ] |
 | `goal_pose_visualizer.yaml` | [x] | [x] | n/a | n/a | n/a | n/a | n/a | n/a | n/a | [ ] |
 | `manual_lane_change_handler.yaml` | [x] | [x] | n/a | n/a | n/a | n/a | n/a | n/a | n/a | [ ] |
 
@@ -38,19 +38,19 @@ contract manifest. See [roadmap/](roadmap/) for feature definitions.
 
 | Manifest | Skel | Topics | QoS | Rates | Timing | Svcs | SvcMs | Args | Cond | Valid |
 |----------|------|--------|-----|-------|--------|------|-------|------|------|-------|
-| `behavior_planning.yaml` | [x] | [x] | [x] | [x] | [x] | n/a | n/a | [ ] | [ ] | [ ] |
+| `behavior_planning.yaml` | [x] | [x] | [x] | [x] | [x] | n/a | n/a | [x] | [ ] | [ ] |
 
 ## Planning — Motion
 
 | Manifest | Skel | Topics | QoS | Rates | Timing | Svcs | SvcMs | Args | Cond | Valid |
 |----------|------|--------|-----|-------|--------|------|-------|------|------|-------|
-| `motion_planning.yaml` | [x] | [x] | [x] | [x] | [x] | n/a | n/a | [ ] | [ ] | [ ] |
+| `motion_planning.yaml` | [x] | [x] | [x] | [x] | [x] | n/a | n/a | [x] | [ ] | [ ] |
 
 ## Planning — Scenario
 
 | Manifest | Skel | Topics | QoS | Rates | Timing | Svcs | SvcMs | Args | Cond | Valid |
 |----------|------|--------|-----|-------|--------|------|-------|------|------|-------|
-| `scenario_selector.yaml` | [x] | [x] | [x] | [x] | [x] | n/a | n/a | [ ] | n/a | [ ] |
+| `scenario_selector.yaml` | [x] | [x] | [x] | [x] | [x] | n/a | n/a | [x] | n/a | [ ] |
 | `external_velocity_limit_selector.yaml` | [x] | [x] | [x] | n/a | n/a | n/a | n/a | n/a | n/a | [ ] |
 | `hazard_lights_selector.yaml` | [x] | [x] | [x] | n/a | n/a | n/a | n/a | n/a | n/a | [ ] |
 | `remaining_distance_time_calculator.yaml` | [x] | [x] | n/a | n/a | n/a | n/a | n/a | n/a | n/a | [ ] |
@@ -59,8 +59,8 @@ contract manifest. See [roadmap/](roadmap/) for feature definitions.
 
 | Manifest | Skel | Topics | QoS | Rates | Timing | Svcs | SvcMs | Args | Cond | Valid |
 |----------|------|--------|-----|-------|--------|------|-------|------|------|-------|
-| `map_based_prediction.yaml` | [x] | [x] | [x] | [x] | [x] | n/a | n/a | [ ] | n/a | [ ] |
-| `multi_object_tracker.yaml` | [x] | [x] | [x] | [x] | [x] | n/a | n/a | [ ] | n/a | [ ] |
+| `map_based_prediction.yaml` | [x] | [x] | [x] | [x] | [x] | n/a | n/a | [x] | n/a | [ ] |
+| `multi_object_tracker.yaml` | [x] | [x] | [x] | [x] | [x] | n/a | n/a | [x] | n/a | [ ] |
 | `laserscan_based_occupancy_grid_map.yaml` | [x] | [x] | [x] | n/a | [x] | n/a | n/a | n/a | n/a | [ ] |
 
 ## Map
@@ -76,11 +76,11 @@ contract manifest. See [roadmap/](roadmap/) for feature definitions.
 | `load_topic_state_monitor.yaml` | [x] | [x] | n/a | n/a | n/a | n/a | n/a | n/a | n/a | [ ] |
 | `load_topic_state_monitor_tf.yaml` | [x] | [x] | n/a | n/a | n/a | n/a | n/a | n/a | n/a | [ ] |
 | `component_state_monitor.yaml` | [x] | [x] | n/a | n/a | n/a | n/a | n/a | n/a | n/a | [ ] |
-| `aggregator.yaml` | [x] | [x] | [x] | n/a | n/a | [x] | [x] | n/a | n/a | [ ] |
-| `mrm_comfortable_stop_operator.yaml` | [x] | [x] | [x] | n/a | n/a | [x] | [x] | n/a | n/a | [ ] |
-| `mrm_emergency_stop_operator.yaml` | [x] | [x] | [x] | n/a | n/a | [x] | [x] | n/a | n/a | [ ] |
+| `aggregator.yaml` | [x] | [x] | [x] | n/a | n/a | [x] | [ ] | n/a | n/a | [ ] |
+| `mrm_comfortable_stop_operator.yaml` | [x] | [x] | [x] | n/a | n/a | [x] | [ ] | n/a | n/a | [ ] |
+| `mrm_emergency_stop_operator.yaml` | [x] | [x] | [x] | n/a | n/a | [x] | [ ] | n/a | n/a | [ ] |
 | `hazard_status_converter.yaml` | [x] | [x] | [x] | n/a | n/a | n/a | n/a | n/a | n/a | [ ] |
-| `mrm_handler.yaml` | [x] | [x] | [x] | n/a | n/a | [x] | [x] | n/a | n/a | [ ] |
+| `mrm_handler.yaml` | [x] | [x] | [x] | n/a | n/a | [x] | [ ] | n/a | n/a | [ ] |
 | `duplicated_node_checker.yaml` | [x] | [x] | n/a | n/a | n/a | n/a | n/a | n/a | n/a | [ ] |
 | `pipeline_latency_monitor.yaml` | [x] | [x] | n/a | n/a | n/a | n/a | n/a | n/a | n/a | [ ] |
 | `processing_time_checker.yaml` | [x] | [x] | n/a | n/a | n/a | n/a | n/a | n/a | n/a | [ ] |
@@ -90,10 +90,10 @@ contract manifest. See [roadmap/](roadmap/) for feature definitions.
 
 | Manifest | Skel | Topics | QoS | Rates | Timing | Svcs | SvcMs | Args | Cond | Valid |
 |----------|------|--------|-----|-------|--------|------|-------|------|------|-------|
-| `simple_planning_simulator.yaml` | [x] | [x] | [x] | [x] | [x] | [x] | [x] | [ ] | [ ] | [ ] |
+| `simple_planning_simulator.yaml` | [x] | [x] | [x] | [x] | [x] | [x] | [x] | [x] | [ ] | [ ] |
 | `detected_object_feature_remover.yaml` | [x] | [x] | n/a | n/a | n/a | n/a | n/a | n/a | n/a | [ ] |
 | `shape_estimation.yaml` | [x] | [x] | n/a | n/a | n/a | n/a | n/a | n/a | n/a | [ ] |
-| `vehicle_door_simulator.yaml` | [x] | [x] | n/a | n/a | n/a | [x] | [x] | n/a | n/a | [ ] |
+| `vehicle_door_simulator.yaml` | [x] | [x] | n/a | n/a | n/a | [x] | [ ] | n/a | n/a | [ ] |
 
 ## API & Infrastructure
 
@@ -102,4 +102,4 @@ contract manifest. See [roadmap/](roadmap/) for feature definitions.
 | `default_adapi.yaml` | [x] | [x] | n/a | n/a | n/a | n/a | n/a | n/a | n/a | [ ] |
 | `pointcloud_container.yaml` | [x] | [x] | n/a | n/a | n/a | n/a | n/a | n/a | n/a | [ ] |
 | `logging.yaml` | [x] | [x] | n/a | n/a | n/a | n/a | n/a | n/a | n/a | [ ] |
-| `pose_initializer.yaml` | [x] | [x] | n/a | n/a | n/a | [x] | [x] | n/a | n/a | [ ] |
+| `pose_initializer.yaml` | [x] | [x] | n/a | n/a | n/a | [x] | [ ] | n/a | n/a | [ ] |

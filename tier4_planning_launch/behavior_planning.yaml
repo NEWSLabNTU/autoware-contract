@@ -5,6 +5,14 @@
 #   launch:   /opt/autoware/1.5.0/share/tier4_planning_launch/launch/scenario_planning/lane_driving/behavior_planning/behavior_planning.launch.xml
 #   path_planner: autoware_universe/planning/behavior_path_planner/autoware_behavior_path_planner/src/behavior_path_planner_node.cpp
 #   vel_planner:  autoware_core/planning/behavior_velocity_planner/autoware_behavior_velocity_planner/src/node.cpp
+
+# Args from behavior_planning.launch.xml <arg> declarations
+args:
+  input_objects_topic_name:
+  input_traffic_light_topic_name:
+  input_vector_map_topic_name:
+  input_pointcloud_topic_name:
+
 version: 1
 
 nodes:

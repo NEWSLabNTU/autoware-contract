@@ -4,6 +4,13 @@
 # Sources:
 #   launch:  /opt/autoware/1.5.0/share/autoware_multi_object_tracker/launch/multi_object_tracker.launch.xml
 #   source:  autoware_universe/perception/autoware_multi_object_tracker/src/multi_object_tracker_node.cpp
+
+# Args from multi_object_tracker.launch.xml
+# Note: input channel topics are configured via a param YAML file, not launch args.
+# The input_channels_path arg points to the config file.
+args:
+  input_channels_path:                          # required — path to input channel config YAML
+
 version: 1
 
 nodes:

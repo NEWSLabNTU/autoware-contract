@@ -4,6 +4,13 @@
 # Sources:
 #   launch:  /opt/autoware/1.5.0/share/autoware_map_based_prediction/launch/map_based_prediction.launch.xml
 #   source:  autoware_universe/perception/autoware_map_based_prediction/src/map_based_prediction_node.cpp
+
+# Args from map_based_prediction.launch.xml
+args:
+  input_topic:
+  output_topic:
+  use_vector_map:
+
 version: 1
 
 nodes:
