@@ -105,6 +105,28 @@ just with different plugins loaded.
 
 For now, document module flags in `args:` comments but don't add `if:` on
 the node itself. Phase 3 conditions are best suited for nodes/topics that
-are truly conditionally present (e.g., `use_control_command_gate` selecting
-a different node plugin, or `launch_collision_detector` enabling/disabling
-a whole node).
+are truly conditionally present (e.g., `launch_collision_detector`
+enabling/disabling a whole node in `control.launch.xml`).
+
+**Finding from Phase 3**: Only `control.launch.xml` has real conditional
+`<group if="...">` blocks for node-level inclusion. The 4 checker nodes
+(control_validator, AEB, lane_departure_checker, collision_detector) got
+`if:` conditions. All other "conditional" features in Autoware planning/
+motion are plugin-level inside existing nodes — `if:` does not apply.
+
+## 8. Conditional Topics Should Follow Conditional Nodes
+
+When a node has `if:`, the topics that reference its endpoints should also
+have `if:` with the same condition. Otherwise the checker will warn about
+wiring to a non-existent endpoint when the condition is false.
+
+Currently `control.yaml` does not add `if:` to the `predicted_trajectory`
+topic (which references `lane_departure_checker` and AEB as subscribers).
+When those nodes are filtered out, the topic's subscriber list points to
+non-existent nodes. The checker's wiring rule may or may not catch this
+depending on whether it validates subscriber endpoint existence.
+
+This is a known gap — for now, we accept that conditional nodes may leave
+dangling topic references. A future improvement would be to support `if:`
+on individual entries in topic pub/sub lists, or to make the wiring rule
+condition-aware.
