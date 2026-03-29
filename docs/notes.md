@@ -114,22 +114,37 @@ enabling/disabling a whole node in `control.launch.xml`).
 `if:` conditions. All other "conditional" features in Autoware planning/
 motion are plugin-level inside existing nodes — `if:` does not apply.
 
-## 8. Conditional Topics Should Follow Conditional Nodes
+## 8. Conditional Endpoint References in Topics
 
-When a node has `if:`, the topics that reference its endpoints should also
-have `if:` with the same condition. Otherwise the checker will warn about
-wiring to a non-existent endpoint when the condition is false.
+When a node has `if:`, topics that reference its endpoints become partially
+conditional — some subscribers may not exist at runtime. The user reading
+the manifest may assume all endpoint refs are always active.
 
-Currently `control.yaml` does not add `if:` to the `predicted_trajectory`
-topic (which references `lane_departure_checker` and AEB as subscribers).
-When those nodes are filtered out, the topic's subscriber list points to
-non-existent nodes. The checker's wiring rule may or may not catch this
-depending on whether it validates subscriber endpoint existence.
+Adding `if:` on individual `pub:`/`sub:` entries was considered but rejected:
+in cross-scope wiring, the condition context of the child node is not
+available in the parent manifest. Even intra-scope, it duplicates the
+condition already on the node.
 
-This is a known gap — for now, we accept that conditional nodes may leave
-dangling topic references. A future improvement would be to support `if:`
-on individual entries in topic pub/sub lists, or to make the wiring rule
-condition-aware.
+**Solution** — `?` suffix on optional endpoint references:
+
+```yaml
+sub:
+  - always_present_node/input             # required — checker errors if missing
+  - conditional_node/input?               # optional — silently dropped if node filtered
+```
+
+- **Unmarked** ref → required. Checker errors if the node doesn't exist
+  after condition filtering.
+- **`?` suffix** → optional. Dropped during post-filter cleanup if the
+  referenced node was filtered out. `?` stripped if node is present.
+
+`?` is unambiguous — not valid in ROS 2 names (only alphanumeric, underscore,
+slash). Machine-checkable — the tool validates the `?` refs, not just comments.
+
+Prior art: AUTOSAR declares the full topology as a superset with variation
+annotations; AADL uses `in modes` on connections matching subcomponent modes.
+Both accept that the manifest is a template — variant resolution selects
+the active subset.
 
 ## 9. Cross-Scope Service Wiring Not Supported
 
