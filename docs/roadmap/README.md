@@ -14,6 +14,7 @@ See [../status.md](../status.md) for per-launch-file implementation status.
 | 4 | [End-to-End Validation](4-end-to-end-validation.md) | Run `play_launch check` against real Autoware launch | Complete (0 errors, 149 warnings) |
 | 5 | [Service Wiring](5-service-wiring.md) | Add scope-level `services:` entries | Complete (cross-scope documented as gap) |
 | 6 | [Optional Refs](6-optional-refs.md) | Add `?` suffix on conditional endpoint refs | Complete |
+| 7 | [Format v2 Adoption](7-format-v2-adoption.md) | Adopt unified interface, arg types, satisfiability | Blocked on play_launch Phase 33 |
 
 ## Phase Order
 
