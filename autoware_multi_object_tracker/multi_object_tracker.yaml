@@ -32,7 +32,7 @@ nodes:
         output: [tracked_objects]
         max_latency_ms: 20          # tracking association + state estimation
 
-imports:
+sub:
   # Detected objects from upstream (lidar/camera/radar detectors)
   detected_objects:
     - multi_object_tracker/detected_objects
@@ -40,7 +40,7 @@ imports:
   odometry:
     - multi_object_tracker/odometry
 
-exports:
+pub:
   # /perception/object_recognition/tracking/objects → map_based_prediction
   tracked_objects:
     - multi_object_tracker/tracked_objects

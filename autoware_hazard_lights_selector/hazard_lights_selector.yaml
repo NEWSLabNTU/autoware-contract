@@ -15,8 +15,8 @@ nodes:
         state: true
     pub:
       hazard_lights_cmd: {}                     # /planning/hazard_lights_cmd — QoS(1)
-imports:
+sub:
   planning_hazard: [hazard_lights_selector/hazard_lights_from_planning]
   system_hazard: [hazard_lights_selector/hazard_lights_from_system]
-exports:
+pub:
   hazard_cmd: [hazard_lights_selector/hazard_lights_cmd]

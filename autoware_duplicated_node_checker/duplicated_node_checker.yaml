@@ -3,5 +3,5 @@ nodes:
   duplicated_node_checker:
     pub:
       diagnostic: {}
-exports:
+pub:
   diagnostic: [duplicated_node_checker/diagnostic]

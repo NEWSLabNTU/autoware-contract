@@ -15,10 +15,10 @@ nodes:
         output: [diagnostic]
         max_latency_ms: 100
 
-imports:
+sub:
   monitored_topic:
     - topic_state_monitor/input_topic
 
-exports:
+pub:
   diagnostic_output:
     - topic_state_monitor/diagnostic

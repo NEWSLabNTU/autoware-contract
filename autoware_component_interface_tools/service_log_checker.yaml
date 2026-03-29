@@ -3,5 +3,5 @@ nodes:
   service_log_checker:
     pub:
       diagnostic: {}
-exports:
+pub:
   diagnostic: [service_log_checker/diagnostic]

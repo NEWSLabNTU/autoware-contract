@@ -109,7 +109,7 @@ topics:
       reliability: reliable     # QoS(1) default = reliable
       depth: 1
 
-imports:
+sub:
   # From behavior_planning scope — /planning/.../behavior_planning/path
   behavior_path:
     - elastic_band_smoother/input_path
@@ -137,7 +137,7 @@ imports:
   occupancy_grid:
     - motion_velocity_planner/occupancy_grid
 
-exports:
+pub:
   # /planning/scenario_planning/lane_driving/trajectory → scenario_selector
   lane_driving_trajectory:
     - motion_velocity_planner/output_trajectory

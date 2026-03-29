@@ -87,7 +87,7 @@ services:
     server: [mission_planner/set_waypoint_route]
     client: [route_selector/set_waypoint_route]
 
-imports:
+sub:
   # /map/vector_map — QoS(1).transient_local()
   vector_map:
     - mission_planner/vector_map
@@ -101,7 +101,7 @@ imports:
   operation_mode:
     - mission_planner/operation_mode
 
-exports:
+pub:
   # ~/main/route → consumed by behavior_path_planner as /planning/mission_planning/route
   route:
     - route_selector/main_route

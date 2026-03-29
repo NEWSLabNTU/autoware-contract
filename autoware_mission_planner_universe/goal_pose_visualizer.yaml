@@ -12,7 +12,7 @@ nodes:
         state: true
     pub:
       goal_pose: {}                             # visualization marker
-imports:
+sub:
   route: [goal_pose_visualizer/route]
-exports:
+pub:
   goal_pose: [goal_pose_visualizer/goal_pose]

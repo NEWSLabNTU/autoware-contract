@@ -20,5 +20,5 @@ services:
     server: [mrm_comfortable_stop_operator/operate]
     # client is mrm_handler (cross-scope)
 
-exports:
+pub:
   mrm_status: [mrm_comfortable_stop_operator/mrm_status]

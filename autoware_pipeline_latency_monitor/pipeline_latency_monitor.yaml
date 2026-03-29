@@ -6,7 +6,7 @@ nodes:
         state: true
     pub:
       diagnostic: {}
-imports:
+sub:
   monitored_topics: [pipeline_latency_monitor/topics_to_monitor]
-exports:
+pub:
   diagnostic: [pipeline_latency_monitor/diagnostic]

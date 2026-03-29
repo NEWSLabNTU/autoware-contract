@@ -48,7 +48,7 @@ nodes:
         output: [output_trajectory]
         max_latency_ms: 5           # simple selection, no computation
 
-imports:
+sub:
   lane_driving_trajectory:
     - scenario_selector/lane_driving_trajectory
   parking_trajectory:
@@ -62,6 +62,6 @@ imports:
   operation_mode:
     - scenario_selector/operation_mode
 
-exports:
+pub:
   planning_trajectory:
     - scenario_selector/output_trajectory

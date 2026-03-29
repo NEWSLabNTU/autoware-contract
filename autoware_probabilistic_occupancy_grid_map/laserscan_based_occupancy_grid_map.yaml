@@ -40,11 +40,11 @@ topics:
       reliability: best_effort                  # SensorDataQoS
       depth: 1
 
-imports:
+sub:
   pointcloud: [pointcloud_to_laserscan/pointcloud]
   obstacle_pointcloud: [occupancy_grid_map/obstacle_pointcloud]
   raw_pointcloud: [occupancy_grid_map/raw_pointcloud]
-exports:
+pub:
   occupancy_grid: [occupancy_grid_map/occupancy_grid]
 paths:
   grid_map:

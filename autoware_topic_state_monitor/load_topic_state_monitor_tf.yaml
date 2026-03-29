@@ -5,7 +5,7 @@ nodes:
       input_topic: {}
     pub:
       diagnostic: {}
-imports:
+sub:
   monitored_topic: [topic_state_monitor_tf/input_topic]
-exports:
+pub:
   diagnostic: [topic_state_monitor_tf/diagnostic]

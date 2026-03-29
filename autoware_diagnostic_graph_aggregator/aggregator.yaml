@@ -36,9 +36,9 @@ services:
     type: std_srvs/srv/SetBool
     server: [aggregator_node/set_initializing]
 
-imports:
+sub:
   diagnostics: [aggregator_node/diagnostics]
-exports:
+pub:
   operation_mode_availability: [converter_node/operation_mode_availability]
   diag_graph_struct: [aggregator_node/diag_graph_struct]
   diag_graph_status: [aggregator_node/diag_graph_status]

@@ -26,7 +26,7 @@ services:
     type: autoware_adapi_v1_msgs/srv/GetDoorLayout
     server: [vehicle_door_simulator/doors_layout]
 
-imports:
+sub:
   door_command: [vehicle_door_simulator/door_command]
-exports:
+pub:
   door_status: [vehicle_door_simulator/door_status]

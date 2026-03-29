@@ -14,8 +14,8 @@ nodes:
         state: true
     pub:
       lane_change_request: {}                   # request to behavior path planner
-imports:
+sub:
   lane_change_cmd: [manual_lane_change_handler/lane_change_command]
   route: [manual_lane_change_handler/route]
-exports:
+pub:
   lane_change_request: [manual_lane_change_handler/lane_change_request]

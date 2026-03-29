@@ -14,8 +14,8 @@ nodes:
         state: true
     pub:
       hazard_status: {}                         # ~/hazard_status — QoS(1)
-imports:
+sub:
   diagnostic_graph: [hazard_status_converter/diagnostic_graph]
   emergency_holding: [hazard_status_converter/emergency_holding]
-exports:
+pub:
   hazard_status: [hazard_status_converter/hazard_status]

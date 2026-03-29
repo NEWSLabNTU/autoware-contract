@@ -151,7 +151,7 @@ topics:
       reliability: reliable       # QoS(1) — controller_node.cpp pub
       depth: 1
 
-imports:
+sub:
   # /planning/trajectory — from scenario_planning output
   trajectory_input:
     - controller_node_exe/trajectory
@@ -199,7 +199,7 @@ imports:
     - control_validator/reference_trajectory?           # when launch_control_validator
     - lane_departure_checker/reference_trajectory?     # when launch_lane_departure_checker
 
-exports:
+pub:
   control_output:
     - controller_node_exe/control_cmd
 

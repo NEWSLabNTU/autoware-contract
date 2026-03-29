@@ -22,7 +22,7 @@ services:
     server: [mrm_emergency_stop_operator/operate]
     # client is mrm_handler (cross-scope)
 
-imports:
+sub:
   control_cmd: [mrm_emergency_stop_operator/control_cmd]
-exports:
+pub:
   mrm_status: [mrm_emergency_stop_operator/mrm_status]

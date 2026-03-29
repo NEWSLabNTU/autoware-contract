@@ -96,7 +96,7 @@ topics:
     qos:                            # intra-container — may bypass DDS
       depth: 1
 
-imports:
+sub:
   # /planning/mission_planning/route — QoS(1).transient_local()
   route:
     - behavior_path_planner/route
@@ -137,7 +137,7 @@ imports:
   external_velocity_limit:
     - behavior_velocity_planner/external_velocity_limit
 
-exports:
+pub:
   # Output path → elastic_band_smoother in motion_planning scope
   behavior_path:
     - behavior_velocity_planner/output_path

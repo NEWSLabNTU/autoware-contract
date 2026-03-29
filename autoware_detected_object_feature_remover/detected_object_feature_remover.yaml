@@ -18,7 +18,7 @@ nodes:
         input: detected_objects
         output: [objects_without_features]
         max_latency_ms: 5                       # simple field removal, no computation
-imports:
+sub:
   detected_objects: [detected_object_feature_remover/detected_objects]
-exports:
+pub:
   objects: [detected_object_feature_remover/objects_without_features]

@@ -5,5 +5,5 @@ nodes:
       diagnostic_graph:
         state: true
     pub: []
-imports:
+sub:
   diagnostic_graph: [logging_diag_graph/diagnostic_graph]

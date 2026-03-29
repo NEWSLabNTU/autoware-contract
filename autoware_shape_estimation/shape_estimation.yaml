@@ -18,7 +18,7 @@ nodes:
         input: detected_objects
         output: [objects_with_shape]
         max_latency_ms: 10                      # shape fitting per object
-imports:
+sub:
   detected_objects: [shape_estimation/detected_objects]
-exports:
+pub:
   objects: [shape_estimation/objects_with_shape]

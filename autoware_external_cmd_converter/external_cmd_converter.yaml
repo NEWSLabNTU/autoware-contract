@@ -26,8 +26,8 @@ nodes:
         input: pedals_cmd
         output: [control_cmd]
         max_latency_ms: 5                       # simple conversion, no heavy computation
-imports:
+sub:
   pedals_cmd: [external_cmd_converter/pedals_cmd]
   odometry: [external_cmd_converter/odometry]
-exports:
+pub:
   control_cmd: [external_cmd_converter/control_cmd]

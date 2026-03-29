@@ -23,8 +23,8 @@ services:
     type: autoware_component_interface_specs/localization/Initialize
     server: [pose_initializer/initialize]
 
-imports:
+sub:
   gnss_pose: [pose_initializer/gnss_pose]
   point_cloud_map: [pose_initializer/point_cloud_map]
-exports:
+pub:
   initialpose: [pose_initializer/initialpose3d]

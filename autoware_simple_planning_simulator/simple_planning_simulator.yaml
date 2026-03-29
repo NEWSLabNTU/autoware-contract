@@ -65,9 +65,9 @@ services:
     type: tier4_external_api_msgs/srv/InitializePose
     server: [simple_planning_simulator/set_pose]
 
-imports:
+sub:
   control_cmd: [simple_planning_simulator/control_cmd]
-exports:
+pub:
   odometry: [simple_planning_simulator/odometry]
   velocity_status: [simple_planning_simulator/velocity_status]
   steering_status: [simple_planning_simulator/steering_status]

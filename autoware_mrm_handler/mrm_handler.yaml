@@ -40,11 +40,11 @@ nodes:
 # Cross-scope service wiring is not yet supported in the manifest format.
 # The service-wiring rule will warn about these — accepted as known gap.
 
-imports:
+sub:
   operation_mode_availability: [mrm_handler/operation_mode_availability]
   odometry: [mrm_handler/odometry]
   comfortable_stop_status: [mrm_handler/comfortable_stop_status]
   emergency_stop_status: [mrm_handler/emergency_stop_status]
   operation_mode_state: [mrm_handler/operation_mode_state]
-exports:
+pub:
   mrm_state: [mrm_handler/mrm_state]

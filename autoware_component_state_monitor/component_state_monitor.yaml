@@ -6,7 +6,7 @@ nodes:
         state: true
     pub:
       component_state: {}
-imports:
+sub:
   diagnostics: [component_state_monitor/diagnostics]
-exports:
+pub:
   state: [component_state_monitor/component_state]

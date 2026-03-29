@@ -6,7 +6,7 @@ nodes:
         state: true
     pub:
       diagnostic: {}
-imports:
+sub:
   processing_times: [processing_time_checker/processing_times]
-exports:
+pub:
   diagnostic: [processing_time_checker/diagnostic]

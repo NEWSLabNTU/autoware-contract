@@ -34,5 +34,5 @@ services:
     type: tier4_control_msgs/srv/ExternalCommandSelect
     server: [external_cmd_selector/select_external_command]
 
-exports:
+pub:
   selector_mode: [external_cmd_selector/current_selector_mode]

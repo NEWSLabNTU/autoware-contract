@@ -14,8 +14,8 @@ nodes:
         state: true
     pub:
       remaining_distance_time: {}               # publishes remaining dist/time to goal
-imports:
+sub:
   route: [remaining_distance_time_calculator/route]
   kinematic_state: [remaining_distance_time_calculator/kinematic_state]
-exports:
+pub:
   remaining: [remaining_distance_time_calculator/remaining_distance_time]

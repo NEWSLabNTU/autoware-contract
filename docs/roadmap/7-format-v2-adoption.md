@@ -21,11 +21,18 @@ After play_launch 33.3 (arg type declarations):
 
 After play_launch 33.2 (unified scope interface):
 
-- [ ] Replace `imports:`/`exports:` with top-level `pub:`/`sub:`/`srv:`/`cli:`
-  on all 36 manifests
-- [ ] Add `srv:` and `cli:` scope-level groups for service endpoints
-  (currently in `services:` entries or undeclared)
-- [ ] Verify `just check` still passes
+- [ ] All 36 manifests: `imports:` → top-level `sub:`, `exports:` → top-level `pub:`
+- [ ] Manifests with service boundaries: add scope-level `srv:` / `cli:` groups
+  - `mission_planner.yaml` — `srv:` for route services, `cli:` for route_selector
+  - `mrm_handler.yaml` — `cli:` for MRM operator services
+  - `mrm_comfortable_stop_operator.yaml` — `srv:` for operate
+  - `mrm_emergency_stop_operator.yaml` — `srv:` for operate
+  - `pose_initializer.yaml` — `srv:` for initialize
+  - `simple_planning_simulator.yaml` — `srv:` for control_mode, set_pose
+  - `vehicle_door_simulator.yaml` — `srv:` for doors
+  - `aggregator.yaml` — `srv:` for reset, set_initializing
+  - `external_cmd_selector.yaml` — `srv:` for select_external_command
+- [ ] Verify `just check` passes with 0 errors
 
 ### 7.3: Add missing args after parser fix
 

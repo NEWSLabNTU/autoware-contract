@@ -16,9 +16,9 @@ nodes:
         state: true
     pub:
       external_velocity_limit: {}               # /planning/scenario_planning/max_velocity — QoS(1)
-imports:
+sub:
   api_limit: [external_velocity_limit_selector/velocity_limit_from_api]
   internal_limit: [external_velocity_limit_selector/velocity_limit_from_internal]
   clear_cmd: [external_velocity_limit_selector/velocity_limit_clear_command_from_internal]
-exports:
+pub:
   velocity_limit: [external_velocity_limit_selector/external_velocity_limit]

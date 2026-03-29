@@ -35,7 +35,7 @@ nodes:
         output: [predicted_objects]
         max_latency_ms: 30          # trajectory prediction for each tracked object
 
-imports:
+sub:
   # /perception/object_recognition/tracking/objects
   tracked_objects:
     - map_based_prediction/tracked_objects
@@ -46,7 +46,7 @@ imports:
   traffic_signals:
     - map_based_prediction/traffic_signals
 
-exports:
+pub:
   # /perception/object_recognition/prediction/objects → behavior planners, motion planners
   predicted_objects:
     - map_based_prediction/predicted_objects
