@@ -165,3 +165,23 @@ no import/export system for services like there is for topics. The
 
 For now, option 3 is adopted. The limitation is documented in each affected
 manifest file.
+
+## 10. End-to-End Validation Results (Phase 4)
+
+First full run of `play_launch check` against Autoware planning_simulator:
+
+- **45 manifests loaded** (36 unique + 9 extra from ×10 topic_state_monitor)
+- **0 errors** — all manifests pass static checks
+- **149 warnings** — 146 wiring + 3 service-wiring
+- **Wiring warnings are expected**: each manifest declares imports/exports for
+  cross-scope endpoints, but no parent manifest wires them. The wiring rule
+  checks intra-scope only.
+
+**Fix applied**: `behavior_planning.yaml` had 2 args (`input_traffic_light_topic_name`,
+`input_vector_map_topic_name`) that are not in the scope table — they have defaults
+in the launch XML and are never passed from the parent. Removed from manifest args.
+
+**Lesson**: only declare args that appear in `scope.args` (from record.json).
+Args with defaults in the launch XML that are never overridden by the parent
+don't appear in the scope table. The manifest should not declare them as
+required.

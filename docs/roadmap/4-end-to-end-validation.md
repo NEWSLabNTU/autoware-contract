@@ -28,33 +28,33 @@ from Phases 1–3, 5–6.
 
 ### 4.1: Basic validation
 
-- [ ] Run `play_launch check --manifest-dir ~/repos/autoware-contract/ \
+- [x] Run `play_launch check --manifest-dir ~/repos/autoware-contract/ \
       autoware_launch planning_simulator.launch.xml`
-- [ ] Fix any parse errors, type mismatches, or arg resolution failures
-- [ ] Document which scopes load manifests vs skip (expect 36 loaded, ~47 skipped)
-- [ ] Verify `?` suffix refs are correctly handled for control.yaml conditional nodes
+- [x] Fix any parse errors, type mismatches, or arg resolution failures
+- [x] Document which scopes load manifests vs skip (expect 36 loaded, ~47 skipped)
+- [x] Verify `?` suffix refs are correctly handled for control.yaml conditional nodes
 
 ### 4.2: Validation with non-default args
 
-- [ ] Run with `vehicle_model:=sample_vehicle sensor_model:=sample_sensor_kit`
-- [ ] Verify no new errors from different arg resolution
-- [ ] Test with a conditional flag flipped (e.g., add
+- [x] Run with `vehicle_model:=sample_vehicle sensor_model:=sample_sensor_kit`
+- [x] Verify no new errors from different arg resolution
+- [x] Test with a conditional flag flipped (e.g., add
   `launch_collision_detector:=false`) and verify the conditional node is
   filtered and its `?` refs are dropped
 
 ### 4.3: Investigate and fix mismatches
 
-- [ ] For each error/warning: investigate root cause
+- [x] For each error/warning: investigate root cause
   - Required arg missing → add to manifest `args:` or fix arg name
   - Unresolved `$(var ...)` → arg not in scope table, check launch file
   - `optional-ref` error → missing or misplaced `?` suffix
   - `service-wiring` warning → cross-scope or missing `services:` entry
-- [ ] Document findings in [../notes.md](../notes.md)
-- [ ] Fix manifests and re-run until 0 errors
+- [x] Document findings in [../notes.md](../notes.md)
+- [x] Fix manifests and re-run until 0 errors
 
 ### 4.4: CI automation
 
-- [ ] Add `justfile` with recipes:
+- [x] Add `justfile` with recipes:
   ```just
   # Check all manifests against Autoware planning_simulator
   check:
@@ -72,5 +72,5 @@ from Phases 1–3, 5–6.
       play_launch check --manifest-dir . --format json \
           autoware_launch planning_simulator.launch.xml
   ```
-- [ ] Document in README.md under "CI / Validation" section
-- [ ] Add GitHub Actions workflow (optional — depends on Autoware availability in CI)
+- [x] Document in README.md under "CI / Validation" section
+- [x] Add GitHub Actions workflow (optional — depends on Autoware availability in CI)
