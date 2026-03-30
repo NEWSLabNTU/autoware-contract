@@ -42,3 +42,10 @@ pub:
   operation_mode_availability: [converter_node/operation_mode_availability]
   diag_graph_struct: [aggregator_node/diag_graph_struct]
   diag_graph_status: [aggregator_node/diag_graph_status]
+
+srv:
+  # Diagnostic admin services
+  reset:
+    - aggregator_node/reset
+  set_initializing:
+    - aggregator_node/set_initializing

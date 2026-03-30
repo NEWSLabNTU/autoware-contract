@@ -48,3 +48,10 @@ sub:
   operation_mode_state: [mrm_handler/operation_mode_state]
 pub:
   mrm_state: [mrm_handler/mrm_state]
+
+cli:
+  # Cross-scope service clients — targets MRM operators in other scopes
+  mrm_operate:
+    - mrm_handler/pull_over_operate
+    - mrm_handler/comfortable_stop_operate
+    - mrm_handler/emergency_stop_operate

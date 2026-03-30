@@ -73,3 +73,10 @@ pub:
   steering_status: [simple_planning_simulator/steering_status]
   acceleration: [simple_planning_simulator/acceleration]
   imu: [simple_planning_simulator/imu]
+
+srv:
+  # Simulation control services
+  control_mode_request:
+    - simple_planning_simulator/control_mode_request
+  set_pose:
+    - simple_planning_simulator/set_pose

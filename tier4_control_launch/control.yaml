@@ -15,9 +15,13 @@ args:
   input_objects_topic_name:
   use_multithread:
   launch_lane_departure_checker:          # control.launch.xml line 214
+    type: bool
   launch_control_validator:               # control.launch.xml line 231
+    type: bool
   launch_autonomous_emergency_braking:    # control.launch.xml line 247
+    type: bool
   launch_collision_detector:              # control.launch.xml line 263
+    type: bool
 
 version: 1
 
@@ -131,7 +135,7 @@ topics:
   control_cmd:
     type: autoware_control_msgs/msg/Control
     pub: [controller_node_exe/control_cmd]
-    sub: [control_validator/control_cmd?]              # node has if: launch_control_validator
+    sub: [control_validator/control_cmd]              # node has if: launch_control_validator
     rate_hz: 30
     qos:
       reliability: reliable       # QoS(1).transient_local() — controller_node.cpp pub
@@ -143,9 +147,9 @@ topics:
     type: autoware_planning_msgs/msg/Trajectory
     pub: [controller_node_exe/predicted_trajectory]
     sub:
-      - control_validator/predicted_trajectory?                 # node has if: launch_control_validator
-      - autonomous_emergency_braking/predicted_trajectory?      # node has if: launch_autonomous_emergency_braking
-      - lane_departure_checker/predicted_trajectory?            # node has if: launch_lane_departure_checker
+      - control_validator/predicted_trajectory                 # node has if: launch_control_validator
+      - autonomous_emergency_braking/predicted_trajectory      # node has if: launch_autonomous_emergency_braking
+      - lane_departure_checker/predicted_trajectory            # node has if: launch_lane_departure_checker
     rate_hz: 30
     qos:
       reliability: reliable       # QoS(1) — controller_node.cpp pub
@@ -158,46 +162,46 @@ sub:
   # /localization/kinematic_state — from EKF
   kinematic_state:
     - controller_node_exe/kinematic_state
-    - control_validator/kinematic_state?               # when launch_control_validator
-    - lane_departure_checker/kinematic_state?           # when launch_lane_departure_checker
-    - collision_detector/kinematic_state?               # when launch_collision_detector
+    - control_validator/kinematic_state               # when launch_control_validator
+    - lane_departure_checker/kinematic_state           # when launch_lane_departure_checker
+    - collision_detector/kinematic_state               # when launch_collision_detector
   # /vehicle/status/steering_status — from vehicle interface
   steering_status:
     - controller_node_exe/steering_status
   # /localization/acceleration — from EKF
   acceleration:
     - controller_node_exe/acceleration
-    - control_validator/measured_acceleration?          # when launch_control_validator
+    - control_validator/measured_acceleration          # when launch_control_validator
   # /system/operation_mode/state or /api/operation_mode/state
   operation_mode:
     - controller_node_exe/operation_mode
-    - control_validator/operation_mode?                 # when launch_control_validator
-    - lane_departure_checker/operation_mode?            # when launch_lane_departure_checker
-    - collision_detector/operation_mode?                # when launch_collision_detector
+    - control_validator/operation_mode                 # when launch_control_validator
+    - lane_departure_checker/operation_mode            # when launch_lane_departure_checker
+    - collision_detector/operation_mode                # when launch_collision_detector
   # /vehicle/status/velocity_status — from vehicle interface
   velocity_status:
-    - autonomous_emergency_braking/velocity_status?    # when launch_autonomous_emergency_braking
+    - autonomous_emergency_braking/velocity_status    # when launch_autonomous_emergency_braking
   # /sensing/imu/imu_data
   imu:
-    - autonomous_emergency_braking/imu?                # when launch_autonomous_emergency_braking
+    - autonomous_emergency_braking/imu                # when launch_autonomous_emergency_braking
   # Pointcloud — $(var input_pointcloud_topic_name)
   pointcloud:
-    - autonomous_emergency_braking/pointcloud?         # when launch_autonomous_emergency_braking
-    - collision_detector/pointcloud?                   # when launch_collision_detector
+    - autonomous_emergency_braking/pointcloud         # when launch_autonomous_emergency_braking
+    - collision_detector/pointcloud                   # when launch_collision_detector
   # Predicted objects — $(var input_objects_topic_name)
   predicted_objects:
-    - autonomous_emergency_braking/predicted_objects?   # when launch_autonomous_emergency_braking
-    - collision_detector/predicted_objects?             # when launch_collision_detector
+    - autonomous_emergency_braking/predicted_objects   # when launch_autonomous_emergency_braking
+    - collision_detector/predicted_objects             # when launch_collision_detector
   # /map/vector_map — transient_local
   vector_map:
-    - lane_departure_checker/vector_map?               # when launch_lane_departure_checker
+    - lane_departure_checker/vector_map               # when launch_lane_departure_checker
   # /planning/mission_planning/route — transient_local
   route:
-    - lane_departure_checker/route?                    # when launch_lane_departure_checker
+    - lane_departure_checker/route                    # when launch_lane_departure_checker
   # /planning/trajectory (same as trajectory_input, consumed as state by checkers)
   reference_trajectory:
-    - control_validator/reference_trajectory?           # when launch_control_validator
-    - lane_departure_checker/reference_trajectory?     # when launch_lane_departure_checker
+    - control_validator/reference_trajectory           # when launch_control_validator
+    - lane_departure_checker/reference_trajectory     # when launch_lane_departure_checker
 
 pub:
   control_output:

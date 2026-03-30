@@ -28,3 +28,8 @@ sub:
   point_cloud_map: [pose_initializer/point_cloud_map]
 pub:
   initialpose: [pose_initializer/initialpose3d]
+
+srv:
+  # NDT-based pose initialization service
+  initialize:
+    - pose_initializer/initialize

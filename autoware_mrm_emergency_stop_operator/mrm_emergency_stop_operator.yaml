@@ -26,3 +26,8 @@ sub:
   control_cmd: [mrm_emergency_stop_operator/control_cmd]
 pub:
   mrm_status: [mrm_emergency_stop_operator/mrm_status]
+
+srv:
+  # Service server exposed to mrm_handler (cross-scope)
+  operate:
+    - mrm_emergency_stop_operator/operate

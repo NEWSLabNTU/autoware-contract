@@ -36,3 +36,8 @@ services:
 
 pub:
   selector_mode: [external_cmd_selector/current_selector_mode]
+
+srv:
+  # Command source selection service
+  select_external_command:
+    - external_cmd_selector/select_external_command

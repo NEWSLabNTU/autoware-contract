@@ -22,3 +22,8 @@ services:
 
 pub:
   mrm_status: [mrm_comfortable_stop_operator/mrm_status]
+
+srv:
+  # Service server exposed to mrm_handler (cross-scope)
+  operate:
+    - mrm_comfortable_stop_operator/operate

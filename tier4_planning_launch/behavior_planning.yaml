@@ -6,12 +6,14 @@
 #   path_planner: autoware_universe/planning/behavior_path_planner/autoware_behavior_path_planner/src/behavior_path_planner_node.cpp
 #   vel_planner:  autoware_core/planning/behavior_velocity_planner/autoware_behavior_velocity_planner/src/node.cpp
 
-# Args from behavior_planning.launch.xml — only args present in scope table
-# input_traffic_light_topic_name and input_vector_map_topic_name have defaults
-# in the launch XML and are not passed from the parent, so they're not in scope.args.
+# Args from behavior_planning.launch.xml
+# After parser fix (33.1), all resolved args are now in scope.args,
+# including those with defaults in the launch XML.
 args:
   input_objects_topic_name:
   input_pointcloud_topic_name:
+  input_traffic_light_topic_name:
+  input_vector_map_topic_name:
 
 version: 1
 

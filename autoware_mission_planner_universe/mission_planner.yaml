@@ -105,3 +105,19 @@ pub:
   # ~/main/route → consumed by behavior_path_planner as /planning/mission_planning/route
   route:
     - route_selector/main_route
+
+srv:
+  # Service servers exposed to external scopes (via route_selector proxy)
+  clear_route:
+    - mission_planner/clear_route
+  set_lanelet_route:
+    - mission_planner/set_lanelet_route
+  set_waypoint_route:
+    - mission_planner/set_waypoint_route
+
+cli:
+  # Service clients (route_selector proxies to mission_planner, intra-scope)
+  route_proxy:
+    - route_selector/clear_route
+    - route_selector/set_lanelet_route
+    - route_selector/set_waypoint_route
