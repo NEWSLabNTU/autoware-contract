@@ -6,7 +6,8 @@
 
 # Args from simple_planning_simulator.launch.py
 args:
-  motion_publish_mode:              # "full_motion" or "pose_only" — changes output topics
+  motion_publish_mode:              # changes output topics
+    choices: [full_motion, pose_only]
 
 version: 1
 
