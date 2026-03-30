@@ -15,3 +15,11 @@ check-with-args:
         map_path:=/tmp/dummy_map \
         vehicle_model:=sample_vehicle \
         sensor_model:=sample_sensor_kit
+
+# Check satisfiability — verifies all typed-arg combinations are valid
+# Requires: control.yaml has type: bool on 4 launch flags (16 configs)
+check-sat:
+    {{play_launch}} check --manifest-dir . \
+        autoware_launch planning_simulator.launch.xml \
+        map_path:=/tmp/dummy_map 2>&1 \
+        | grep -E "satisfiability|unreachable" || echo "No satisfiability issues found"

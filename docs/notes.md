@@ -185,3 +185,35 @@ in the launch XML and are never passed from the parent. Removed from manifest ar
 Args with defaults in the launch XML that are never overridden by the parent
 don't appear in the scope table. The manifest should not declare them as
 required.
+
+**Update (Phase 7.3)**: After parser fix (33.1), all resolved args including
+defaults now appear in `scope.args`. The 2 missing args have been re-added
+to `behavior_planning.yaml`.
+
+## 11. `?` Suffix Removed — Optionality Inferred from Conditions
+
+The `?` suffix on optional endpoint refs was removed. Optionality is now
+inferred automatically from node conditions:
+
+- Ref to a node with `if:`/`unless:` → automatically optional (dropped
+  silently when node is filtered out)
+- Ref to an unconditional node → always required (checker errors if missing)
+
+This eliminates the YAML compatibility issue (`?` broke PyYAML/yamllint
+in flow sequences) and simplifies manifest authoring — just write the
+ref, the tool figures out the rest.
+
+All `?` suffixes removed from `control.yaml` (22 occurrences).
+
+## 12. Cross-Scope Service Warnings Are Permanent Noise
+
+`mrm_handler` has 3 `cli:` endpoints targeting servers in other scopes.
+The `service-wiring` rule warns about these on every check run. With
+scope-level `cli:` groups added (Phase 7.2), the *intent* is documented
+but the checker still has no cross-scope awareness. There's no suppression
+mechanism — these warnings can't be silenced.
+
+3 permanent warnings per run from mrm_handler alone. As more cross-scope
+services are documented, this will grow.
+
+Tracked as design-issues.md #17.
