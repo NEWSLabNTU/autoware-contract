@@ -1,0 +1,16 @@
+# tier4_perception_launch/obstacle_segmentation/ground_segmentation/ground_segmentation.launch.py
+# Namespace: /perception/obstacle_segmentation
+#
+# Ground point filtering for obstacle detection.
+#
+# Source: /opt/autoware/1.5.0/share/tier4_perception_launch/launch/obstacle_segmentation/ground_segmentation/ground_segmentation.launch.py
+
+version: 1
+
+sub:
+  pointcloud:
+    - []  # from sensing
+
+pub:
+  obstacle_pointcloud:
+    - []  # filtered pointcloud → detection + planning

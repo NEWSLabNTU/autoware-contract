@@ -1,0 +1,27 @@
+# tier4_perception_launch/object_recognition/prediction/prediction.launch.xml
+# Namespace: /perception/object_recognition/prediction
+#
+# Object prediction: selects between map_based_prediction and simpl
+# based on prediction_model_type arg.
+#
+# Source: /opt/autoware/1.5.0/share/tier4_perception_launch/launch/object_recognition/prediction/prediction.launch.xml
+
+args:
+  use_vector_map:
+    type: bool
+
+version: 1
+
+includes:
+  map_based_prediction:
+    manifest: autoware_map_based_prediction/map_based_prediction.yaml
+
+sub:
+  objects:
+    - map_based_prediction/tracked_objects
+  vector_map:
+    - map_based_prediction/vector_map
+
+pub:
+  objects:
+    - map_based_prediction/predicted_objects

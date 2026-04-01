@@ -1,0 +1,24 @@
+# tier4_perception_launch/object_recognition/detection/detection.launch.xml
+# Namespace: /perception/object_recognition/detection
+#
+# Object detection: mode-based pipeline selection (camera, lidar, fusion
+# variants). Complex conditional tree with 60+ args.
+#
+# Source: /opt/autoware/1.5.0/share/tier4_perception_launch/launch/object_recognition/detection/detection.launch.xml
+#
+# Note: This launch file has extensive conditional logic selecting between
+# detector configurations (camera_lidar_fusion, lidar, radar, etc.).
+# The manifest documents the common output interface; internal pipeline
+# selection is mode-dependent and not modeled with if: conditions.
+
+version: 1
+
+sub:
+  pointcloud:
+    - []  # from sensing/ground_segmentation
+  camera_images:
+    - []  # from sensing (mode-dependent)
+
+pub:
+  objects:
+    - []  # detected objects → tracking

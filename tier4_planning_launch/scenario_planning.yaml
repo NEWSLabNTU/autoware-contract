@@ -1,0 +1,44 @@
+# tier4_planning_launch/scenario_planning/scenario_planning.launch.xml
+# Namespace: /planning/scenario_planning
+#
+# Scenario selection (lane driving / parking), velocity smoothing,
+# and external velocity limit handling.
+#
+# Source: /opt/autoware/1.5.0/share/tier4_planning_launch/launch/scenario_planning/scenario_planning.launch.xml
+
+args:
+  input_objects_topic_name:
+  input_pointcloud_topic_name:
+
+version: 1
+
+# velocity_smoother is a composable node loaded in this scope's container
+nodes:
+  velocity_smoother:
+    sub:
+      input_trajectory: {}
+    pub:
+      output_trajectory: {}
+
+includes:
+  scenario_selector:
+    manifest: autoware_scenario_selector/scenario_selector.yaml
+  external_velocity_limit_selector:
+    manifest: autoware_external_velocity_limit_selector/external_velocity_limit_selector.yaml
+  hazard_lights_selector:
+    manifest: autoware_hazard_lights_selector/hazard_lights_selector.yaml
+  lane_driving:
+    manifest: tier4_planning_launch/lane_driving.yaml
+  parking:
+    manifest: tier4_planning_launch/parking.yaml
+
+sub:
+  route:
+    - scenario_selector/route
+  odometry:
+    - scenario_selector/odometry
+    - lane_driving/odometry
+
+pub:
+  trajectory:
+    - velocity_smoother/output_trajectory

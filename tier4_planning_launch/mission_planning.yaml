@@ -1,0 +1,36 @@
+# tier4_planning_launch/mission_planning/mission_planning.launch.xml
+# Namespace: /planning/mission_planning
+#
+# Mission planning: route generation and visualization.
+#
+# Source: /opt/autoware/1.5.0/share/tier4_planning_launch/launch/mission_planning/mission_planning.launch.xml
+
+version: 1
+
+includes:
+  mission_planner:
+    manifest: autoware_mission_planner_universe/mission_planner.yaml
+  goal_pose_visualizer:
+    manifest: autoware_mission_planner_universe/goal_pose_visualizer.yaml
+
+sub:
+  vector_map:
+    - mission_planner/vector_map
+  odometry:
+    - mission_planner/odometry
+  modified_goal:
+    - mission_planner/modified_goal
+  operation_mode:
+    - mission_planner/operation_mode
+
+pub:
+  route:
+    - mission_planner/route
+
+srv:
+  clear_route:
+    - mission_planner/clear_route
+  set_lanelet_route:
+    - mission_planner/set_lanelet_route
+  set_waypoint_route:
+    - mission_planner/set_waypoint_route

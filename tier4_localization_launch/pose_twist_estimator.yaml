@@ -1,0 +1,35 @@
+# tier4_localization_launch/pose_twist_estimator/pose_twist_estimator.launch.xml
+# Namespace: /localization
+#
+# Pose/twist estimation: selects between NDT, YabLoc, Eagleye, AR tag,
+# gyro odometer based on pose_source and twist_source args.
+#
+# Source: /opt/autoware/1.5.0/share/tier4_localization_launch/launch/pose_twist_estimator/pose_twist_estimator.launch.xml
+
+# Note: pose_source/twist_source select which estimator launch files are
+# included. This is a complex conditional tree — NDT, YabLoc, Eagleye,
+# AR tag, gyro odometer can be combined. The manifest lists common cases.
+args:
+  pose_source:
+  twist_source:
+  input_pointcloud:
+
+version: 1
+
+# Child includes depend on pose_source/twist_source args.
+# Common configuration: pose_source=ndt, twist_source=gyro_odom
+# includes NDT scan matcher + gyro odometer + pose initializer.
+includes:
+  # pose_initializer loaded conditionally based on initial_pose arg
+  pose_initializer:
+    manifest: autoware_pose_initializer/pose_initializer.yaml
+
+sub:
+  pointcloud:
+    - pose_initializer/point_cloud_map
+  gnss:
+    - pose_initializer/gnss_pose
+
+pub:
+  pose:
+    - pose_initializer/initialpose

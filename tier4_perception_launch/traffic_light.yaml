@@ -1,0 +1,18 @@
+# tier4_perception_launch/traffic_light_recognition/traffic_light.launch.xml
+# Namespace: /perception/traffic_light_recognition
+#
+# Traffic light detection, classification, and map-based association.
+#
+# Source: /opt/autoware/1.5.0/share/tier4_perception_launch/launch/traffic_light_recognition/traffic_light.launch.xml
+
+version: 1
+
+sub:
+  camera_images:
+    - []  # from sensing cameras
+  vector_map:
+    - []  # from map
+
+pub:
+  traffic_signals:
+    - []  # recognized traffic signals → planning

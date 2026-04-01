@@ -1,0 +1,20 @@
+# tier4_perception_launch/occupancy_grid_map/probabilistic_occupancy_grid_map.launch.xml
+# Namespace: /perception/occupancy_grid_map
+#
+# Probabilistic occupancy grid map generation.
+#
+# Source: /opt/autoware/1.5.0/share/tier4_perception_launch/launch/occupancy_grid_map/probabilistic_occupancy_grid_map.launch.xml
+
+version: 1
+
+includes:
+  laserscan_based_occupancy_grid_map:
+    manifest: autoware_probabilistic_occupancy_grid_map/laserscan_based_occupancy_grid_map.yaml
+
+sub:
+  pointcloud:
+    - laserscan_based_occupancy_grid_map/pointcloud
+
+pub:
+  occupancy_grid:
+    - laserscan_based_occupancy_grid_map/occupancy_grid

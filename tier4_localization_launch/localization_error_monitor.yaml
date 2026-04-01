@@ -1,0 +1,10 @@
+# tier4_localization_launch/localization_error_monitor/localization_error_monitor.launch.xml
+# Namespace: /localization
+#
+# Simple wrapper that includes the localization error monitor node.
+#
+# Source: /opt/autoware/1.5.0/share/tier4_localization_launch/launch/localization_error_monitor/localization_error_monitor.launch.xml
+
+version: 1
+
+# Single child — localization_error_monitor node (no leaf manifest yet)

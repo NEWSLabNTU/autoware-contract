@@ -1,0 +1,54 @@
+# tier4_planning_launch/scenario_planning/parking.launch.xml
+# Namespace: /planning/scenario_planning/parking
+#
+# Parking planning: costmap generation + freespace planner.
+#
+# Source: /opt/autoware/1.5.0/share/tier4_planning_launch/launch/scenario_planning/parking.launch.xml
+
+args:
+  input_objects_topic_name:
+  input_pointcloud_topic_name:
+
+version: 1
+
+# Composable nodes in parking_container
+nodes:
+  costmap_generator:
+    sub:
+      objects: {}
+      points_no_ground: {}
+      scenario: {}
+      lanelet_map_bin: {}
+    pub:
+      occupancy_grid: {}
+
+  freespace_planner:
+    sub:
+      route: {}
+      occupancy_grid: {}
+      scenario: {}
+      odometry: {}
+    pub:
+      trajectory: {}
+
+topics:
+  costmap:
+    type: nav_msgs/msg/OccupancyGrid
+    pub: [costmap_generator/occupancy_grid]
+    sub: [freespace_planner/occupancy_grid]
+
+sub:
+  objects:
+    - costmap_generator/objects
+  pointcloud:
+    - costmap_generator/points_no_ground
+  route:
+    - freespace_planner/route
+  odometry:
+    - freespace_planner/odometry
+  lanelet_map:
+    - costmap_generator/lanelet_map_bin
+
+pub:
+  trajectory:
+    - freespace_planner/trajectory

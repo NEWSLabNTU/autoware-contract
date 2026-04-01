@@ -1,0 +1,20 @@
+# tier4_perception_launch/object_recognition/tracking/tracking.launch.xml
+# Namespace: /perception/object_recognition/tracking
+#
+# Object tracking: multi-object tracker with optional radar fusion.
+#
+# Source: /opt/autoware/1.5.0/share/tier4_perception_launch/launch/object_recognition/tracking/tracking.launch.xml
+
+version: 1
+
+includes:
+  multi_object_tracker:
+    manifest: autoware_multi_object_tracker/multi_object_tracker.yaml
+
+sub:
+  detected_objects:
+    - multi_object_tracker/detected_objects
+
+pub:
+  objects:
+    - multi_object_tracker/tracked_objects

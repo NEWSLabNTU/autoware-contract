@@ -1,0 +1,32 @@
+# tier4_localization_launch/pose_twist_fusion_filter/pose_twist_fusion_filter.launch.xml
+# Namespace: /localization/pose_twist_fusion_filter
+#
+# EKF-based pose/twist fusion: combines estimator outputs into a single
+# kinematic state. Includes stop filter, twist-to-acceleration converter,
+# and pose instability detector.
+#
+# Source: /opt/autoware/1.5.0/share/tier4_localization_launch/launch/pose_twist_fusion_filter/pose_twist_fusion_filter.launch.xml
+
+version: 1
+
+# No leaf manifests for these children yet — they are simple single-node
+# launch files. Listed as includes for tree completeness.
+includes:
+  # ekf_localizer: EKF fusion node
+  # stop_filter: detects vehicle stop state
+  # twist2accel: converts twist to acceleration
+  # pose_instability_detector: monitors pose stability
+
+sub:
+  # Pose/twist inputs from estimators
+  pose_with_covariance:
+    - []  # from pose_twist_estimator output
+  twist_with_covariance:
+    - []  # from gyro_odometer or eagleye
+
+pub:
+  # Fused outputs to planning/control
+  kinematic_state:
+    - []  # /localization/kinematic_state
+  acceleration:
+    - []  # /localization/acceleration
