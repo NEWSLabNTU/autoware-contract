@@ -8,6 +8,12 @@
 #   velocity:  autoware_core/planning/motion_velocity_planner/autoware_motion_velocity_planner/src/node.cpp
 
 # Args from motion_planning.launch.xml <arg> declarations
+#
+# Note: motion_path_smoother_type (elastic_band/none) and
+# motion_path_planner_type (path_optimizer/path_sampler/none) select between
+# implementations. These are plugin-level conditions inside the same
+# composable node container — not node-level if: (see notes.md #7).
+# launch_surround_obstacle_checker is also a module toggle.
 args:
   input_objects_topic_name:
   input_pointcloud_topic_name:

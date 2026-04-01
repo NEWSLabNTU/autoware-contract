@@ -9,6 +9,10 @@
 # Args from behavior_planning.launch.xml
 # After parser fix (33.1), all resolved args are now in scope.args,
 # including those with defaults in the launch XML.
+#
+# Note: behavior_path_planner_type selects between BehaviorPathPlannerNode
+# (default) and PathGenerator. This is a plugin-level condition inside the
+# same composable node container — not a node-level if: (see notes.md #7).
 args:
   input_objects_topic_name:
   input_pointcloud_topic_name:

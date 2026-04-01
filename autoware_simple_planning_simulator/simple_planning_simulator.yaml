@@ -5,8 +5,11 @@
 #   source: autoware_universe/simulator/autoware_simple_planning_simulator/src/simple_planning_simulator_core.cpp (line 118-194)
 
 # Args from simple_planning_simulator.launch.py
+# motion_publish_mode changes topic remapping — pose_only publishes to
+# /simulation/debug/... while full_motion publishes to /localization/...
+# The node always exists; only the output remaps change (not node-level if:).
 args:
-  motion_publish_mode:              # changes output topics
+  motion_publish_mode:              # changes output topic remapping
     choices: [full_motion, pose_only]
 
 version: 1
