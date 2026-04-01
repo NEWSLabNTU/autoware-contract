@@ -1,7 +1,9 @@
 # Per-Launch-File Implementation Status
 
-Tracks which manifest format features have been applied to each Autoware
-contract manifest. See [roadmap/](roadmap/) for feature definitions.
+Tracks manifest coverage for the Autoware planning_simulator launch tree.
+See [roadmap/](roadmap/) for feature definitions.
+
+## Feature Columns (Leaf Manifests)
 
 | Column     | Feature                                 | Phase                                          |
 |------------|-----------------------------------------|------------------------------------------------|
@@ -18,81 +20,78 @@ contract manifest. See [roadmap/](roadmap/) for feature definitions.
 
 ---
 
-## Launch Tree Coverage
+## Intermediate Manifests (includes only, no nodes)
 
-The Autoware planning_simulator launch tree has ~48 scopes with entities.
-Manifests exist for 36 leaf scopes. The following intermediate (parent)
-scopes do **not** have manifests yet — they orchestrate children but don't
-declare nodes or topics themselves.
+Intermediate launch files orchestrate children via `<include>`. Their
+manifests declare `includes:` and scope interface (`pub:`/`sub:`/`srv:`/
+`cli:`) to wire children together across namespace boundaries.
 
 ### Tier 1 — Top Level
 
-| Launch file (pkg / file)                              | Role                           | Manifest |
-|-------------------------------------------------------|--------------------------------|----------|
-| `autoware_launch/planning_simulator.launch.xml`       | Entry point, includes 9 components | —        |
+| Launch file (pkg / file)                        | Includes | Status |
+|-------------------------------------------------|----------|--------|
+| `autoware_launch/planning_simulator.launch.xml` | 9        | [ ]    |
 
 ### Tier 2 — Component Wrappers (autoware_launch/components/)
 
-Thin wrappers that load global params + include one tier 3 subsystem.
-No nodes of their own — purely orchestration.
+Thin wrappers: load global params + include one tier 3 subsystem.
 
-| Launch file                                      | Includes                           | Manifest |
-|--------------------------------------------------|-------------------------------------|----------|
-| `tier4_system_component.launch.xml`              | system.launch.xml + logging        | —        |
-| `tier4_control_component.launch.xml`             | control.launch.xml                 | —        |
-| `tier4_planning_component.launch.xml`            | planning.launch.xml                | —        |
-| `tier4_perception_component.launch.xml`          | perception.launch.xml              | —        |
-| `tier4_localization_component.launch.xml`        | localization.launch.xml            | —        |
-| `tier4_simulator_component.launch.xml`           | simulator.launch.xml               | —        |
-| `tier4_sensing_component.launch.xml`             | sensing.launch.xml                 | —        |
-| `tier4_map_component.launch.xml`                 | map.launch.xml                     | —        |
-| `tier4_autoware_api_component.launch.xml`        | autoware_api.launch.xml            | —        |
+| Launch file                               | Includes                    | Status |
+|-------------------------------------------|-----------------------------|--------|
+| `tier4_system_component.launch.xml`       | system.launch.xml + logging | [ ]    |
+| `tier4_control_component.launch.xml`      | control.launch.xml          | [ ]    |
+| `tier4_planning_component.launch.xml`     | planning.launch.xml         | [ ]    |
+| `tier4_perception_component.launch.xml`   | perception.launch.xml       | [ ]    |
+| `tier4_localization_component.launch.xml` | localization.launch.xml     | [ ]    |
+| `tier4_simulator_component.launch.xml`    | simulator.launch.xml        | [ ]    |
+| `tier4_sensing_component.launch.xml`      | sensing.launch.xml          | [ ]    |
+| `tier4_map_component.launch.xml`          | map.launch.xml              | [ ]    |
+| `tier4_autoware_api_component.launch.xml` | autoware_api.launch.xml     | [ ]    |
 
 ### Tier 3 — Subsystem Aggregators
 
-These are the main subsystem launch files. They include leaf launch files
-(which have manifests) and other intermediate files. A manifest here would
-wire cross-scope services and declare the subsystem's external interface.
+Main subsystem launch files. Include leaf launch files and sub-modules.
+Manifests here wire cross-scope services and declare subsystem interfaces.
 
-| Launch file (pkg / file)                                   | Children | Manifest | Notes |
-|------------------------------------------------------------|----------|----------|-------|
-| `tier4_system_launch/system.launch.xml`                    | 14       | —        | Wires MRM handler ↔ operators (cross-scope services) |
-| `tier4_planning_launch/planning.launch.xml`                | 6        | —        | Mission + scenario planning orchestration |
-| `tier4_perception_launch/perception.launch.xml`            | 8        | —        | Detection, tracking, traffic lights |
-| `tier4_control_launch/control.launch.xml`                  | 5        | **Yes** (`control.yaml`) | Has own nodes + children |
-| `tier4_simulator_launch/simulator.launch.xml`              | 14       | —        | Dummy perception + vehicle sim |
-| `tier4_localization_launch/localization.launch.xml`        | 3        | —        | Estimator, fusion, monitoring |
-| `tier4_sensing_launch/sensing.launch.xml`                  | 1        | —        | Sensor drivers |
-| `tier4_map_launch/map.launch.xml`                          | 1        | —        | Map loading |
-| `tier4_autoware_api_launch/autoware_api.launch.xml`       | ?        | —        | ADAPI endpoints |
+| Launch file (pkg / file)                            | Children | Status | Notes                                                |
+|-----------------------------------------------------|----------|--------|------------------------------------------------------|
+| `tier4_system_launch/system.launch.xml`             | 14       | [ ]    | Wires MRM handler ↔ operators (cross-scope services) |
+| `tier4_planning_launch/planning.launch.xml`         | 6        | [ ]    | Mission + scenario planning orchestration            |
+| `tier4_perception_launch/perception.launch.xml`     | 8        | [ ]    | Detection, tracking, traffic lights                  |
+| `tier4_control_launch/control.launch.xml`           | 5        | [x]    | Has own nodes + children (`control.yaml`)            |
+| `tier4_simulator_launch/simulator.launch.xml`       | 14       | [ ]    | Dummy perception + vehicle sim                       |
+| `tier4_localization_launch/localization.launch.xml` | 3        | [ ]    | Estimator, fusion, monitoring                        |
+| `tier4_sensing_launch/sensing.launch.xml`           | 1        | [ ]    | Sensor drivers                                       |
+| `tier4_map_launch/map.launch.xml`                   | 1        | [ ]    | Map loading                                          |
+| `tier4_autoware_api_launch/autoware_api.launch.xml` | ?        | [ ]    | ADAPI endpoints                                      |
 
 ### Tier 3b — Planning Sub-modules
 
-| Launch file (pkg / file)                                                | Manifest | Notes |
-|-------------------------------------------------------------------------|----------|-------|
-| `tier4_planning_launch/.../mission_planning.launch.xml`                 | —        | Includes mission_planner + goal_pose_visualizer |
-| `tier4_planning_launch/.../scenario_planning.launch.xml`                | —        | Lane driving + parking orchestration |
-| `tier4_planning_launch/.../lane_driving.launch.xml`                     | —        | Includes behavior + motion planning |
-| `tier4_planning_launch/.../parking.launch.xml`                          | —        | Parking planner |
+| Launch file (pkg / file)                                 | Status | Notes                                           |
+|----------------------------------------------------------|--------|-------------------------------------------------|
+| `tier4_planning_launch/.../mission_planning.launch.xml`  | [ ]    | Includes mission_planner + goal_pose_visualizer |
+| `tier4_planning_launch/.../scenario_planning.launch.xml` | [ ]    | Lane driving + parking orchestration            |
+| `tier4_planning_launch/.../lane_driving.launch.xml`      | [ ]    | Includes behavior + motion planning             |
+| `tier4_planning_launch/.../parking.launch.xml`           | [ ]    | Parking planner                                 |
 
 ### Tier 3c — Perception Sub-modules
 
-| Launch file (pkg / file)                                                | Manifest | Notes |
-|-------------------------------------------------------------------------|----------|-------|
-| `tier4_perception_launch/.../detection.launch.xml`                      | —        | Detector selection + filtering |
-| `tier4_perception_launch/.../tracking.launch.xml`                       | —        | Includes multi_object_tracker |
-| `tier4_perception_launch/.../prediction.launch.xml`                     | —        | Includes map_based_prediction |
-| `tier4_perception_launch/.../traffic_light.launch.xml`                  | —        | Traffic light recognition pipeline |
-| `tier4_perception_launch/.../ground_segmentation.launch.py`             | —        | Ground filtering |
-| `tier4_perception_launch/.../probabilistic_occupancy_grid_map.launch.xml` | —      | Occupancy grid |
+| Launch file (pkg / file)                                                  | Status | Notes                              |
+|---------------------------------------------------------------------------|--------|------------------------------------|
+| `tier4_perception_launch/.../detection.launch.xml`                        | [ ]    | Detector selection + filtering     |
+| `tier4_perception_launch/.../tracking.launch.xml`                         | [ ]    | Includes multi_object_tracker      |
+| `tier4_perception_launch/.../prediction.launch.xml`                       | [ ]    | Includes map_based_prediction      |
+| `tier4_perception_launch/.../traffic_light.launch.xml`                    | [ ]    | Traffic light recognition pipeline |
+| `tier4_perception_launch/.../ground_segmentation.launch.py`               | [ ]    | Ground filtering                   |
+| `tier4_perception_launch/.../probabilistic_occupancy_grid_map.launch.xml` | [ ]    | Occupancy grid                     |
 
 ### Tier 3d — Localization Sub-modules
 
-| Launch file (pkg / file)                                                | Manifest | Notes |
-|-------------------------------------------------------------------------|----------|-------|
-| `tier4_localization_launch/.../pose_twist_estimator.launch.xml`         | —        | NDT, gyro odometer, etc. |
-| `tier4_localization_launch/.../pose_twist_fusion_filter.launch.xml`     | —        | EKF fusion |
-| `tier4_localization_launch/.../localization_error_monitor.launch.xml`   | —        | Error monitoring |
+| Launch file (pkg / file)                                            | Status | Notes                    |
+|---------------------------------------------------------------------|--------|--------------------------|
+| `tier4_localization_launch/.../pose_twist_estimator.launch.xml`     | [ ]    | NDT, gyro odometer, etc. |
+| `tier4_localization_launch/.../pose_twist_fusion_filter.launch.xml` | [ ]    | EKF fusion               |
+| `tier4_localization_launch/.../localization_error_monitor.launch.xml` | [ ]  | Error monitoring         |
 
 ---
 
@@ -188,13 +187,19 @@ wire cross-scope services and declare the subsystem's external interface.
 
 ## Coverage Summary
 
-| Category | Count | Status |
-|----------|-------|--------|
-| Leaf manifests (with nodes) | 36 | All authored |
-| Tier 3 subsystem aggregators | 9 | 1 authored (control.yaml), 8 missing |
-| Tier 3b-d sub-modules | 10+ | All missing |
-| Tier 2 component wrappers | 9 | All missing (thin wrappers, low priority) |
-| Tier 1 entry point | 1 | Missing |
+| Category                           | Total | Done | Remaining |
+|------------------------------------|-------|------|-----------|
+| Leaf manifests (with nodes)        | 36    | 36   | 0         |
+| Tier 3 subsystem aggregators       | 9     | 1    | 8         |
+| Tier 3b planning sub-modules       | 4     | 0    | 4         |
+| Tier 3c perception sub-modules     | 6     | 0    | 6         |
+| Tier 3d localization sub-modules   | 3     | 0    | 3         |
+| Tier 2 component wrappers          | 9     | 0    | 9         |
+| Tier 1 entry point                 | 1     | 0    | 1         |
+| **Total**                          | **68**| **37** | **31**  |
 
-**Next priority**: `tier4_system_launch/system.yaml` — would wire MRM
-cross-scope services and eliminate 3+ permanent service-wiring warnings.
+**Priority order**:
+1. Tier 3 subsystem aggregators — wire cross-scope services, declare subsystem interfaces
+2. Tier 3b-d sub-modules — complete the intermediate tree
+3. Tier 2 component wrappers — thin, mostly pass-through
+4. Tier 1 entry point — top-level orchestration
