@@ -1,0 +1,44 @@
+# tier4_planning_launch/planning.launch.xml
+# Namespace: /planning
+#
+# Top-level planning orchestration: mission planning, scenario planning,
+# validation, and evaluation.
+#
+# Source: /opt/autoware/1.5.0/share/tier4_planning_launch/launch/planning.launch.xml
+
+args:
+  input_objects_topic_name:
+  input_pointcloud_topic_name:
+  launch_remaining_distance_time_calculator:
+    type: bool
+
+version: 1
+
+includes:
+  manual_lane_change_handler:
+    manifest: autoware_manual_lane_change_handler/manual_lane_change_handler.yaml
+  mission_planning:
+    manifest: tier4_planning_launch/mission_planning.yaml
+  scenario_planning:
+    manifest: tier4_planning_launch/scenario_planning.yaml
+  # planning_validator: no manifest yet (leaf node)
+  # planning_evaluator: no manifest yet (leaf node)
+  remaining_distance_time_calculator:
+    if: $(var launch_remaining_distance_time_calculator)
+    manifest: autoware_remaining_distance_time_calculator/remaining_distance_time_calculator.yaml
+
+sub:
+  # Consumed from localization/perception
+  route:
+    - mission_planning/route
+  kinematic_state:
+    - scenario_planning/odometry
+  vector_map:
+    - mission_planning/vector_map
+
+pub:
+  # Published to control subsystem
+  trajectory:
+    - scenario_planning/trajectory
+  route:
+    - mission_planning/route

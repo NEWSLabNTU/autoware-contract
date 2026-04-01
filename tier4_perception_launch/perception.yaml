@@ -1,0 +1,46 @@
+# tier4_perception_launch/perception.launch.xml
+# Namespace: /perception
+#
+# Perception pipeline: obstacle segmentation, occupancy grid, object
+# recognition (detection → tracking → prediction), traffic light.
+#
+# Source: /opt/autoware/1.5.0/share/tier4_perception_launch/launch/perception.launch.xml
+
+args:
+  use_traffic_light_recognition:
+    type: bool
+
+version: 1
+
+includes:
+  ground_segmentation:
+    manifest: tier4_perception_launch/ground_segmentation.yaml
+  occupancy_grid_map:
+    manifest: tier4_perception_launch/occupancy_grid_map.yaml
+  detection:
+    manifest: tier4_perception_launch/detection.yaml
+  tracking:
+    manifest: tier4_perception_launch/tracking.yaml
+  prediction:
+    manifest: tier4_perception_launch/prediction.yaml
+  traffic_light:
+    if: $(var use_traffic_light_recognition)
+    manifest: tier4_perception_launch/traffic_light.yaml
+
+sub:
+  # From sensing
+  pointcloud:
+    - ground_segmentation/pointcloud
+    - detection/pointcloud
+  # From map
+  vector_map:
+    - prediction/vector_map
+
+pub:
+  # To planning
+  objects:
+    - prediction/objects
+  obstacle_pointcloud:
+    - ground_segmentation/obstacle_pointcloud
+  occupancy_grid:
+    - occupancy_grid_map/occupancy_grid

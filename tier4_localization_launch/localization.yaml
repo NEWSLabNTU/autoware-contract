@@ -1,0 +1,37 @@
+# tier4_localization_launch/localization.launch.xml
+# Namespace: /localization
+#
+# Localization pipeline: pose/twist estimation, fusion filter, error monitoring.
+#
+# Source: /opt/autoware/1.5.0/share/tier4_localization_launch/launch/localization.launch.xml
+
+args:
+  pose_source:
+  twist_source:
+  input_pointcloud:
+
+version: 1
+
+includes:
+  pose_twist_estimator:
+    manifest: tier4_localization_launch/pose_twist_estimator.yaml
+  pose_twist_fusion_filter:
+    manifest: tier4_localization_launch/pose_twist_fusion_filter.yaml
+  localization_error_monitor:
+    manifest: tier4_localization_launch/localization_error_monitor.yaml
+
+sub:
+  # From sensing
+  pointcloud:
+    - pose_twist_estimator/pointcloud
+  imu:
+    - pose_twist_estimator/imu
+  gnss:
+    - pose_twist_estimator/gnss
+
+pub:
+  # To planning/control
+  kinematic_state:
+    - pose_twist_fusion_filter/kinematic_state
+  acceleration:
+    - pose_twist_fusion_filter/acceleration

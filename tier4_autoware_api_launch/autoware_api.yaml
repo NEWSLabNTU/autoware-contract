@@ -1,0 +1,22 @@
+# tier4_autoware_api_launch/autoware_api.launch.xml
+# Namespace: /
+#
+# Autoware external API: ADAPI endpoints, RViz adaptors, RTC controller.
+#
+# Source: /opt/autoware/1.5.0/share/tier4_autoware_api_launch/launch/autoware_api.launch.xml
+
+args:
+  launch_default_adapi:
+    type: bool
+  launch_deprecated_api:
+    type: bool
+
+version: 1
+
+includes:
+  default_adapi:
+    if: $(var launch_default_adapi)
+    manifest: autoware_default_adapi_universe/default_adapi.yaml
+  # deprecated_api: conditional, no leaf manifest
+  # rviz_adaptors: conditional, no leaf manifest
+  # rosbridge: conditional, no leaf manifest

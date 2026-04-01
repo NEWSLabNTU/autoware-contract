@@ -1,0 +1,20 @@
+# tier4_sensing_launch/sensing.launch.xml
+# Namespace: /sensing
+#
+# Sensor driver orchestration. Includes the sensor-model-specific
+# launch file (e.g., sample_sensor_kit_launch/sensing.launch.xml).
+#
+# Source: /opt/autoware/1.5.0/share/tier4_sensing_launch/launch/sensing.launch.xml
+
+args:
+  sensor_model:
+
+version: 1
+
+# Child is sensor-model-specific — no fixed manifest path.
+# The actual launch file is $(find-pkg-share $(var sensor_model)_launch)/launch/sensing.launch.xml
+
+sub:
+  # Sensor drivers produce raw data
+pub:
+  # Concatenated pointcloud, IMU, GNSS → localization + perception

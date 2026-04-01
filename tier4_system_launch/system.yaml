@@ -1,0 +1,98 @@
+# tier4_system_launch/system.launch.xml
+# Namespace: /system
+#
+# System health monitoring, MRM (Minimal Risk Maneuver) handling,
+# and diagnostic aggregation. This is the parent scope that wires
+# MRM handler (client) to MRM operators (servers).
+#
+# Source: /opt/autoware/1.5.0/share/tier4_system_launch/launch/system.launch.xml
+
+args:
+  use_control_command_gate:
+    type: bool
+  launch_system_monitor:
+    type: bool
+  launch_dummy_diag_publisher:
+    type: bool
+
+version: 1
+
+includes:
+  # --- Always present ---
+  duplicated_node_checker:
+    manifest: autoware_duplicated_node_checker/duplicated_node_checker.yaml
+  processing_time_checker:
+    manifest: autoware_processing_time_checker/processing_time_checker.yaml
+  pipeline_latency_monitor:
+    manifest: autoware_pipeline_latency_monitor/pipeline_latency_monitor.yaml
+  service_log_checker:
+    manifest: autoware_component_interface_tools/service_log_checker.yaml
+  component_state_monitor:
+    manifest: autoware_component_state_monitor/component_state_monitor.yaml
+  mrm_emergency_stop_operator:
+    manifest: autoware_mrm_emergency_stop_operator/mrm_emergency_stop_operator.yaml
+  aggregator:
+    manifest: autoware_diagnostic_graph_aggregator/aggregator.yaml
+  hazard_status_converter:
+    manifest: autoware_hazard_status_converter/hazard_status_converter.yaml
+
+  # --- Conditional: unless use_control_command_gate ---
+  mrm_comfortable_stop_operator:
+    unless: $(var use_control_command_gate)
+    manifest: autoware_mrm_comfortable_stop_operator/mrm_comfortable_stop_operator.yaml
+  mrm_handler:
+    unless: $(var use_control_command_gate)
+    manifest: autoware_mrm_handler/mrm_handler.yaml
+
+  # --- Conditional: if launch_system_monitor ---
+  # system_monitor: no manifest (hardware monitoring, not in scope)
+
+# Cross-scope service wiring: mrm_handler (cli) ↔ operators (srv)
+# mrm_handler calls operate on each operator via remapped service names:
+#   ~/output/mrm/comfortable_stop/operate → /system/mrm/comfortable_stop/operate
+#   ~/output/mrm/emergency_stop/operate   → /system/mrm/emergency_stop/operate
+# The operators serve at the same global paths via their own remaps.
+services:
+  comfortable_stop_operate:
+    type: tier4_system_msgs/srv/OperateMrm
+    server: [mrm_comfortable_stop_operator/operate]
+    client: [mrm_handler/comfortable_stop_operate]
+  emergency_stop_operate:
+    type: tier4_system_msgs/srv/OperateMrm
+    server: [mrm_emergency_stop_operator/operate]
+    client: [mrm_handler/emergency_stop_operate]
+  # pull_over_operate: client is mrm_handler, but mrm_pull_over_operator
+  # is not in planning_simulator (it's in the real vehicle stack only)
+
+sub:
+  # Subscriptions consumed by children from outside /system
+  diagnostics:
+    - aggregator/diagnostics
+  operation_mode_availability:
+    - mrm_handler/operation_mode_availability
+  odometry:
+    - mrm_handler/odometry
+  operation_mode_state:
+    - mrm_handler/operation_mode_state
+
+pub:
+  # Publications exposed to other subsystems
+  mrm_state:
+    - mrm_handler/mrm_state
+  operation_mode_availability:
+    - aggregator/operation_mode_availability
+  diag_graph_struct:
+    - aggregator/diag_graph_struct
+  diag_graph_status:
+    - aggregator/diag_graph_status
+  mrm_comfortable_stop_status:
+    - mrm_comfortable_stop_operator/mrm_status
+  mrm_emergency_stop_status:
+    - mrm_emergency_stop_operator/mrm_status
+
+srv:
+  # Service servers exposed outside /system
+  diag_reset:
+    - aggregator/reset
+  diag_set_initializing:
+    - aggregator/set_initializing

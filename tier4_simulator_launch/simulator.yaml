@@ -1,0 +1,59 @@
+# tier4_simulator_launch/simulator.launch.xml
+# Namespace: / (multiple sub-namespaces)
+#
+# Simulation stack: dummy perception, vehicle simulator, door simulator.
+# Also includes localization components (gyro_odometer, ekf) for sim mode.
+#
+# Source: /opt/autoware/1.5.0/share/tier4_simulator_launch/launch/simulator.launch.xml
+
+args:
+  launch_dummy_perception:
+    type: bool
+  launch_dummy_vehicle:
+    type: bool
+  launch_dummy_doors:
+    type: bool
+
+version: 1
+
+includes:
+  simple_planning_simulator:
+    if: $(var launch_dummy_vehicle)
+    manifest: autoware_simple_planning_simulator/simple_planning_simulator.yaml
+  vehicle_door_simulator:
+    if: $(var launch_dummy_doors)
+    manifest: autoware_vehicle_door_simulator/vehicle_door_simulator.yaml
+  pose_initializer:
+    manifest: autoware_pose_initializer/pose_initializer.yaml
+  # gyro_odometer, ekf_localizer, stop_filter, twist2accel: no leaf manifests
+  # dummy_perception_publisher: conditional, no leaf manifest
+  # occupancy_grid_map: conditional, reuses perception launch
+  # fault_injection: conditional (scenario simulation only)
+
+sub:
+  control_cmd:
+    - simple_planning_simulator/control_cmd
+
+pub:
+  odometry:
+    - simple_planning_simulator/odometry
+  velocity_status:
+    - simple_planning_simulator/velocity_status
+  steering_status:
+    - simple_planning_simulator/steering_status
+  acceleration:
+    - simple_planning_simulator/acceleration
+  imu:
+    - simple_planning_simulator/imu
+
+srv:
+  control_mode_request:
+    - simple_planning_simulator/control_mode_request
+  set_pose:
+    - simple_planning_simulator/set_pose
+  doors_command:
+    - vehicle_door_simulator/doors_command
+  doors_layout:
+    - vehicle_door_simulator/doors_layout
+  initialize:
+    - pose_initializer/initialize

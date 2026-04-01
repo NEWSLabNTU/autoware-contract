@@ -1,0 +1,55 @@
+# tier4_map_launch/map.launch.xml
+# Namespace: /map
+#
+# Map loading: pointcloud map, lanelet2 vector map, map projection,
+# TF generation. Has own composable nodes in map_container.
+#
+# Source: /opt/autoware/1.5.0/share/tier4_map_launch/launch/map.launch.xml
+
+version: 1
+
+# Composable nodes in map_container
+nodes:
+  pointcloud_map_loader:
+    pub:
+      pointcloud_map: {}
+    srv:
+      get_partial_pcd_map: {}
+      get_differential_pcd_map: {}
+      get_selected_pcd_map: {}
+
+  lanelet2_map_loader:
+    pub:
+      vector_map: {}           # /map/vector_map — QoS(1).transient_local()
+
+  lanelet2_map_visualization:
+    sub:
+      vector_map:
+        state: true
+    pub:
+      visualization: {}
+
+  vector_map_tf_generator:
+    sub:
+      vector_map:
+        state: true
+
+  map_hash_generator:
+    pub:
+      map_hash: {}
+
+includes:
+  map_projection_loader:
+    manifest: autoware_map_projection_loader/map_projection_loader.yaml
+
+pub:
+  vector_map:
+    - lanelet2_map_loader/vector_map
+  pointcloud_map:
+    - pointcloud_map_loader/pointcloud_map
+
+srv:
+  get_partial_pcd_map:
+    - pointcloud_map_loader/get_partial_pcd_map
+  get_differential_pcd_map:
+    - pointcloud_map_loader/get_differential_pcd_map
