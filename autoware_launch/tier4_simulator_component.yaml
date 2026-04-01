@@ -1,0 +1,13 @@
+# autoware_launch/components/tier4_simulator_component.launch.xml
+# Namespace: /
+#
+# Component wrapper: loads global params + includes tier4_simulator_launch/simulator.
+# Vehicle and perception simulation.
+#
+# Source: /opt/autoware/1.5.0/share/autoware_launch/launch/components/tier4_simulator_component.launch.xml
+
+version: 1
+
+includes:
+  main:
+    manifest: tier4_simulator_launch/simulator.yaml

@@ -1,0 +1,29 @@
+# autoware_launch/planning_simulator.launch.xml
+# Namespace: /
+#
+# Top-level entry point for Autoware planning simulator.
+# Includes all subsystem components.
+#
+# Source: /opt/autoware/1.5.0/share/autoware_launch/launch/planning_simulator.launch.xml
+
+version: 1
+
+includes:
+  system:
+    manifest: autoware_launch/tier4_system_component.yaml
+  control:
+    manifest: autoware_launch/tier4_control_component.yaml
+  planning:
+    manifest: autoware_launch/tier4_planning_component.yaml
+  perception:
+    manifest: autoware_launch/tier4_perception_component.yaml
+  localization:
+    manifest: autoware_launch/tier4_localization_component.yaml
+  simulator:
+    manifest: autoware_launch/tier4_simulator_component.yaml
+  sensing:
+    manifest: autoware_launch/tier4_sensing_component.yaml
+  map:
+    manifest: autoware_launch/tier4_map_component.yaml
+  api:
+    manifest: autoware_launch/tier4_autoware_api_component.yaml

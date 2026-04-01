@@ -1,0 +1,13 @@
+# autoware_launch/components/tier4_localization_component.launch.xml
+# Namespace: /
+#
+# Component wrapper: loads global params + includes tier4_localization_launch/localization.
+# Pose estimation.
+#
+# Source: /opt/autoware/1.5.0/share/autoware_launch/launch/components/tier4_localization_component.launch.xml
+
+version: 1
+
+includes:
+  main:
+    manifest: tier4_localization_launch/localization.yaml
