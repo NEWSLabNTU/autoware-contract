@@ -9,5 +9,9 @@ nodes:
         input: []
         output: [map_projector_info]
         max_latency_ms: 1000
-pub:
-  map_projector_info: [map_projection_loader/map_projector_info]
+
+topics:
+  # relative — resolves via scope ns (e.g. /map/map_projector_info)
+  map_projector_info:
+    type: tier4_map_msgs/msg/MapProjectorInfo  # TODO verify
+    pub: [map_projection_loader/map_projector_info]

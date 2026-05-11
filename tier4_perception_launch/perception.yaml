@@ -26,21 +26,3 @@ includes:
   traffic_light:
     if: $(var use_traffic_light_recognition)
     manifest: tier4_perception_launch/traffic_light.yaml
-
-sub:
-  # From sensing
-  pointcloud:
-    - ground_segmentation/pointcloud
-    - detection/pointcloud
-  # From map
-  vector_map:
-    - prediction/vector_map
-
-pub:
-  # To planning
-  objects:
-    - prediction/objects
-  obstacle_pointcloud:
-    - ground_segmentation/obstacle_pointcloud
-  occupancy_grid:
-    - occupancy_grid_map/occupancy_grid

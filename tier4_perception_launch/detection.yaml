@@ -13,12 +13,24 @@
 
 version: 1
 
-sub:
-  pointcloud:
-    - []  # from sensing/ground_segmentation
-  camera_images:
-    - []  # from sensing (mode-dependent)
+# Leaf manifests for the various detector backends (centerpoint, apollo,
+# camera fusion, etc.) are not yet authored. This file currently captures
+# only the scope's input/output topic surface as placeholders so the
+# graph wiring can be expressed once those leaves land.
 
-pub:
+topics:
+  # /perception/obstacle_segmentation/pointcloud — input from ground segmentation
+  # In planning_simulator, this topic comes from dummy_perception_publisher (QoS(1).transient_local()).
+  /perception/obstacle_segmentation/pointcloud:
+    type: sensor_msgs/msg/PointCloud2
+    qos:
+      reliability: reliable
+      durability: transient_local
+      depth: 1
+    # sub: filled in once detector leaf manifests are authored
+
+  # relative — /perception/object_recognition/detection/objects (output to tracking)
+  # TODO: type — needs source check (varies by detector pipeline)
   objects:
-    - []  # detected objects → tracking
+    type: TODO/msg/TODO
+    # pub: filled in once detector leaf manifests are authored

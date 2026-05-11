@@ -25,35 +25,15 @@ includes:
     manifest: autoware_vehicle_door_simulator/vehicle_door_simulator.yaml
   pose_initializer:
     manifest: autoware_pose_initializer/pose_initializer.yaml
+  dummy_perception_publisher:
+    if: $(var launch_dummy_perception)
+    manifest: autoware_dummy_perception_publisher/dummy_perception_publisher.yaml
   # gyro_odometer, ekf_localizer, stop_filter, twist2accel: no leaf manifests
-  # dummy_perception_publisher: conditional, no leaf manifest
   # occupancy_grid_map: conditional, reuses perception launch
   # fault_injection: conditional (scenario simulation only)
 
-sub:
-  control_cmd:
-    - simple_planning_simulator/control_cmd
-
-pub:
-  odometry:
-    - simple_planning_simulator/odometry
-  velocity_status:
-    - simple_planning_simulator/velocity_status
-  steering_status:
-    - simple_planning_simulator/steering_status
-  acceleration:
-    - simple_planning_simulator/acceleration
-  imu:
-    - simple_planning_simulator/imu
-
-srv:
-  control_mode_request:
-    - simple_planning_simulator/control_mode_request
-  set_pose:
-    - simple_planning_simulator/set_pose
-  doors_command:
-    - vehicle_door_simulator/doors_command
-  doors_layout:
-    - vehicle_door_simulator/doors_layout
-  initialize:
-    - pose_initializer/initialize
+# Scope-level pub:/sub:/srv: blocks removed (Phase 9.1) — child-scope
+# endpoints (simple_planning_simulator/*, vehicle_door_simulator/*,
+# pose_initializer/*) belong to their own leaf manifests. Cross-scope
+# wiring flows through topics:/services: keyed by ROS names declared
+# in those leaves.

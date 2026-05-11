@@ -1,7 +1,16 @@
+# autoware_component_interface_tools/service_log_checker.launch.xml
+# Namespace: /system
+#
+# Subscribes to component_interface_utils service logs and emits a diagnostic.
 version: 1
+
 nodes:
   service_log_checker:
     pub:
       diagnostic: {}
-pub:
-  diagnostic: [service_log_checker/diagnostic]
+
+topics:
+  # absolute — global diagnostics aggregation channel
+  /diagnostics:
+    type: diagnostic_msgs/msg/DiagnosticArray
+    pub: [service_log_checker/diagnostic]

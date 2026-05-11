@@ -1,9 +1,15 @@
 # tier4_planning_launch/scenario_planning/parking.launch.xml
-# Namespace: /planning/scenario_planning/parking
+# Scope namespace (parser): /planning/scenario_planning
+# (Internal <push-ros-namespace namespace="parking"/> places node names under
+#  /planning/scenario_planning/parking, but the file scope itself sits at
+#  /planning/scenario_planning. Use absolute topic keys here.)
 #
 # Parking planning: costmap generation + freespace planner.
 #
-# Source: /opt/autoware/1.5.0/share/tier4_planning_launch/launch/scenario_planning/parking.launch.xml
+# Sources:
+#   launch:  /opt/autoware/1.5.0/share/tier4_planning_launch/launch/scenario_planning/parking.launch.xml
+#   costmap: autoware_universe/planning/autoware_costmap_generator/src/costmap_generator.cpp:172-179
+#   freesp:  autoware_universe/planning/autoware_freespace_planner/src/autoware_freespace_planner/freespace_planner_node.cpp:94-98
 
 args:
   input_objects_topic_name:
@@ -15,40 +21,88 @@ version: 1
 nodes:
   costmap_generator:
     sub:
-      objects: {}
-      points_no_ground: {}
-      scenario: {}
-      lanelet_map_bin: {}
+      objects: {}                   # $(var input_objects_topic_name) — predicted objects
+      points_no_ground: {}          # $(var input_pointcloud_topic_name) — no-ground pointcloud
+      scenario: {}                  # /planning/scenario_planning/scenario
+      lanelet_map_bin: {}           # /map/vector_map
     pub:
-      occupancy_grid: {}
+      occupancy_grid: {}            # ~/output/occupancy_grid → costmap_generator/occupancy_grid (relative under /parking)
+      grid_map: {}                  # ~/output/grid_map → costmap_generator/grid_map
 
   freespace_planner:
     sub:
-      route: {}
-      occupancy_grid: {}
-      scenario: {}
-      odometry: {}
+      route: {}                     # /planning/mission_planning/route
+      occupancy_grid: {}            # costmap_generator/occupancy_grid (intra-container)
+      scenario: {}                  # /planning/scenario_planning/scenario
+      odometry: {}                  # /localization/kinematic_state
     pub:
-      trajectory: {}
+      trajectory: {}                # ~/output/trajectory → /planning/scenario_planning/parking/trajectory (absolute remap)
+      is_completed: {}              # is_completed → /planning/scenario_planning/parking/is_completed (absolute remap)
 
 topics:
-  costmap:
+  # Intra-scope: costmap_generator → freespace_planner.
+  # Both endpoints sit inside the <push-ros-namespace namespace="parking"> group, so
+  # relative "costmap_generator/occupancy_grid" resolves to
+  # /planning/scenario_planning/parking/costmap_generator/occupancy_grid.
+  /planning/scenario_planning/parking/costmap_generator/occupancy_grid:
     type: nav_msgs/msg/OccupancyGrid
     pub: [costmap_generator/occupancy_grid]
     sub: [freespace_planner/occupancy_grid]
+    qos:
+      reliability: reliable           # QoS(1)
+      depth: 1
 
-sub:
-  objects:
-    - costmap_generator/objects
-  pointcloud:
-    - costmap_generator/points_no_ground
-  route:
-    - freespace_planner/route
-  odometry:
-    - freespace_planner/odometry
-  lanelet_map:
-    - costmap_generator/lanelet_map_bin
+  # costmap_generator grid_map output (no in-scope subscriber, declared for graph completeness)
+  /planning/scenario_planning/parking/costmap_generator/grid_map:
+    type: grid_map_msgs/msg/GridMap
+    pub: [costmap_generator/grid_map]
+    qos:
+      reliability: reliable           # QoS(1)
+      depth: 1
 
-pub:
-  trajectory:
-    - freespace_planner/trajectory
+  # Cross-scope inputs (topic names from launch arg remappings)
+  /perception/object_recognition/objects:
+    type: autoware_perception_msgs/msg/PredictedObjects
+    sub: [costmap_generator/objects]
+
+  /perception/obstacle_segmentation/pointcloud:
+    type: sensor_msgs/msg/PointCloud2
+    sub: [costmap_generator/points_no_ground]
+
+  # Source: src/universe/autoware_universe/planning/autoware_scenario_selector/src/node.cpp:482
+  # type is autoware_internal_planning_msgs/msg/Scenario (not tier4_planning_msgs/Scenario).
+  /planning/scenario_planning/scenario:
+    type: autoware_internal_planning_msgs/msg/Scenario
+    sub:
+      - costmap_generator/scenario
+      - freespace_planner/scenario
+
+  /map/vector_map:
+    type: autoware_map_msgs/msg/LaneletMapBin
+    sub: [costmap_generator/lanelet_map_bin]
+
+  /planning/mission_planning/route:
+    type: autoware_planning_msgs/msg/LaneletRoute
+    sub: [freespace_planner/route]
+
+  /localization/kinematic_state:
+    type: nav_msgs/msg/Odometry
+    sub: [freespace_planner/odometry]
+
+  # Output trajectory — absolute remap in parking.launch.xml.
+  # Source: parking.launch.xml: <remap from="~/output/trajectory" to="/planning/scenario_planning/parking/trajectory"/>
+  /planning/scenario_planning/parking/trajectory:
+    type: autoware_planning_msgs/msg/Trajectory
+    pub: [freespace_planner/trajectory]
+    qos:
+      reliability: reliable           # QoS(1)
+      depth: 1
+
+  # Parking completion flag — absolute remap in parking.launch.xml.
+  # Source publisher: freespace_planner_node.cpp:97 — std_msgs/msg/Bool, QoS(1).
+  /planning/scenario_planning/parking/is_completed:
+    type: std_msgs/msg/Bool
+    pub: [freespace_planner/is_completed]
+    qos:
+      reliability: reliable           # QoS(1)
+      depth: 1

@@ -24,12 +24,23 @@ includes:
   pose_initializer:
     manifest: autoware_pose_initializer/pose_initializer.yaml
 
-sub:
-  pointcloud:
-    - pose_initializer/point_cloud_map
-  gnss:
-    - pose_initializer/gnss_pose
+# Topics consumed/produced at this scope level. Cross-subsystem ones use
+# absolute names; internal ones use relative names.
+topics:
+  # Sensor inputs — $(var input_pointcloud) → /sensing/lidar/concatenated/pointcloud (default)
+  /sensing/lidar/concatenated/pointcloud:
+    type: sensor_msgs/msg/PointCloud2  # TODO verify
+    sub: [pose_initializer/point_cloud_map]
+  # IMU/GNSS inputs (sourced from /sensing scope; declared as cross-scope refs)
+  /sensing/imu/imu_data:
+    type: sensor_msgs/msg/Imu  # TODO verify — imu sub is referenced here but no
+                               # local node consumes it yet (consumed by ekf inside
+                               # pose_twist_fusion_filter)
+  /sensing/gnss/pose:
+    type: geometry_msgs/msg/PoseWithCovarianceStamped  # TODO verify
+    sub: [pose_initializer/gnss_pose]
 
-pub:
-  pose:
-    - pose_initializer/initialpose
+  # Pose output from initializer
+  initialpose:
+    type: geometry_msgs/msg/PoseWithCovarianceStamped  # TODO verify
+    pub: [pose_initializer/initialpose3d]

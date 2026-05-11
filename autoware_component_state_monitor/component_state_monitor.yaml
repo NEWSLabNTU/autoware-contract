@@ -1,4 +1,9 @@
+# autoware_component_state_monitor/component_state_monitor.launch.xml
+# Namespace: /system
+#
+# Maps subsystem diagnostics into per-component state.
 version: 1
+
 nodes:
   component_state_monitor:
     sub:
@@ -6,7 +11,15 @@ nodes:
         state: true
     pub:
       component_state: {}
-sub:
-  diagnostics: [component_state_monitor/diagnostics]
-pub:
-  state: [component_state_monitor/component_state]
+
+topics:
+  # absolute — global /diagnostics aggregated stream
+  /diagnostics:
+    type: diagnostic_msgs/msg/DiagnosticArray
+    sub: [component_state_monitor/diagnostics]
+
+  # relative → /system/component_state_monitor/component_state
+  # TODO: type — ModeChangeAvailable / component-state message
+  component_state_monitor/component_state:
+    type: TODO/msg/TODO
+    pub: [component_state_monitor/component_state]

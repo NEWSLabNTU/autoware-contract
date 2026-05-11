@@ -26,21 +26,30 @@ nodes:
     pub:
       tracked_objects:              # output/objects — QoS(1)
         min_rate_hz: 10             # publish_rate param (default ~10 Hz)
-    paths:
-      main:
-        input: detected_objects
-        output: [tracked_objects]
-        max_latency_ms: 20          # tracking association + state estimation
+    # No `paths:` block — the `detected_objects` fan-in is parameterized per
+    # launch via `input/detectionNN/objects` args, so we can't declare a
+    # topic-level wiring without a placeholder. The latency contract
+    # (~20ms detected_objects→tracked_objects) is enforced at runtime by
+    # the tracker itself.
 
-sub:
-  # Detected objects from upstream (lidar/camera/radar detectors)
-  detected_objects:
-    - multi_object_tracker/detected_objects
-  # /localization/kinematic_state
-  odometry:
-    - multi_object_tracker/odometry
+topics:
+  # Detected objects fan-in: the tracker subscribes to up to 12 input channels
+  # (`input/objects01..12`) whose ROS names are configured per launch
+  # invocation via `input/detectionNN/objects` args. The actual topics vary
+  # per pipeline. The `detected_objects` endpoint above is the contract;
+  # per-channel wiring is validated at runtime by the tracker itself.
+  # No placeholder topic entry here.
 
-pub:
-  # /perception/object_recognition/tracking/objects → map_based_prediction
-  tracked_objects:
-    - multi_object_tracker/tracked_objects
+  # /localization/kinematic_state — from EKF
+  /localization/kinematic_state:
+    type: nav_msgs/msg/Odometry
+    sub: [multi_object_tracker/odometry]
+
+  # relative → /perception/object_recognition/tracking/objects → map_based_prediction
+  objects:
+    type: autoware_perception_msgs/msg/TrackedObjects
+    pub: [multi_object_tracker/tracked_objects]
+    rate_hz: 10
+    qos:
+      reliability: reliable           # QoS(1)
+      depth: 1

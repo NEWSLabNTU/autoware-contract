@@ -54,6 +54,7 @@ nodes:
 
 topics:
   # Mission Planner → Route Selector (intra-container, transient_local)
+  # relative → /planning/mission_planning/planner_route
   planner_route:
     type: autoware_planning_msgs/msg/LaneletRoute
     pub: [mission_planner/route]
@@ -63,6 +64,7 @@ topics:
       durability: transient_local
       depth: 1
 
+  # relative → /planning/mission_planning/planner_state
   planner_state:
     type: autoware_planning_msgs/msg/RouteState
     pub: [mission_planner/state]
@@ -72,8 +74,51 @@ topics:
       durability: transient_local
       depth: 1
 
+  # Cross-scope inputs
+  /map/vector_map:
+    type: autoware_map_msgs/msg/LaneletMapBin
+    sub: [mission_planner/vector_map]
+    qos:
+      reliability: reliable           # QoS(1).transient_local()
+      durability: transient_local
+      depth: 1
+
+  /localization/kinematic_state:
+    type: nav_msgs/msg/Odometry
+    sub: [mission_planner/odometry]
+    qos:
+      reliability: reliable           # QoS(1)
+      depth: 1
+
+  /planning/scenario_planning/modified_goal:
+    type: geometry_msgs/msg/PoseWithUuidStamped
+    sub: [mission_planner/modified_goal]
+    qos:
+      reliability: reliable           # QoS(1).transient_local()
+      durability: transient_local
+      depth: 1
+
+  /system/operation_mode/state:
+    type: autoware_adapi_v1_msgs/msg/OperationModeState
+    sub: [mission_planner/operation_mode]
+    qos:
+      reliability: reliable           # QoS(1).transient_local()
+      durability: transient_local
+      depth: 1
+
+  # Mission Planner output route — consumed by behavior_path_planner
+  # relative → /planning/mission_planning/route
+  route:
+    type: autoware_planning_msgs/msg/LaneletRoute
+    pub: [route_selector/main_route]
+    qos:
+      reliability: reliable           # QoS(1).transient_local()
+      durability: transient_local
+      depth: 1
+
 services:
   # Intra-scope: route_selector → mission_planner (same container)
+  # relative → /planning/mission_planning/clear_route
   clear_route:
     type: autoware_planning_msgs/srv/ClearRoute
     server: [mission_planner/clear_route]
@@ -86,38 +131,3 @@ services:
     type: autoware_planning_msgs/srv/SetWaypointRoute
     server: [mission_planner/set_waypoint_route]
     client: [route_selector/set_waypoint_route]
-
-sub:
-  # /map/vector_map — QoS(1).transient_local()
-  vector_map:
-    - mission_planner/vector_map
-  # /localization/kinematic_state — QoS(1)
-  odometry:
-    - mission_planner/odometry
-  # /planning/scenario_planning/modified_goal — QoS(1).transient_local()
-  modified_goal:
-    - mission_planner/modified_goal
-  # /system/operation_mode/state — QoS(1).transient_local()
-  operation_mode:
-    - mission_planner/operation_mode
-
-pub:
-  # ~/main/route → consumed by behavior_path_planner as /planning/mission_planning/route
-  route:
-    - route_selector/main_route
-
-srv:
-  # Service servers exposed to external scopes (via route_selector proxy)
-  clear_route:
-    - mission_planner/clear_route
-  set_lanelet_route:
-    - mission_planner/set_lanelet_route
-  set_waypoint_route:
-    - mission_planner/set_waypoint_route
-
-cli:
-  # Service clients (route_selector proxies to mission_planner, intra-scope)
-  route_proxy:
-    - route_selector/clear_route
-    - route_selector/set_lanelet_route
-    - route_selector/set_waypoint_route

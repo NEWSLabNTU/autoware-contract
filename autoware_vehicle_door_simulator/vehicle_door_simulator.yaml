@@ -7,16 +7,26 @@ version: 1
 
 nodes:
   vehicle_door_simulator:
-    sub:
-      door_command:                             # door command input
-        state: true
     pub:
-      door_status: {}                           # door status output
+      door_status:                              # ~/doors/status → /vehicle/doors/status
+        rate_hz: 5                              # 5Hz timer in dummy_doors.cpp
     srv:
       doors_command:                            # ~/doors/command — autoware_adapi_v1_msgs/srv/SetDoorCommand — SERVER
         # simulation only — no response time requirement
       doors_layout:                             # ~/doors/layout — autoware_adapi_v1_msgs/srv/GetDoorLayout — SERVER
         # simulation only — no response time requirement
+
+topics:
+  # ~/doors/status → /vehicle/doors/status (remap in launch xml).
+  # Source: dummy_doors.cpp — create_publisher<DoorStatusArray>("~/doors/status", QoS(1).transient_local())
+  /vehicle/doors/status:
+    type: autoware_adapi_v1_msgs/msg/DoorStatusArray
+    pub: [vehicle_door_simulator/door_status]
+    rate_hz: 5                                  # publishes on 5Hz timer
+    qos:
+      reliability: reliable
+      durability: transient_local
+      depth: 1
 
 services:
   doors_command:
@@ -25,15 +35,3 @@ services:
   doors_layout:
     type: autoware_adapi_v1_msgs/srv/GetDoorLayout
     server: [vehicle_door_simulator/doors_layout]
-
-sub:
-  door_command: [vehicle_door_simulator/door_command]
-pub:
-  door_status: [vehicle_door_simulator/door_status]
-
-srv:
-  # Door simulation services
-  doors_command:
-    - vehicle_door_simulator/doors_command
-  doors_layout:
-    - vehicle_door_simulator/doors_layout

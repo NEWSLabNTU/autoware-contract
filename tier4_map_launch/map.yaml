@@ -42,14 +42,42 @@ includes:
   map_projection_loader:
     manifest: autoware_map_projection_loader/map_projection_loader.yaml
 
-pub:
+topics:
+  # /map/vector_map — published by lanelet2_map_loader, consumed locally too
   vector_map:
-    - lanelet2_map_loader/vector_map
-  pointcloud_map:
-    - pointcloud_map_loader/pointcloud_map
+    type: autoware_map_msgs/msg/LaneletMapBin  # TODO verify
+    pub: [lanelet2_map_loader/vector_map]
+    sub:
+      - lanelet2_map_visualization/vector_map
+      - vector_map_tf_generator/vector_map
+    qos:
+      reliability: reliable       # transient_local in source
+      durability: transient_local
+      depth: 1
 
-srv:
+  # /map/pointcloud_map — published by pointcloud_map_loader
+  pointcloud_map:
+    type: sensor_msgs/msg/PointCloud2  # TODO verify
+    pub: [pointcloud_map_loader/pointcloud_map]
+
+  # /map/map_hash — map fingerprint
+  map_hash:
+    type: tier4_external_api_msgs/msg/MapHash  # TODO verify
+    pub: [map_hash_generator/map_hash]
+
+  # /map/lanelet2_map_visualization output marker stream
+  visualization:
+    type: visualization_msgs/msg/MarkerArray  # TODO verify
+    pub: [lanelet2_map_visualization/visualization]
+
+services:
+  # /map/get_partial_pcd_map — pcd map slice retrieval
   get_partial_pcd_map:
-    - pointcloud_map_loader/get_partial_pcd_map
+    type: autoware_map_msgs/srv/GetPartialPointCloudMap  # TODO verify
+    server: [pointcloud_map_loader/get_partial_pcd_map]
   get_differential_pcd_map:
-    - pointcloud_map_loader/get_differential_pcd_map
+    type: autoware_map_msgs/srv/GetDifferentialPointCloudMap  # TODO verify
+    server: [pointcloud_map_loader/get_differential_pcd_map]
+  get_selected_pcd_map:
+    type: autoware_map_msgs/srv/GetSelectedPointCloudMap  # TODO verify
+    server: [pointcloud_map_loader/get_selected_pcd_map]

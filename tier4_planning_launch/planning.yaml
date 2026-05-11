@@ -26,19 +26,3 @@ includes:
   remaining_distance_time_calculator:
     if: $(var launch_remaining_distance_time_calculator)
     manifest: autoware_remaining_distance_time_calculator/remaining_distance_time_calculator.yaml
-
-sub:
-  # Consumed from localization/perception
-  route:
-    - mission_planning/route
-  kinematic_state:
-    - scenario_planning/odometry
-  vector_map:
-    - mission_planning/vector_map
-
-pub:
-  # Published to control subsystem
-  trajectory:
-    - scenario_planning/trajectory
-  route:
-    - mission_planning/route

@@ -26,6 +26,7 @@ nodes:
       turn_indicators: {}                       # ~/output/turn_indicators — QoS(1)
       hazard_lights: {}                         # ~/output/hazard — QoS(1)
       gear_cmd: {}                              # ~/output/gear — QoS(1)
+      emergency_holding: {}                     # ~/output/emergency_holding → /system/emergency_holding — QoS(1)
     cli:                                        # service clients — calls MRM operators (safety-critical)
       pull_over_operate:                        # ~/output/mrm/pull_over/operate — tier4_system_msgs/srv/OperateMrm
         # safety-critical — no documented response time requirement in Autoware source
@@ -33,25 +34,86 @@ nodes:
         # safety-critical
       emergency_stop_operate:                   # ~/output/mrm/emergency_stop/operate — tier4_system_msgs/srv/OperateMrm
         # safety-critical
+
+topics:
+  # absolute — operation_mode_availability published by aggregator's converter (also in /system)
+  /system/operation_mode/availability:
+    type: tier4_system_msgs/msg/OperationModeAvailability  # TODO verify
+    sub: [mrm_handler/operation_mode_availability]
+    qos:
+      reliability: reliable           # QoS(1)
+      depth: 1
+
+  # absolute — odometry from localization
+  /localization/kinematic_state:
+    type: nav_msgs/msg/Odometry
+    sub: [mrm_handler/odometry]
+
+  # absolute — control mode from vehicle
+  /vehicle/status/control_mode:
+    type: autoware_vehicle_msgs/msg/ControlModeReport  # TODO verify
+    sub: [mrm_handler/control_mode]
+
+  # relative → /system/mrm/comfortable_stop/status (published by mrm_comfortable_stop_operator)
+  mrm/comfortable_stop/status:
+    type: tier4_system_msgs/msg/MrmBehaviorStatus  # TODO verify
+    sub: [mrm_handler/comfortable_stop_status]
+
+  # relative → /system/mrm/emergency_stop/status (published by mrm_emergency_stop_operator)
+  mrm/emergency_stop/status:
+    type: tier4_system_msgs/msg/MrmBehaviorStatus  # TODO verify
+    sub: [mrm_handler/emergency_stop_status]
+
+  # absolute — operation_mode/state from API
+  # publisher: autoware_default_adapi_universe/operation_mode_node — see default_adapi.yaml
+  # Source (spec/QoS): autoware_adapi_specs/include/autoware/adapi_specs/operation_mode.hpp:62-69
+  /api/operation_mode/state:
+    type: autoware_adapi_v1_msgs/msg/OperationModeState
+    sub: [mrm_handler/operation_mode_state]
+    qos:
+      reliability: reliable
+      durability: transient_local
+      depth: 1
+
+  # relative → /system/fail_safe/mrm_state
+  fail_safe/mrm_state:
+    type: tier4_system_msgs/msg/MrmState  # TODO verify
+    pub: [mrm_handler/mrm_state]
+    qos:
+      reliability: reliable           # QoS(1)
+      depth: 1
+
+  # absolute — /system/emergency_holding (consumed by hazard_status_converter)
+  # remap: ~/output/emergency_holding → /system/emergency_holding (mrm_handler.launch.xml line 38)
+  # Source: src/universe/autoware_universe/system/autoware_mrm_handler/src/mrm_handler/mrm_handler_core.cpp:59-60
+  /system/emergency_holding:
+    type: tier4_system_msgs/msg/EmergencyHoldingState
+    pub: [mrm_handler/emergency_holding]
+    qos:
+      reliability: reliable           # QoS(1)
+      depth: 1
+
+  # relative → /system/turn_indicators_cmd (or vehicle topic)
+  # TODO: confirm topic name and type
+  turn_indicators_cmd:
+    type: TODO/msg/TODO
+    pub: [mrm_handler/turn_indicators]
+
+  # relative → /system/hazard_lights_cmd
+  # Source: src/universe/autoware_universe/system/autoware_command_mode_switcher_plugins/src/comfortable_stop.cpp:34
+  # publisher type confirmed: autoware_vehicle_msgs::msg::HazardLightsCommand
+  hazard_lights_cmd:
+    type: autoware_vehicle_msgs/msg/HazardLightsCommand
+    pub: [mrm_handler/hazard_lights]
+
+  # relative → /system/gear_cmd
+  # TODO: confirm topic name and type
+  gear_cmd:
+    type: TODO/msg/TODO
+    pub: [mrm_handler/gear_cmd]
+
 # Service wiring: cli: targets are in other scopes (cross-scope)
 #   pull_over_operate → mrm_pull_over_operator (not in planning_simulator)
 #   comfortable_stop_operate → mrm_comfortable_stop_operator/operate
 #   emergency_stop_operate → mrm_emergency_stop_operator/operate
-# Cross-scope service wiring is not yet supported in the manifest format.
-# The service-wiring rule will warn about these — accepted as known gap.
-
-sub:
-  operation_mode_availability: [mrm_handler/operation_mode_availability]
-  odometry: [mrm_handler/odometry]
-  comfortable_stop_status: [mrm_handler/comfortable_stop_status]
-  emergency_stop_status: [mrm_handler/emergency_stop_status]
-  operation_mode_state: [mrm_handler/operation_mode_state]
-pub:
-  mrm_state: [mrm_handler/mrm_state]
-
-cli:
-  # Cross-scope service clients — targets MRM operators in other scopes
-  mrm_operate:
-    - mrm_handler/pull_over_operate
-    - mrm_handler/comfortable_stop_operate
-    - mrm_handler/emergency_stop_operate
+# Cross-scope client refs are declared at tier4_system_launch/system.yaml.

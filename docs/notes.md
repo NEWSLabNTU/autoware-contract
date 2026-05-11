@@ -217,3 +217,249 @@ mechanism — these warnings can't be silenced.
 services are documented, this will grow.
 
 Tracked as design-issues.md #17.
+
+## Upstream divergences (Phase 9 audit)
+
+This audit fixed 11 `consistency` errors and 2 `rate-hierarchy` errors reported by
+`play_launch check`. The fixes uncovered several places where Autoware source
+code (or earlier manifest authoring) was internally inconsistent. Each is
+documented inline near the manifest declaration with `# UPSTREAM:` comments.
+
+### 1. `/map/vector_map` — subscriber depth ≠ publisher depth
+
+- **Publisher**: `rclcpp::QoS{1}.transient_local()` (depth=1)
+- **Source**: `src/core/autoware_core/map/autoware_map_loader/src/lanelet2_map_loader/lanelet2_map_loader_node.cpp:130`
+- **Subscribers found at depth=10**:
+  - `tier4_planning_launch/motion_planning.yaml` (motion_velocity_planner inline comment said depth=10)
+  - `autoware_simple_planning_simulator/simple_planning_simulator.yaml` (sim subscribes with depth=10)
+- **Our choice**: aligned all subscriber declarations to depth=1 (publisher wins).
+- **Other vector_map subscribers** in `tier4_control_launch/control.yaml` and
+  `autoware_remaining_distance_time_calculator/remaining_distance_time_calculator.yaml`
+  had partial QoS (only `durability: transient_local`); filled in
+  `reliability: reliable, depth: 1` to be explicit.
+
+### 2. `/planning/scenario_planning/max_velocity_candidates` and `/.../clear_velocity_limit`
+
+- **Publisher**: `rclcpp::QoS{1}.transient_local()` (depth=1)
+  - Source: `src/core/autoware_core/planning/motion_velocity_planner/autoware_motion_velocity_planner/src/node.cpp:87-89`
+- **Subscriber** (`external_velocity_limit_selector`): `QoS{10}.transient_local()` (depth=10)
+  - Source: `src/universe/autoware_universe/planning/autoware_external_velocity_limit_selector/src/external_velocity_limit_selector_node.cpp:127,131`
+- **Our choice**: aligned the manifest subscriber side to depth=1 (publisher wins).
+  ROS 2 allows differing depth across pub/sub but the checker requires consistency
+  in the declared contract. For transient_local control commands, only the latest
+  message has meaning; depth>1 doesn't help.
+- **Note**: the type field in our manifests still reads
+  `tier4_planning_msgs/msg/VelocityLimit` and `tier4_planning_msgs/msg/VelocityLimitClearCommand`,
+  but the actual upstream type is `autoware_internal_planning_msgs/msg/VelocityLimit{,ClearCommand}`
+  (`include <autoware_internal_planning_msgs/msg/velocity_limit.hpp>` in both
+  publisher node.hpp and subscriber selector_node.hpp). This is a separate
+  authoring error not flagged by the checker because both pub and sub
+  manifests share the same wrong type. Tracked for follow-up.
+
+### 3. `/localization/kinematic_state` — subscriber depth=100
+
+- **Publisher**: `QoS(1)` (depth=1) from simple_planning_simulator and EKF on real vehicle.
+- **Subscriber** (`scenario_selector`): `QoS{100}` polling subscriber (depth=100).
+- **Our choice**: aligned manifest subscriber to depth=1.
+
+### 4. `/planning/scenario_planning/scenario` — wrong message package
+
+- **Actual upstream type**: `autoware_internal_planning_msgs/msg/Scenario`
+  - Publisher source: `src/universe/autoware_universe/planning/autoware_scenario_selector/src/node.cpp:482`
+  - Subscribers (`behavior_path_planner`, `remaining_distance_time_calculator`,
+    `costmap_generator`, `freespace_planner`) all `using autoware_internal_planning_msgs::msg::Scenario;`
+- **Manifests previously declared**:
+  - `autoware_scenario_selector/scenario_selector.yaml`: `tier4_planning_msgs/msg/Scenario` (wrong)
+  - `tier4_planning_launch/behavior_planning.yaml`: `tier4_planning_msgs/msg/Scenario` (wrong)
+  - `tier4_planning_launch/parking.yaml`: `tier4_planning_msgs/msg/Scenario` (wrong)
+  - `autoware_remaining_distance_time_calculator/remaining_distance_time_calculator.yaml`: `autoware_planning_msgs/msg/Scenario` (wrong)
+- **Our choice**: corrected all four to `autoware_internal_planning_msgs/msg/Scenario`.
+
+### 5. `/system/hazard_lights_cmd` — TODO type filled in
+
+- **Actual upstream type**: `autoware_vehicle_msgs/msg/HazardLightsCommand`
+  - Publisher source: `src/universe/autoware_universe/system/autoware_command_mode_switcher_plugins/src/comfortable_stop.cpp:34`
+- **Manifests**: `autoware_mrm_handler/mrm_handler.yaml` had `TODO/msg/TODO`. Fixed.
+  `autoware_hazard_lights_selector/hazard_lights_selector.yaml` already used the
+  correct type — the consistency error was triggered by the mrm_handler manifest
+  declaring the topic with TODO/msg/TODO, not by hazard_lights_selector.
+
+### 6. `/perception/object_recognition/detection/objects_with_feature` — wrong type
+
+- **Actual upstream type**: `tier4_perception_msgs/msg/DetectedObjectsWithFeature`
+  - Publisher source: `src/universe/autoware_universe/perception/autoware_shape_estimation/src/shape_estimation_node.cpp:47`
+  - Subscriber header: `src/universe/autoware_universe/perception/autoware_detected_object_feature_remover/src/detected_object_feature_remover_node.hpp:23`
+- **Manifests previously declared**:
+  - `autoware_shape_estimation/shape_estimation.yaml`: `autoware_perception_msgs/msg/DetectedObjects` (wrong — topic suffix `_with_feature` signals the WithFeature variant)
+  - `autoware_detected_object_feature_remover/detected_object_feature_remover.yaml`: `TODO/msg/TODO`
+- **Our choice**: corrected both to `tier4_perception_msgs/msg/DetectedObjectsWithFeature`.
+
+### 7. controller_node_exe sub min_rate_hz: simulator vs real-vehicle divergence
+
+- **Real-vehicle** EKF publishes `/localization/kinematic_state` and
+  `/localization/acceleration` at 50 Hz; controller's `min_rate_hz: 50` matches.
+- **Simulator** (`simple_planning_simulator`) publishes both at `sim_hz=40` (default).
+- **Source**: `src/universe/autoware_universe/simulator/autoware_simple_planning_simulator/src/simple_planning_simulator_core.cpp` (sim_hz default 40)
+- **Our choice**: lowered controller `min_rate_hz` to 40 in
+  `tier4_control_launch/control.yaml` to match the simulator-driven pipeline
+  used by `planning_simulator.launch.xml`. For real-vehicle contracts this
+  should be 50; comment in the file flags the divergence.
+
+## 13. External Topics — Format Has No Way to Declare Them
+
+After Phase 9 the checker reports zero errors but **39 dangling-entity
+warnings**. Every remaining warning is a topic with zero publishers
+across the manifest tree. Tracked as
+[play_launch design issue #51](../../play_launch/src/ros-launch-manifest/docs/design-issues.md#51-no-way-to-declare-external-topics--producers).
+
+### Why this happens
+
+A topic is "dangling" in the cross-scope merge when no manifest
+declares a producer for it. There are three reasons:
+
+1. **Truly external** — produced by a system outside Autoware (or
+   outside this repo's scope): TF broadcaster, vehicle hardware,
+   sensor drivers, map_loader package, ROS standard topics like
+   `/diagnostics`. We will never author a manifest for these.
+2. **Incomplete manifest coverage** — produced by a launched Autoware
+   node, but the producing leaf manifest doesn't declare the topic on
+   the publisher side. Fix is to add the `pub:` declaration in the
+   producing manifest.
+3. **TODO / generic topics** — placeholders we left unresolved
+   (`type: TODO/msg/TODO`) or topics whose name is launch-arg
+   parameterized (e.g. monitored_topic in topic_state_monitor).
+
+The checker can't tell which is which without a format mechanism for
+declaring external producers.
+
+### Triage of current 39 warnings
+
+| Category | Count | Action |
+|---|---|---|
+| Truly external (no Autoware producer) | ~5 | Need `external_topics:` block (issue #51) |
+| Incomplete manifest coverage (Autoware producer not yet manifested) | ~28 | Author missing producer decl; do not suppress |
+| TODO placeholders / generic monitors | ~6 | Resolve types or accept as parameterized |
+
+#### Truly external
+
+| Topic | Producer | Note |
+|---|---|---|
+| `/tf` | tf2_broadcaster (any node using tf2) | System frame |
+| `/gnss_pose` | GNSS driver | Real-vehicle hardware; absent in `planning_simulator` |
+| `/point_cloud_map` | `autoware_map_loader` (separate package, not in this contract repo's scope) | Could be authored as its own contract repo |
+| `/door_command` | External fleet management or human input | Vehicle door command source |
+| `/diagnostics_graph` (bare topic, not the `/struct`/`/status` variants) | unclear — may be a manifest typo, audit needed | Open question |
+
+These need the spec change in #51 before they can be silenced cleanly.
+Until then they are documented as accepted noise.
+
+#### Incomplete manifest coverage
+
+These are topics produced by Autoware nodes that **are** launched in
+`planning_simulator.launch.xml` but whose leaf manifest doesn't list
+them under any `topics:` key with a `pub:` line. Examples of producers
+not yet authored as full leaf manifests:
+
+- `vehicle_cmd_gate` (publishes `/control/command/control_cmd`,
+  `/control/command/gear_cmd`, `/control/command/turn_indicators_cmd`,
+  `/control/command/hazard_lights_cmd`, `/control/current_gate_mode`,
+  `/system/command_mode/availability`)
+- `external_cmd_selector` output side
+  (`/external/selected/gear_cmd` etc. — selector exists in our
+  manifests but its outputs aren't declared)
+- `behavior_path_planner` (publishes
+  `/planning/behavior_path_planner/hazard_lights_cmd`)
+- `scenario_planning` output (`/planning/trajectory`)
+- `motion_velocity_planner` debug
+  (`/planning/scenario_planning/max_velocity_default`)
+- `freespace_planner` parking branch
+  (`/planning/scenario_planning/parking/trajectory` etc.)
+- `operation_mode_transition_manager`
+  (`/system/operation_mode/state`, `/api/operation_mode/state`)
+- `diagnostic_graph_aggregator`
+  (`/system/emergency_holding`, `/diagnostics_graph` variants)
+- `obstacle_segmentation` output
+  (`/perception/obstacle_segmentation/pointcloud`)
+- `lidar_centerpoint` / `lidar_apollo_instance_segmentation`
+  detector outputs
+  (`/perception/object_recognition/detection/labeled_clusters`,
+  `/occupancy_grid_map/no_ground/oneshot/pointcloud`)
+- `traffic_light_classifier` (when traffic_light arg is true)
+  (`/perception/traffic_light_recognition/traffic_signals`)
+
+These warnings are **legitimate signal** — they tell us where the
+contract coverage is incomplete. We should treat them as a follow-up
+authoring backlog, not as noise.
+
+#### TODO placeholders / generic monitors
+
+- `/planning/mission_planning/lane_change_command` — placeholder, real
+  type unknown (manual_lane_change_handler.yaml carries a TODO)
+- `/planning/scenario_planning/scenario_selector/is_parking_completed`
+  — same, scenario_selector source check needed
+- `/planning/scenario_planning/scenario_selector_trajectory` — same
+- `/system/topic_state_monitor/monitored_topic` — generic by design;
+  the actual topic name is launch-arg parameterized. The manifest
+  currently uses a placeholder absolute key that never matches a real
+  topic. Better modeled as an external_topic with an arg-parameterized
+  name once #51 lands.
+- `/system/pipeline_latency_monitor/topics_to_monitor` — same generic
+  pattern.
+- `/system/processing_time_checker/processing_times` — same.
+
+### Next steps
+
+1. **Spec side**: implement #51 (`external_topics:` block) in
+   play_launch.
+2. **Repo side**: when #51 is available, add `external_topics:` to
+   the closest scope (likely
+   `autoware_launch/planning_simulator.yaml`) listing the ~5 truly
+   external topics.
+3. **Repo side**: file follow-up tasks per producer for the ~28
+   incomplete-coverage cases; author the missing leaf manifests over
+   time.
+4. **Repo side**: resolve TODO placeholder types (~6) by checking
+   the relevant Autoware source files.
+
+CI policy: until #51 lands, dangling-entity warnings do not gate
+merges. The repo-level success criterion is `0 errors`, which is
+currently met.
+
+### Inventory of accepted external topics (post Phase 9)
+
+After the Phase 9 cleanup pass (parameterized monitors dropped,
+`/perception/object_recognition/tracking/detected_objects` placeholder
+removed from the multi_object_tracker manifest, vehicle_door_simulator
+fixed to declare `/vehicle/doors/status`), the remaining
+dangling-entity warnings split into two camps: incomplete manifest
+coverage (Autoware producers not yet authored — see the table above)
+and **truly external** (no Autoware producer in
+`planning_simulator.launch.xml`).
+
+The inventory below documents the truly-external set. These cannot
+be silenced cleanly until #51 (`external_topics:` block) lands; until
+then they are accepted noise.
+
+| Topic | External producer | Notes |
+|---|---|---|
+| `/tf` | `tf2_ros::TransformBroadcaster` invoked by many nodes / system frame | Standard ROS frame topic. |
+| `/gnss_pose` | GNSS driver (real-vehicle hardware) | Absent in `planning_simulator.launch.xml` — the simulator does not include a GNSS driver. |
+| `/point_cloud_map` | `autoware_map_loader` (separate package, not in this contract repo's scope) | Could be authored as its own contract repo; out of scope here. |
+| `/vehicle/engage` | External: joystick, teleop, fleet management, or HMI | `autoware_default_adapi_universe` consumes this; the producer is operator/teleop input, not an Autoware node in the simulator graph. |
+| `/external/local/heartbeat` | External: local-control input device (joystick / keyboard driver) | Liveness signal from a local cmd source. Not produced by any Autoware node in `planning_simulator`. |
+| `/external/local/pedals_cmd` | External: local-control input device | Throttle/brake from local driver console. |
+| `/external/local/steering_cmd` | External: local-control input device | Steering from local driver console. |
+| `/external/remote/heartbeat` | External: remote-control teleop link | Liveness signal from a remote operator station. |
+| `/external/remote/pedals_cmd` | External: remote-control teleop link | Throttle/brake from remote operator station. |
+| `/external/remote/steering_cmd` | External: remote-control teleop link | Steering from remote operator station. |
+
+The `/external/local/*` and `/external/remote/*` families are inputs to
+`autoware_external_cmd_selector`; the selector merges them into
+`/external/selected/*`. These six are inherently external in any real
+or simulated deployment because they originate at human-driver input
+devices.
+
+Action: do **not** modify these manifests to silence the warnings.
+When #51 ships, declare them via `external_topics:` in the closest
+ancestor scope (likely
+`autoware_launch/planning_simulator.yaml`).

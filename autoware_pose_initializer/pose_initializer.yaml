@@ -18,18 +18,22 @@ nodes:
       initialize:                               # autoware component_interface_specs::localization::Initialize — SERVER
         # no documented response time requirement — NDT alignment is iterative, map-dependent
 
+topics:
+  # gnss_pose — relative; resolves via scope ns
+  gnss_pose:
+    type: geometry_msgs/msg/PoseWithCovarianceStamped  # TODO verify
+    sub: [pose_initializer/gnss_pose]
+  # point_cloud_map — pcd map source for NDT initialization
+  point_cloud_map:
+    type: sensor_msgs/msg/PointCloud2  # TODO verify
+    sub: [pose_initializer/point_cloud_map]
+  # initialpose3d — published initialization result
+  initialpose3d:
+    type: geometry_msgs/msg/PoseWithCovarianceStamped  # TODO verify
+    pub: [pose_initializer/initialpose3d]
+
 services:
+  # NDT-based pose initialization service
   initialize:
     type: autoware_component_interface_specs/localization/Initialize
     server: [pose_initializer/initialize]
-
-sub:
-  gnss_pose: [pose_initializer/gnss_pose]
-  point_cloud_map: [pose_initializer/point_cloud_map]
-pub:
-  initialpose: [pose_initializer/initialpose3d]
-
-srv:
-  # NDT-based pose initialization service
-  initialize:
-    - pose_initializer/initialize

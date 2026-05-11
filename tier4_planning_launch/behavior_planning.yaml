@@ -30,6 +30,7 @@ nodes:
       route:                        # /planning/mission_planning/route — QoS(1).transient_local()
         state: true
         required: true
+        max_age_ms: 300             # E2E freshness incl. upstream route + perception latency
       vector_map:                   # /map/vector_map — QoS(1).transient_local()
         state: true
         required: true
@@ -94,6 +95,7 @@ nodes:
 
 topics:
   # Path Planner → Velocity Planner (intra-container)
+  # relative → /planning/scenario_planning/lane_driving/behavior_planning/path_with_lane_id
   path_with_lane_id:
     type: autoware_internal_planning_msgs/msg/PathWithLaneId
     pub: [behavior_path_planner/path_with_lane_id]
@@ -102,56 +104,153 @@ topics:
     qos:                            # intra-container — may bypass DDS
       depth: 1
 
-sub:
-  # /planning/mission_planning/route — QoS(1).transient_local()
-  route:
-    - behavior_path_planner/route
-  # /map/vector_map — QoS(1).transient_local()
-  vector_map:
-    - behavior_path_planner/vector_map
-    - behavior_velocity_planner/vector_map
-  # Predicted objects — from perception/prediction pipeline
-  predicted_objects:
-    - behavior_path_planner/predicted_objects
-    - behavior_velocity_planner/predicted_objects
-  # /localization/kinematic_state
-  odometry:
-    - behavior_path_planner/odometry
-    - behavior_velocity_planner/odometry
-  # /localization/acceleration
-  acceleration:
-    - behavior_path_planner/acceleration
-    - behavior_velocity_planner/acceleration
-  # Traffic light recognition
-  traffic_signals:
-    - behavior_path_planner/traffic_signals
-    - behavior_velocity_planner/traffic_signals
-  # /perception/occupancy_grid_map/map
-  occupancy_grid:
-    - behavior_path_planner/occupancy_grid
-    - behavior_velocity_planner/occupancy_grid
-  # No-ground pointcloud — sensor data
-  pointcloud:
-    - behavior_velocity_planner/pointcloud
-  # Parking costmap
-  costmap:
-    - behavior_path_planner/costmap
-  # Scenario selection
-  scenario:
-    - behavior_path_planner/scenario
-  # External velocity limit — QoS(1).transient_local()
-  external_velocity_limit:
-    - behavior_velocity_planner/external_velocity_limit
+  # Cross-scope inputs
+  /planning/mission_planning/route:
+    type: autoware_planning_msgs/msg/LaneletRoute
+    sub: [behavior_path_planner/route]
+    qos:
+      reliability: reliable           # QoS(1).transient_local()
+      durability: transient_local
+      depth: 1
 
-pub:
-  # Output path → elastic_band_smoother in motion_planning scope
-  behavior_path:
-    - behavior_velocity_planner/output_path
+  /map/vector_map:
+    type: autoware_map_msgs/msg/LaneletMapBin
+    sub:
+      - behavior_path_planner/vector_map
+      - behavior_velocity_planner/vector_map
+    qos:
+      reliability: reliable           # QoS(1).transient_local()
+      durability: transient_local
+      depth: 1
+
+  # Predicted objects — from perception/prediction pipeline
+  # Topic name is provided via launch arg input_objects_topic_name (typically /perception/object_recognition/objects)
+  /perception/object_recognition/objects:
+    type: autoware_perception_msgs/msg/PredictedObjects
+    sub:
+      - behavior_path_planner/predicted_objects
+      - behavior_velocity_planner/predicted_objects
+    qos:
+      reliability: reliable           # QoS(1)
+      depth: 1
+
+  /localization/kinematic_state:
+    type: nav_msgs/msg/Odometry
+    sub:
+      - behavior_path_planner/odometry
+      - behavior_velocity_planner/odometry
+    qos:
+      reliability: reliable           # QoS(1)
+      depth: 1
+
+  /localization/acceleration:
+    type: geometry_msgs/msg/AccelWithCovarianceStamped
+    sub:
+      - behavior_path_planner/acceleration
+      - behavior_velocity_planner/acceleration
+    qos:
+      reliability: reliable           # QoS(1)
+      depth: 1
+
+  # Traffic light recognition — input topic via launch arg input_traffic_light_topic_name
+  /perception/traffic_light_recognition/traffic_signals:
+    type: autoware_perception_msgs/msg/TrafficLightGroupArray
+    sub:
+      - behavior_path_planner/traffic_signals
+      - behavior_velocity_planner/traffic_signals
+    qos:
+      reliability: reliable           # QoS(1)
+      depth: 1
+
+  /perception/occupancy_grid_map/map:
+    type: nav_msgs/msg/OccupancyGrid
+    sub:
+      - behavior_path_planner/occupancy_grid
+      - behavior_velocity_planner/occupancy_grid
+    qos:
+      reliability: reliable           # QoS(1)
+      depth: 1
+
+  # No-ground pointcloud — sensor data, topic name from input_pointcloud_topic_name
+  # In planning_simulator the publisher is dummy_perception_publisher (reliable+transient_local).
+  # behavior_velocity_planner uses single_depth_sensor_qos (best_effort) — DDS-compatible because
+  # offered reliable+durable ≥ requested best_effort+volatile.
+  /perception/obstacle_segmentation/pointcloud:
+    type: sensor_msgs/msg/PointCloud2
+    sub: [behavior_velocity_planner/pointcloud]
+    qos:
+      reliability: reliable
+      durability: transient_local
+      depth: 1
+
+  # Parking costmap
+  /planning/scenario_planning/parking/costmap_generator/occupancy_grid:
+    type: nav_msgs/msg/OccupancyGrid
+    sub: [behavior_path_planner/costmap]
+    qos:
+      reliability: reliable           # QoS(1)
+      depth: 1
+
+  # Scenario selection
+  # Source: src/universe/autoware_universe/planning/autoware_scenario_selector/src/node.cpp:482
+  # type is autoware_internal_planning_msgs/msg/Scenario (not tier4_planning_msgs/Scenario).
+  /planning/scenario_planning/scenario:
+    type: autoware_internal_planning_msgs/msg/Scenario
+    sub: [behavior_path_planner/scenario]
+    qos:
+      reliability: reliable           # QoS(1)
+      depth: 1
+
+  # External velocity limit — QoS(1).transient_local()
+  /planning/scenario_planning/max_velocity_default:
+    type: tier4_planning_msgs/msg/VelocityLimit
+    sub: [behavior_velocity_planner/external_velocity_limit]
+    qos:
+      reliability: reliable
+      durability: transient_local
+      depth: 1
+
+  # Behavior planning output path (consumed by motion_planning)
+  # relative → /planning/scenario_planning/lane_driving/behavior_planning/path
+  path:
+    type: autoware_planning_msgs/msg/Path
+    pub: [behavior_velocity_planner/output_path]
+    rate_hz: 10
+    qos:
+      reliability: reliable           # QoS(1)
+      depth: 1
+
+  # Other publishers (no in-scope subscribers; declared so they appear in the graph)
+  /planning/turn_indicators_cmd:
+    type: autoware_vehicle_msgs/msg/TurnIndicatorsCommand
+    pub: [behavior_path_planner/turn_indicators_cmd]
+    qos:
+      reliability: reliable           # QoS(1)
+      depth: 1
+
+  # Source remap: behavior_planning.launch.xml:244
+  #   ~/output/hazard_lights_cmd → /planning/behavior_path_planner/hazard_lights_cmd
+  # Consumed by autoware_hazard_lights_selector (input_hazard_lights_cmd_from_path_planner).
+  /planning/behavior_path_planner/hazard_lights_cmd:
+    type: autoware_vehicle_msgs/msg/HazardLightsCommand
+    pub: [behavior_path_planner/hazard_lights_cmd]
+    qos:
+      reliability: reliable           # QoS(1)
+      depth: 1
+
+  /planning/scenario_planning/modified_goal:
+    type: geometry_msgs/msg/PoseWithUuidStamped
+    pub: [behavior_path_planner/modified_goal]
+    qos:
+      reliability: reliable           # QoS(1).transient_local()
+      durability: transient_local
+      depth: 1
 
 paths:
   # Full behavior planning: periodic path gen → event-driven velocity planning
+  # Scope path I/O are ROS topic names (not group names)
   behavior:
-    input: route                    # periodic node reads route as state, not causal trigger
-    output: [behavior_path]
+    input: /planning/mission_planning/route
+    output: [path]                  # relative → /planning/scenario_planning/lane_driving/behavior_planning/path
     max_latency_ms: 100             # path planner (50ms) + velocity planner (30ms) + margin
-    max_age_ms: 300                 # includes upstream route + perception latency
+    # max_age_ms relocated to behavior_velocity_planner.sub.external_velocity_limit (consumer-side)

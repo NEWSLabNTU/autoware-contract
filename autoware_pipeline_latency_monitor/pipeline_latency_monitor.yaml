@@ -1,4 +1,10 @@
+# autoware_pipeline_latency_monitor/pipeline_latency_monitor.launch.xml
+# Namespace: /system
+#
+# Monitors end-to-end pipeline latency by subscribing to a configured set of
+# topics and publishes a diagnostic.
 version: 1
+
 nodes:
   pipeline_latency_monitor:
     sub:
@@ -6,7 +12,14 @@ nodes:
         state: true
     pub:
       diagnostic: {}
-sub:
-  monitored_topics: [pipeline_latency_monitor/topics_to_monitor]
-pub:
-  diagnostic: [pipeline_latency_monitor/diagnostic]
+
+topics:
+  # The set of topics aggregated for latency is configured per invocation via
+  # launch args; the actual ROS names vary. The `topics_to_monitor` endpoint
+  # above is the contract — per-invocation wiring is validated at runtime by
+  # the pipeline_latency_monitor itself. No placeholder topic entry here.
+
+  # absolute — global diagnostics aggregation channel
+  /diagnostics:
+    type: diagnostic_msgs/msg/DiagnosticArray
+    pub: [pipeline_latency_monitor/diagnostic]

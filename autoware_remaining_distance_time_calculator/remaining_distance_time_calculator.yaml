@@ -8,14 +8,43 @@ version: 1
 nodes:
   remaining_distance_time_calculator:
     sub:
-      route:                                    # state: reads current route
+      route:                                    # ~/input/route → /planning/mission_planning/route — state
         state: true
-      kinematic_state:                          # state: reads current pose/velocity
+      odometry:                                 # ~/input/odometry → /localization/kinematic_state — state
+        state: true
+      map:                                      # ~/input/map → /map/vector_map — state
+        state: true
+      scenario:                                 # ~/input/scenario → /planning/scenario_planning/scenario — state
         state: true
     pub:
-      remaining_distance_time: {}               # publishes remaining dist/time to goal
-sub:
-  route: [remaining_distance_time_calculator/route]
-  kinematic_state: [remaining_distance_time_calculator/kinematic_state]
-pub:
-  remaining: [remaining_distance_time_calculator/remaining_distance_time]
+      mission_remaining_distance_time: {}       # ~/output/mission_remaining_distance_time → /planning/mission_remaining_distance_time
+
+topics:
+  /planning/mission_planning/route:
+    type: autoware_planning_msgs/msg/LaneletRoute
+    sub: [remaining_distance_time_calculator/route]
+
+  /localization/kinematic_state:
+    type: nav_msgs/msg/Odometry
+    sub: [remaining_distance_time_calculator/odometry]
+
+  # Source: src/core/autoware_core/map/autoware_map_loader/src/lanelet2_map_loader/lanelet2_map_loader_node.cpp:130
+  # publisher uses rclcpp::QoS{1}.transient_local()
+  /map/vector_map:
+    type: autoware_map_msgs/msg/LaneletMapBin
+    sub: [remaining_distance_time_calculator/map]
+    qos:
+      reliability: reliable
+      durability: transient_local
+      depth: 1
+
+  # Source: src/universe/autoware_universe/planning/autoware_scenario_selector/src/node.cpp:482
+  # type is autoware_internal_planning_msgs/msg/Scenario (not autoware_planning_msgs/Scenario).
+  /planning/scenario_planning/scenario:
+    type: autoware_internal_planning_msgs/msg/Scenario
+    sub: [remaining_distance_time_calculator/scenario]
+
+  # absolute — ~/output/mission_remaining_distance_time → /planning/mission_remaining_distance_time
+  /planning/mission_remaining_distance_time:
+    type: TODO/msg/TODO  # TODO: identify message type from autoware_remaining_distance_time_calculator
+    pub: [remaining_distance_time_calculator/mission_remaining_distance_time]

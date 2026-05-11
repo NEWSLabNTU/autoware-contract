@@ -8,11 +8,22 @@ version: 1
 nodes:
   goal_pose_visualizer:
     sub:
-      route:                                    # state: reads route to extract goal pose — QoS transient_local
-        state: true
+      input_route:                              # input/route → /planning/mission_planning/route
+        state: true                             # QoS transient_local
     pub:
-      goal_pose: {}                             # visualization marker
-sub:
-  route: [goal_pose_visualizer/route]
-pub:
-  goal_pose: [goal_pose_visualizer/goal_pose]
+      output_goal_pose: {}                      # output/goal_pose → /planning/mission_planning/echo_back_goal_pose
+
+topics:
+  # absolute — input/route → /planning/mission_planning/route (sub-only, published by mission_planner)
+  /planning/mission_planning/route:
+    type: autoware_planning_msgs/msg/LaneletRoute
+    sub: [goal_pose_visualizer/input_route]
+    qos:
+      reliability: reliable           # QoS transient_local in source
+      durability: transient_local
+      depth: 1
+
+  # absolute — output/goal_pose → /planning/mission_planning/echo_back_goal_pose
+  /planning/mission_planning/echo_back_goal_pose:
+    type: geometry_msgs/msg/PoseStamped
+    pub: [goal_pose_visualizer/output_goal_pose]

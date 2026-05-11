@@ -20,18 +20,6 @@ includes:
   localization_error_monitor:
     manifest: tier4_localization_launch/localization_error_monitor.yaml
 
-sub:
-  # From sensing
-  pointcloud:
-    - pose_twist_estimator/pointcloud
-  imu:
-    - pose_twist_estimator/imu
-  gnss:
-    - pose_twist_estimator/gnss
-
-pub:
-  # To planning/control
-  kinematic_state:
-    - pose_twist_fusion_filter/kinematic_state
-  acceleration:
-    - pose_twist_fusion_filter/acceleration
+# This is a coordinator/intermediate scope; topic wiring lives in the
+# child leaf manifests. Topics here only document scope-edge inputs/
+# outputs that aren't fully captured by any single child.

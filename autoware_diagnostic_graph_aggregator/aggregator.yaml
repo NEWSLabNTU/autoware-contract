@@ -15,6 +15,10 @@ nodes:
       diag_graph_struct: {}                     # ~/struct — QoS(1).transient_local()
       diag_graph_status: {}                     # ~/status — QoS(graph_qos_depth param)
       unknowns: {}                              # ~/unknowns — QoS(1)
+      # CommandModeMapping member of aggregator_node:
+      # source: autoware_universe/system/autoware_diagnostic_graph_aggregator/src/node/command_mode_mapping.cpp:49
+      # ~/availability — QoS(1) — remap → /system/command_mode/availability
+      command_mode_availability: {}
     srv:
       reset:                                    # ~/reset — ResetDiagGraph
         # diagnostic admin — no response time requirement
@@ -28,24 +32,63 @@ nodes:
     pub:
       operation_mode_availability: {}           # ~/operation_mode/availability — QoS(1)
 
+topics:
+  # absolute — global /diagnostics aggregated stream
+  /diagnostics:
+    type: diagnostic_msgs/msg/DiagnosticArray
+    sub: [aggregator_node/diagnostics]
+
+  # absolute — diagnostic graph structure / status (consumed by hazard_status_converter, logging)
+  # remap: ~/struct → /diagnostics_graph/struct, ~/status → /diagnostics_graph/status, ~/unknowns → /diagnostics_graph/unknowns
+  # Source (types):  src/universe/autoware_universe/system/autoware_diagnostic_graph_aggregator/src/common/types/diagnostics.hpp:31-32
+  # Source (QoS):    src/universe/autoware_universe/system/autoware_diagnostic_graph_aggregator/src/node/aggregator.cpp:43-51
+  /diagnostics_graph/struct:
+    type: tier4_system_msgs/msg/DiagGraphStruct
+    pub: [aggregator_node/diag_graph_struct]
+    qos:
+      reliability: reliable
+      durability: transient_local       # QoS(1).transient_local()
+      depth: 1
+  /diagnostics_graph/status:
+    type: tier4_system_msgs/msg/DiagGraphStatus
+    pub: [aggregator_node/diag_graph_status]
+    qos:
+      reliability: reliable             # QoS(graph_qos_depth) — depth is parameter-driven; default reliable
+  /diagnostics_graph/unknowns:
+    type: diagnostic_msgs/msg/DiagnosticArray
+    pub: [aggregator_node/unknowns]
+    qos:
+      reliability: reliable
+      depth: 1
+
+  # converter inputs/outputs
+  # relative → /system/command_mode/availability
+  # source: command_mode_mapping.cpp:49 — type tier4_system_msgs/msg/CommandModeAvailability
+  # Published by aggregator_node (~/availability remap → /system/command_mode/availability,
+  # CommandModeMapping is a member of AggregatorNode, see aggregator.launch.xml line 18).
+  command_mode/availability:
+    type: tier4_system_msgs/msg/CommandModeAvailability
+    pub: [aggregator_node/command_mode_availability]
+    sub: [converter_node/command_mode_availability]
+    qos:
+      reliability: reliable           # QoS(1)
+      depth: 1
+
+  # relative → /system/operation_mode/availability (consumed by mrm_handler)
+  operation_mode/availability:
+    type: tier4_system_msgs/msg/OperationModeAvailability  # TODO verify
+    pub: [converter_node/operation_mode_availability]
+    qos:
+      reliability: reliable           # QoS(1)
+      depth: 1
+
 services:
-  reset:
+  # absolute — remap: ~/reset → /diagnostics_graph/reset
+  /diagnostics_graph/reset:
     type: autoware_system_msgs/srv/ResetDiagGraph
     server: [aggregator_node/reset]
-  set_initializing:
+
+  # absolute — ~/set_initializing has no remap declared, so falls under node FQN; keep as-is
+  diag_graph/set_initializing:
     type: std_srvs/srv/SetBool
     server: [aggregator_node/set_initializing]
-
-sub:
-  diagnostics: [aggregator_node/diagnostics]
-pub:
-  operation_mode_availability: [converter_node/operation_mode_availability]
-  diag_graph_struct: [aggregator_node/diag_graph_struct]
-  diag_graph_status: [aggregator_node/diag_graph_status]
-
-srv:
-  # Diagnostic admin services
-  reset:
-    - aggregator_node/reset
-  set_initializing:
-    - aggregator_node/set_initializing

@@ -30,6 +30,7 @@ nodes:
     sub:
       input_path:               # behavior_planning/path — remap ~/input/path
         min_rate_hz: 10         # triggered by upstream behavior planner
+        max_age_ms: 200         # E2E freshness incl. upstream behavior planning latency
       odometry:                 # /localization/kinematic_state — InterProcessPollingSubscriber
         state: true
     pub:
@@ -96,6 +97,7 @@ nodes:
 
 topics:
   # Smoother → Optimizer (intra-container)
+  # relative → /planning/scenario_planning/lane_driving/motion_planning/smoothed_path
   smoothed_path:
     type: autoware_planning_msgs/msg/Path
     pub: [elastic_band_smoother/output_path]
@@ -106,6 +108,7 @@ topics:
       depth: 1
 
   # Optimizer → Velocity Planner (intra-container)
+  # relative → /planning/scenario_planning/lane_driving/motion_planning/optimized_trajectory
   optimized_trajectory:
     type: autoware_planning_msgs/msg/Trajectory
     pub: [path_optimizer/output_trajectory]
@@ -115,43 +118,88 @@ topics:
       reliability: reliable     # QoS(1) default = reliable
       depth: 1
 
-sub:
-  # From behavior_planning scope — /planning/.../behavior_planning/path
-  behavior_path:
-    - elastic_band_smoother/input_path
-  # /localization/kinematic_state — shared by all nodes (polled)
-  odometry:
-    - elastic_band_smoother/odometry
-    - path_optimizer/odometry
-    - motion_velocity_planner/odometry
-  # /map/vector_map — QoS(10).transient_local(), needed for velocity planning modules
-  vector_map:
-    - motion_velocity_planner/vector_map
-  # /localization/acceleration
-  acceleration:
-    - motion_velocity_planner/acceleration
-  # Predicted objects — from perception/prediction pipeline
-  predicted_objects:
-    - motion_velocity_planner/predicted_objects
-  # No-ground pointcloud — from perception pipeline
-  pointcloud:
-    - motion_velocity_planner/pointcloud
-  # Traffic light recognition results
-  traffic_signals:
-    - motion_velocity_planner/traffic_signals
-  # Occupancy grid map
-  occupancy_grid:
-    - motion_velocity_planner/occupancy_grid
+  # Cross-scope inputs
+  # behavior_planning's output path — sibling scope
+  /planning/scenario_planning/lane_driving/behavior_planning/path:
+    type: autoware_planning_msgs/msg/Path
+    sub: [elastic_band_smoother/input_path]
 
-pub:
-  # /planning/scenario_planning/lane_driving/trajectory → scenario_selector
-  lane_driving_trajectory:
-    - motion_velocity_planner/output_trajectory
+  /localization/kinematic_state:
+    type: nav_msgs/msg/Odometry
+    sub:
+      - elastic_band_smoother/odometry
+      - path_optimizer/odometry
+      - motion_velocity_planner/odometry
+
+  # UPSTREAM: motion_velocity_planner subscriber comment in source said QoS(10).transient_local(),
+  # but the actual publisher (autoware_map_loader / lanelet2_map_loader_node.cpp:130) uses
+  # rclcpp::QoS{1}.transient_local(). Authoritative QoS is the publisher's; the subscriber
+  # comment is misleading. Aligned to depth=1 to match publisher and other map subscribers.
+  # Source: src/core/autoware_core/map/autoware_map_loader/src/lanelet2_map_loader/lanelet2_map_loader_node.cpp:130
+  /map/vector_map:
+    type: autoware_map_msgs/msg/LaneletMapBin
+    sub: [motion_velocity_planner/vector_map]
+    qos:
+      reliability: reliable
+      durability: transient_local
+      depth: 1
+
+  /localization/acceleration:
+    type: geometry_msgs/msg/AccelWithCovarianceStamped
+    sub: [motion_velocity_planner/acceleration]
+
+  /perception/object_recognition/objects:
+    type: autoware_perception_msgs/msg/PredictedObjects
+    sub: [motion_velocity_planner/predicted_objects]
+
+  # In planning_simulator the publisher is dummy_perception_publisher (reliable+transient_local).
+  /perception/obstacle_segmentation/pointcloud:
+    type: sensor_msgs/msg/PointCloud2
+    sub: [motion_velocity_planner/pointcloud]
+    qos:
+      reliability: reliable
+      durability: transient_local
+      depth: 1
+
+  /perception/traffic_light_recognition/traffic_signals:
+    type: autoware_perception_msgs/msg/TrafficLightGroupArray
+    sub: [motion_velocity_planner/traffic_signals]
+
+  /perception/occupancy_grid_map/map:
+    type: nav_msgs/msg/OccupancyGrid
+    sub: [motion_velocity_planner/occupancy_grid]
+
+  # Output trajectory → scenario_selector
+  /planning/scenario_planning/lane_driving/trajectory:
+    type: autoware_planning_msgs/msg/Trajectory
+    pub: [motion_velocity_planner/output_trajectory]
+    rate_hz: 10
+    qos:
+      reliability: reliable           # QoS(1)
+      depth: 1
+
+  # Velocity limit candidates / clear command — consumed by external_velocity_limit_selector
+  /planning/scenario_planning/max_velocity_candidates:
+    type: tier4_planning_msgs/msg/VelocityLimit
+    pub: [motion_velocity_planner/velocity_limit]
+    qos:
+      reliability: reliable
+      durability: transient_local
+      depth: 1
+
+  /planning/scenario_planning/clear_velocity_limit:
+    type: tier4_planning_msgs/msg/VelocityLimitClearCommand
+    pub: [motion_velocity_planner/clear_velocity_limit]
+    qos:
+      reliability: reliable
+      durability: transient_local
+      depth: 1
 
 paths:
   # Full motion planning pipeline: path → smooth → optimize → velocity plan
+  # Scope path I/O are ROS topic names
   motion_planning:
-    input: behavior_path
-    output: [lane_driving_trajectory]
+    input: /planning/scenario_planning/lane_driving/behavior_planning/path
+    output: [/planning/scenario_planning/lane_driving/trajectory]
     max_latency_ms: 50          # sum: 10 (smooth) + 15 (optimize) + 20 (velocity) = 45ms + margin
-    max_age_ms: 200             # includes upstream behavior planning latency
+    # max_age_ms relocated to elastic_band_smoother.sub.input_path (consumer-side)

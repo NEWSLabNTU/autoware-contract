@@ -1,11 +1,24 @@
+# autoware_topic_state_monitor/load_topic_state_monitor_tf.launch.xml
+# Namespace: /system
+#
+# Topic state monitor specialized for tf topics.
 version: 1
+
 nodes:
   topic_state_monitor_tf:
     sub:
       input_topic: {}
     pub:
       diagnostic: {}
-sub:
-  monitored_topic: [topic_state_monitor_tf/input_topic]
-pub:
-  diagnostic: [topic_state_monitor_tf/diagnostic]
+
+topics:
+  # absolute — /tf (or /tf_static) — actual selection comes from launch args.
+  # TODO: type — tf2_msgs/msg/TFMessage
+  /tf:
+    type: tf2_msgs/msg/TFMessage
+    sub: [topic_state_monitor_tf/input_topic]
+
+  # absolute — global diagnostics aggregation channel
+  /diagnostics:
+    type: diagnostic_msgs/msg/DiagnosticArray
+    pub: [topic_state_monitor_tf/diagnostic]

@@ -13,8 +13,6 @@ version: 1
 
 # Child is sensor-model-specific — no fixed manifest path.
 # The actual launch file is $(find-pkg-share $(var sensor_model)_launch)/launch/sensing.launch.xml
-
-sub:
-  # Sensor drivers produce raw data
-pub:
-  # Concatenated pointcloud, IMU, GNSS → localization + perception
+#
+# This scope contributes no nodes/topics directly — sensor drivers and
+# their pub/sub graph live in the sensor-model-specific child manifest.

@@ -8,17 +8,30 @@ version: 1
 nodes:
   detected_object_feature_remover:
     sub:
-      detected_objects:                         # input detected objects — QoS(1)
+      input:                                    # ~/input → /perception/object_recognition/detection/objects_with_feature
         min_rate_hz: 10
     pub:
-      objects_without_features:                 # strips features for simulated objects — QoS(1)
+      output:                                   # ~/output → /perception/object_recognition/detection/objects
         min_rate_hz: 10
     paths:
       main:
-        input: detected_objects
-        output: [objects_without_features]
+        input: input
+        output: [output]
         max_latency_ms: 5                       # simple field removal, no computation
-sub:
-  detected_objects: [detected_object_feature_remover/detected_objects]
-pub:
-  objects: [detected_object_feature_remover/objects_without_features]
+
+topics:
+  # absolute — input from shape_estimation (remap: ~/input → /perception/object_recognition/detection/objects_with_feature)
+  # Source: src/universe/autoware_universe/perception/autoware_detected_object_feature_remover/src/detected_object_feature_remover_node.hpp:23
+  # type confirmed: tier4_perception_msgs::msg::DetectedObjectsWithFeature
+  /perception/object_recognition/detection/objects_with_feature:
+    type: tier4_perception_msgs/msg/DetectedObjectsWithFeature
+    sub: [detected_object_feature_remover/input]
+
+  # absolute — feature-stripped detected objects (remap: ~/output → /perception/object_recognition/detection/objects)
+  /perception/object_recognition/detection/objects:
+    type: autoware_perception_msgs/msg/DetectedObjects
+    pub: [detected_object_feature_remover/output]
+    rate_hz: 10
+    qos:
+      reliability: reliable           # QoS(1)
+      depth: 1

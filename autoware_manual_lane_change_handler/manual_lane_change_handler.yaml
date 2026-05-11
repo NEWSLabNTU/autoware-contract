@@ -1,21 +1,63 @@
 # autoware_manual_lane_change_handler/manual_lane_change_handler.launch.xml
-# Namespace: /planning/mission_planning
+# Namespace: /planning/mission_planning  (per tier4_planning_launch/planning.launch.xml)
 #
 # Sources:
-#   source: autoware_universe/planning/autoware_manual_lane_change_handler/
+#   launch:  /opt/autoware/1.5.0/share/autoware_manual_lane_change_handler/launch/manual_lane_change_handler.launch.xml
+#   source:  autoware_universe/planning/autoware_manual_lane_change_handler/src/manual_lane_change_handler.cpp
+#
+# Note: this node does NOT publish "lane_change_command" or "lane_change_request"
+# topics — earlier manifests carried stale TODO entries based on misleading naming.
+# It exposes a service (~/set_preferred_lane), calls a service
+# (mission_planner/set_preferred_primitive), and publishes only debug topics.
+# See manual_lane_change_handler.cpp:36-54 for the actual subs/pubs/srv/cli.
 version: 1
 
 nodes:
   manual_lane_change_handler:
     sub:
-      lane_change_command:                      # from ADAPI — state: waits for user request
+      odometry:                                 # ~/input/odometry  — remapped to /localization/kinematic_state
+        state: true                             # cached, used inside service callback
+      route:                                    # /planning/mission_planning/route — QoS(1).transient_local()
         state: true
-      route:                                    # state: reads current route — QoS transient_local
-        state: true
+        required: true
     pub:
-      lane_change_request: {}                   # request to behavior path planner
-sub:
-  lane_change_cmd: [manual_lane_change_handler/lane_change_command]
-  route: [manual_lane_change_handler/route]
-pub:
-  lane_change_request: [manual_lane_change_handler/lane_change_request]
+      processing_time_ms: {}                    # ~/debug/processing_time_ms — QoS(1)
+      shift_number: {}                          # ~/debug/shift_number — QoS(1)
+    srv:
+      set_preferred_lane: {}                    # ~/set_preferred_lane — tier4_system_msgs/srv/ChangeLaneByDirection (handle_exception wrapped)
+    cli:
+      set_preferred_primitive: {}               # /planning/mission_planning/mission_planner/set_preferred_primitive
+
+topics:
+  # Cross-scope inputs
+  /localization/kinematic_state:
+    type: nav_msgs/msg/Odometry
+    sub: [manual_lane_change_handler/odometry]
+    qos:
+      reliability: reliable           # QoS(1)
+      depth: 1
+
+  /planning/mission_planning/route:
+    type: autoware_planning_msgs/msg/LaneletRoute
+    sub: [manual_lane_change_handler/route]
+    qos:
+      reliability: reliable           # QoS(1).transient_local()
+      durability: transient_local
+      depth: 1
+
+  # Debug outputs (not consumed inside Autoware tree — declared so they show in graph)
+  # relative → /planning/mission_planning/manual_lane_change_handler/debug/processing_time_ms
+  manual_lane_change_handler/debug/processing_time_ms:
+    type: autoware_internal_debug_msgs/msg/Float64Stamped
+    pub: [manual_lane_change_handler/processing_time_ms]
+    qos:
+      reliability: reliable
+      depth: 1
+
+  # relative → /planning/mission_planning/manual_lane_change_handler/debug/shift_number
+  manual_lane_change_handler/debug/shift_number:
+    type: autoware_internal_debug_msgs/msg/Int32Stamped
+    pub: [manual_lane_change_handler/shift_number]
+    qos:
+      reliability: reliable
+      depth: 1

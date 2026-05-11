@@ -61,6 +61,130 @@ nodes:
         output: [odometry, velocity_status, steering_status, acceleration]
         max_latency_ms: 5
 
+topics:
+  # Subscriptions — absolute ROS names (cross-scope inputs)
+  # Topic-level QoS reflects the publisher (vehicle_cmd_gate, durable_qos = QoS(1).transient_local()).
+  # SPS subscriber itself uses QoS{1} (volatile) — DDS-compatible with the durable publisher.
+  /control/command/control_cmd:
+    type: autoware_control_msgs/msg/Control
+    sub: [simple_planning_simulator/control_cmd]
+    qos:
+      reliability: reliable           # publisher QoS(1).transient_local()
+      durability: transient_local
+      depth: 1
+  /control/command/gear_cmd:
+    type: autoware_vehicle_msgs/msg/GearCommand
+    sub: [simple_planning_simulator/gear_cmd]
+    qos:
+      reliability: reliable
+      durability: transient_local
+      depth: 1
+  /control/command/turn_indicators_cmd:
+    type: autoware_vehicle_msgs/msg/TurnIndicatorsCommand
+    sub: [simple_planning_simulator/turn_indicators_cmd]
+    qos:
+      reliability: reliable
+      durability: transient_local
+      depth: 1
+  /control/command/hazard_lights_cmd:
+    type: autoware_vehicle_msgs/msg/HazardLightsCommand
+    sub: [simple_planning_simulator/hazard_lights_cmd]
+    qos:
+      reliability: reliable
+      durability: transient_local
+      depth: 1
+  /initialpose3d:
+    type: geometry_msgs/msg/PoseWithCovarianceStamped
+    sub: [simple_planning_simulator/initial_pose]
+    qos:
+      reliability: reliable           # QoS(1)
+      depth: 1
+  # UPSTREAM: simple_planning_simulator subscribes with QoS(10).transient_local() but the
+  # actual publisher (autoware_map_loader / lanelet2_map_loader_node.cpp:130) uses
+  # rclcpp::QoS{1}.transient_local(). Authoritative QoS = publisher; aligned to depth=1.
+  # Source: src/core/autoware_core/map/autoware_map_loader/src/lanelet2_map_loader/lanelet2_map_loader_node.cpp:130
+  /map/vector_map:
+    type: autoware_map_msgs/msg/LaneletMapBin
+    sub: [simple_planning_simulator/vector_map]
+    qos:
+      reliability: reliable           # publisher: QoS(1).transient_local() (subscriber source: QoS(10))
+      durability: transient_local
+      depth: 1
+  /planning/trajectory:
+    type: autoware_planning_msgs/msg/Trajectory
+    sub: [simple_planning_simulator/trajectory]
+    qos:
+      reliability: reliable           # QoS(1)
+      depth: 1
+  /vehicle/engage:
+    type: autoware_vehicle_msgs/msg/Engage
+    sub: [simple_planning_simulator/engage]
+    qos:
+      reliability: reliable           # QoS(1)
+      depth: 1
+
+  # Publications — absolute ROS names per remapping in launch file
+  /localization/kinematic_state:
+    type: nav_msgs/msg/Odometry
+    pub: [simple_planning_simulator/odometry]
+    rate_hz: 40
+    qos:
+      reliability: reliable           # QoS(1)
+      depth: 1
+  /vehicle/status/velocity_status:
+    type: autoware_vehicle_msgs/msg/VelocityReport
+    pub: [simple_planning_simulator/velocity_status]
+    rate_hz: 40
+    qos:
+      reliability: reliable           # QoS(1)
+      depth: 1
+  /vehicle/status/steering_status:
+    type: autoware_vehicle_msgs/msg/SteeringReport
+    pub: [simple_planning_simulator/steering_status]
+    rate_hz: 40
+    qos:
+      reliability: reliable           # QoS(1)
+      depth: 1
+  /localization/acceleration:                   # TODO: confirm topic name from launch remap
+    type: geometry_msgs/msg/AccelWithCovarianceStamped  # TODO
+    pub: [simple_planning_simulator/acceleration]
+    rate_hz: 40
+    qos:
+      reliability: reliable           # QoS(1)
+      depth: 1
+  /sensing/imu/imu_data:
+    type: sensor_msgs/msg/Imu
+    pub: [simple_planning_simulator/imu]
+    rate_hz: 40
+    qos:
+      reliability: reliable           # QoS(1)
+      depth: 1
+  /vehicle/status/control_mode:
+    type: autoware_vehicle_msgs/msg/ControlModeReport
+    pub: [simple_planning_simulator/control_mode]
+    rate_hz: 40
+    qos:
+      reliability: reliable           # QoS(1)
+      depth: 1
+  /vehicle/status/gear_status:
+    type: autoware_vehicle_msgs/msg/GearReport
+    pub: [simple_planning_simulator/gear_status]
+    qos:
+      reliability: reliable           # QoS(1)
+      depth: 1
+  /vehicle/status/turn_indicators_status:
+    type: autoware_vehicle_msgs/msg/TurnIndicatorsReport
+    pub: [simple_planning_simulator/turn_indicators_status]
+    qos:
+      reliability: reliable           # QoS(1)
+      depth: 1
+  /vehicle/status/hazard_lights_status:
+    type: autoware_vehicle_msgs/msg/HazardLightsReport
+    pub: [simple_planning_simulator/hazard_lights_status]
+    qos:
+      reliability: reliable           # QoS(1)
+      depth: 1
+
 services:
   control_mode_request:
     type: autoware_vehicle_msgs/srv/ControlModeCommand
@@ -68,19 +192,3 @@ services:
   set_pose:
     type: tier4_external_api_msgs/srv/InitializePose
     server: [simple_planning_simulator/set_pose]
-
-sub:
-  control_cmd: [simple_planning_simulator/control_cmd]
-pub:
-  odometry: [simple_planning_simulator/odometry]
-  velocity_status: [simple_planning_simulator/velocity_status]
-  steering_status: [simple_planning_simulator/steering_status]
-  acceleration: [simple_planning_simulator/acceleration]
-  imu: [simple_planning_simulator/imu]
-
-srv:
-  # Simulation control services
-  control_mode_request:
-    - simple_planning_simulator/control_mode_request
-  set_pose:
-    - simple_planning_simulator/set_pose

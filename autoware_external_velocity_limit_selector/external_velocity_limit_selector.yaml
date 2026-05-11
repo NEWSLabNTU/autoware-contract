@@ -16,9 +16,50 @@ nodes:
         state: true
     pub:
       external_velocity_limit: {}               # /planning/scenario_planning/max_velocity — QoS(1)
-sub:
-  api_limit: [external_velocity_limit_selector/velocity_limit_from_api]
-  internal_limit: [external_velocity_limit_selector/velocity_limit_from_internal]
-  clear_cmd: [external_velocity_limit_selector/velocity_limit_clear_command_from_internal]
-pub:
-  velocity_limit: [external_velocity_limit_selector/external_velocity_limit]
+
+topics:
+  # relative → /planning/scenario_planning/max_velocity_default
+  max_velocity_default:
+    type: tier4_planning_msgs/msg/VelocityLimit
+    sub: [external_velocity_limit_selector/velocity_limit_from_api]
+    qos:
+      reliability: reliable
+      durability: transient_local
+      depth: 1
+
+  # UPSTREAM: subscriber-side QoS{10}.transient_local() in
+  # external_velocity_limit_selector_node.cpp:127 disagrees with publisher-side
+  # QoS{1}.transient_local() in motion_velocity_planner/node.cpp:87. Subscriber
+  # depth>publisher depth is legal but inconsistent — only the most recent message
+  # is meaningful for transient_local velocity limits anyway. Authoritative QoS
+  # = publisher; aligned to depth=1.
+  # Source: src/core/autoware_core/planning/motion_velocity_planner/autoware_motion_velocity_planner/src/node.cpp:87
+  # Source: src/universe/autoware_universe/planning/autoware_external_velocity_limit_selector/src/external_velocity_limit_selector_node.cpp:127
+  # relative → /planning/scenario_planning/max_velocity_candidates
+  max_velocity_candidates:
+    type: tier4_planning_msgs/msg/VelocityLimit
+    sub: [external_velocity_limit_selector/velocity_limit_from_internal]
+    qos:
+      reliability: reliable
+      durability: transient_local
+      depth: 1                                # publisher: QoS(1).transient_local() (subscriber source: QoS(10))
+
+  # UPSTREAM: same divergence as above for the clear command.
+  # Source: src/core/autoware_core/planning/motion_velocity_planner/autoware_motion_velocity_planner/src/node.cpp:88-89
+  # Source: src/universe/autoware_universe/planning/autoware_external_velocity_limit_selector/src/external_velocity_limit_selector_node.cpp:131
+  # relative → /planning/scenario_planning/clear_velocity_limit
+  clear_velocity_limit:
+    type: tier4_planning_msgs/msg/VelocityLimitClearCommand
+    sub: [external_velocity_limit_selector/velocity_limit_clear_command_from_internal]
+    qos:
+      reliability: reliable
+      durability: transient_local
+      depth: 1                                # publisher: QoS(1).transient_local() (subscriber source: QoS(10))
+
+  # relative → /planning/scenario_planning/max_velocity
+  max_velocity:
+    type: tier4_planning_msgs/msg/VelocityLimit
+    pub: [external_velocity_limit_selector/external_velocity_limit]
+    qos:
+      reliability: reliable           # QoS(1)
+      depth: 1

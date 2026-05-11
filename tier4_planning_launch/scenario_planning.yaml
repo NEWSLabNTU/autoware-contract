@@ -5,6 +5,15 @@
 # and external velocity limit handling.
 #
 # Source: /opt/autoware/1.5.0/share/tier4_planning_launch/launch/scenario_planning/scenario_planning.launch.xml
+# Composable: motion_velocity_smoother (autoware_velocity_smoother::VelocitySmootherNode)
+#   src/core/autoware_core/planning/autoware_velocity_smoother/src/node.cpp:60-64
+# Remaps in scenario_planning.launch.xml:
+#   ~/input/trajectory  ← /planning/scenario_planning/scenario_selector/trajectory
+#   ~/output/trajectory → /planning/scenario_planning/velocity_smoother/trajectory
+#   ~/output/current_velocity_limit_mps → /planning/scenario_planning/current_max_velocity
+#   ~/input/external_velocity_limit_mps ← /planning/scenario_planning/max_velocity
+#   ~/input/acceleration ← /localization/acceleration
+#   ~/input/operation_mode_state ← /system/operation_mode/state
 
 args:
   input_objects_topic_name:
@@ -16,9 +25,23 @@ version: 1
 nodes:
   velocity_smoother:
     sub:
-      input_trajectory: {}
+      input_trajectory:           # ~/input/trajectory ← /planning/scenario_planning/scenario_selector/trajectory
+        min_rate_hz: 10
+      external_velocity_limit:    # ~/input/external_velocity_limit_mps ← /planning/scenario_planning/max_velocity
+        state: true
+      acceleration:               # ~/input/acceleration ← /localization/acceleration
+        state: true
+      operation_mode:             # ~/input/operation_mode_state ← /system/operation_mode/state
+        state: true
     pub:
-      output_trajectory: {}
+      output_trajectory:          # ~/output/trajectory → /planning/scenario_planning/velocity_smoother/trajectory
+        min_rate_hz: 10
+      current_max_velocity: {}    # ~/output/current_velocity_limit_mps → /planning/scenario_planning/current_max_velocity
+    paths:
+      main:
+        input: input_trajectory
+        output: [output_trajectory]
+        max_latency_ms: 15        # smoothing optimization
 
 includes:
   scenario_selector:
@@ -32,13 +55,49 @@ includes:
   parking:
     manifest: tier4_planning_launch/parking.yaml
 
-sub:
-  route:
-    - scenario_selector/route
-  odometry:
-    - scenario_selector/odometry
-    - lane_driving/odometry
+topics:
+  # Scenario selector trajectory → velocity smoother (intra-scope)
+  # Source remap: scenario_planning.launch.xml line 17
+  /planning/scenario_planning/scenario_selector/trajectory:
+    type: autoware_planning_msgs/msg/Trajectory
+    sub: [velocity_smoother/input_trajectory]
+    qos:
+      reliability: reliable           # QoS(1)
+      depth: 1
 
-pub:
-  trajectory:
-    - velocity_smoother/output_trajectory
+  # Final scenario_planning output (consumed by planning_validator)
+  # Source remap: scenario_planning.launch.xml line 41
+  /planning/scenario_planning/velocity_smoother/trajectory:
+    type: autoware_planning_msgs/msg/Trajectory
+    pub: [velocity_smoother/output_trajectory]
+    rate_hz: 10
+    qos:
+      reliability: reliable           # QoS(1)
+      depth: 1
+
+  # External velocity limit (output of external_velocity_limit_selector)
+  /planning/scenario_planning/max_velocity:
+    type: tier4_planning_msgs/msg/VelocityLimit
+    sub: [velocity_smoother/external_velocity_limit]
+    qos:
+      reliability: reliable           # QoS(1)
+      depth: 1
+
+  /localization/acceleration:
+    type: geometry_msgs/msg/AccelWithCovarianceStamped
+    sub: [velocity_smoother/acceleration]
+
+  /system/operation_mode/state:
+    type: autoware_adapi_v1_msgs/msg/OperationModeState
+    sub: [velocity_smoother/operation_mode]
+    qos:
+      reliability: reliable           # QoS(1).transient_local()
+      durability: transient_local
+      depth: 1
+
+  /planning/scenario_planning/current_max_velocity:
+    type: tier4_planning_msgs/msg/VelocityLimit
+    pub: [velocity_smoother/current_max_velocity]
+    qos:
+      reliability: reliable           # QoS(1)
+      depth: 1

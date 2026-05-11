@@ -66,3 +66,18 @@ nodes:
   manual_remote_node:
     sub: { operation_mode: { state: true } }
     pub: []
+
+# Cross-scope publisher decls — these absolute topics are published by the
+# adapi nodes and consumed across the system. Source citations refer to the
+# adapi_specs (immutable name/QoS contract).
+#
+# Source (operation_mode publisher): autoware_universe/system/autoware_default_adapi_universe/src/operation_mode.cpp:32 — adaptor.init_pub(pub_state_)
+# Source (spec/QoS): autoware_core/api/autoware_adapi_specs/include/autoware/adapi_specs/operation_mode.hpp:62-69 — name="/api/operation_mode/state", depth=1, reliable, transient_local
+topics:
+  /api/operation_mode/state:
+    type: autoware_adapi_v1_msgs/msg/OperationModeState
+    pub: [operation_mode_node/operation_mode]
+    qos:
+      reliability: reliable
+      durability: transient_local
+      depth: 1

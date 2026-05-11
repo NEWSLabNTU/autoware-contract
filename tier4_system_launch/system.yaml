@@ -6,6 +6,7 @@
 # MRM handler (client) to MRM operators (servers).
 #
 # Source: /opt/autoware/1.5.0/share/tier4_system_launch/launch/system.launch.xml
+version: 1
 
 args:
   use_control_command_gate:
@@ -14,8 +15,6 @@ args:
     type: bool
   launch_dummy_diag_publisher:
     type: bool
-
-version: 1
 
 includes:
   # --- Always present ---
@@ -47,52 +46,9 @@ includes:
   # --- Conditional: if launch_system_monitor ---
   # system_monitor: no manifest (hardware monitoring, not in scope)
 
-# Cross-scope service wiring: mrm_handler (cli) ↔ operators (srv)
-# mrm_handler calls operate on each operator via remapped service names:
-#   ~/output/mrm/comfortable_stop/operate → /system/mrm/comfortable_stop/operate
-#   ~/output/mrm/emergency_stop/operate   → /system/mrm/emergency_stop/operate
-# The operators serve at the same global paths via their own remaps.
-services:
-  comfortable_stop_operate:
-    type: tier4_system_msgs/srv/OperateMrm
-    server: [mrm_comfortable_stop_operator/operate]
-    client: [mrm_handler/comfortable_stop_operate]
-  emergency_stop_operate:
-    type: tier4_system_msgs/srv/OperateMrm
-    server: [mrm_emergency_stop_operator/operate]
-    client: [mrm_handler/emergency_stop_operate]
-  # pull_over_operate: client is mrm_handler, but mrm_pull_over_operator
-  # is not in planning_simulator (it's in the real vehicle stack only)
-
-sub:
-  # Subscriptions consumed by children from outside /system
-  diagnostics:
-    - aggregator/diagnostics
-  operation_mode_availability:
-    - mrm_handler/operation_mode_availability
-  odometry:
-    - mrm_handler/odometry
-  operation_mode_state:
-    - mrm_handler/operation_mode_state
-
-pub:
-  # Publications exposed to other subsystems
-  mrm_state:
-    - mrm_handler/mrm_state
-  operation_mode_availability:
-    - aggregator/operation_mode_availability
-  diag_graph_struct:
-    - aggregator/diag_graph_struct
-  diag_graph_status:
-    - aggregator/diag_graph_status
-  mrm_comfortable_stop_status:
-    - mrm_comfortable_stop_operator/mrm_status
-  mrm_emergency_stop_status:
-    - mrm_emergency_stop_operator/mrm_status
-
-srv:
-  # Service servers exposed outside /system
-  diag_reset:
-    - aggregator/reset
-  diag_set_initializing:
-    - aggregator/set_initializing
+# Cross-scope service wiring is automatic — clients in mrm_handler.yaml
+# and servers in mrm_*_operator.yaml share /system as scope ns and use
+# matching ROS service names (mrm/comfortable_stop/operate etc.). The
+# checker merges declarations by FQN, so no `services:` block is needed
+# here. The pull_over operator is not in planning_simulator (real-vehicle
+# only) — its dangling-entity warning is an accepted gap.

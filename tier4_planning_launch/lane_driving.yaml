@@ -16,22 +16,3 @@ includes:
     manifest: tier4_planning_launch/behavior_planning.yaml
   motion_planning:
     manifest: tier4_planning_launch/motion_planning.yaml
-
-sub:
-  route:
-    - behavior_planning/route
-  vector_map:
-    - behavior_planning/vector_map
-  odometry:
-    - behavior_planning/odometry
-    - motion_planning/odometry
-  predicted_objects:
-    - behavior_planning/predicted_objects
-    - motion_planning/predicted_objects
-  pointcloud:
-    - behavior_planning/pointcloud
-    - motion_planning/pointcloud
-
-pub:
-  trajectory:
-    - motion_planning/trajectory

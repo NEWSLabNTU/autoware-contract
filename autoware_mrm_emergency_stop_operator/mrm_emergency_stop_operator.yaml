@@ -16,18 +16,37 @@ nodes:
     srv:
       operate:                                  # ~/input/mrm/emergency_stop/operate — OperateMrm
         # safety-critical (emergency) — no documented response time requirement
+
+topics:
+  # absolute — control command from upstream control stack
+  # Topic-level QoS aligned with vehicle_cmd_gate publisher (QoS(1).transient_local).
+  /control/command/control_cmd:
+    type: autoware_control_msgs/msg/Control
+    sub: [mrm_emergency_stop_operator/control_cmd]
+    qos:
+      reliability: reliable           # publisher QoS(1).transient_local()
+      durability: transient_local
+      depth: 1
+
+  # relative → /system/mrm/emergency_stop/status
+  mrm/emergency_stop/status:
+    type: tier4_system_msgs/msg/MrmBehaviorStatus  # TODO verify
+    pub: [mrm_emergency_stop_operator/mrm_status]
+    qos:
+      reliability: reliable           # QoS(1)
+      depth: 1
+
+  # relative → /system/mrm/emergency_stop/control_cmd
+  mrm/emergency_stop/control_cmd:
+    type: autoware_control_msgs/msg/Control
+    pub: [mrm_emergency_stop_operator/mrm_control_cmd]
+    qos:
+      reliability: reliable           # QoS(1)
+      depth: 1
+
 services:
-  operate:
+  # relative → /system/mrm/emergency_stop/operate
+  mrm/emergency_stop/operate:
     type: tier4_system_msgs/srv/OperateMrm
     server: [mrm_emergency_stop_operator/operate]
-    # client is mrm_handler (cross-scope)
-
-sub:
-  control_cmd: [mrm_emergency_stop_operator/control_cmd]
-pub:
-  mrm_status: [mrm_emergency_stop_operator/mrm_status]
-
-srv:
-  # Service server exposed to mrm_handler (cross-scope)
-  operate:
-    - mrm_emergency_stop_operator/operate
+    # client is mrm_handler (cross-scope, declared in tier4_system_launch/system.yaml)

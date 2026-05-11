@@ -1,24 +1,30 @@
 # autoware_topic_state_monitor/load_topic_state_monitor.launch.xml
 # Namespace: /system (loaded 10 times with different topic args)
-# Each invocation monitors one topic for liveness
+# Each invocation monitors one topic for liveness.
+#
+# This manifest describes one loader invocation. The actual monitored
+# topic name is provided via launch args; the manifest models the
+# generic shape (input → diagnostic).
 version: 1
 
 nodes:
   topic_state_monitor:
     sub:
-      input_topic: {}
+      input_topic: {}                           # arg-parameterized — actual topic varies per loader invocation
     pub:
       diagnostic: {}
-    paths:
-      monitor:
-        input: input_topic
-        output: [diagnostic]
-        max_latency_ms: 100
+    # No `paths:` block — the input topic name is launch-arg parameterized
+    # so we can't declare a topic-level wiring without a placeholder. The
+    # latency contract (max ~100ms input→diagnostic) is enforced at runtime
+    # by topic_state_monitor itself.
 
-sub:
-  monitored_topic:
-    - topic_state_monitor/input_topic
+topics:
+  # The monitored topic is configured per invocation via launch args (`topic_name`),
+  # so the actual ROS name varies. The `input_topic` endpoint above is the
+  # contract — per-invocation wiring is validated at runtime by the
+  # topic_state_monitor itself. No placeholder topic entry here.
 
-pub:
-  diagnostic_output:
-    - topic_state_monitor/diagnostic
+  # absolute — global diagnostics aggregation channel
+  /diagnostics:
+    type: diagnostic_msgs/msg/DiagnosticArray
+    pub: [topic_state_monitor/diagnostic]

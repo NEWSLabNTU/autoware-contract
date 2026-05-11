@@ -1,7 +1,16 @@
+# autoware_duplicated_node_checker/duplicated_node_checker.launch.xml
+# Namespace: /system
+#
+# Detects duplicate ROS node names and publishes a diagnostic.
 version: 1
+
 nodes:
   duplicated_node_checker:
     pub:
-      diagnostic: {}
-pub:
-  diagnostic: [duplicated_node_checker/diagnostic]
+      diagnostic: {}                            # /diagnostics
+
+topics:
+  # absolute — global diagnostics aggregation channel
+  /diagnostics:
+    type: diagnostic_msgs/msg/DiagnosticArray
+    pub: [duplicated_node_checker/diagnostic]

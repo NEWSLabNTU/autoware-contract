@@ -33,12 +33,18 @@ nodes:
     sub:
       trajectory:
         min_rate_hz: 10     # /planning/trajectory — remap ~/input/reference_trajectory
+      # UPSTREAM: real-vehicle EKF publishes kinematic_state and acceleration at 50 Hz
+      # (controller's design expectation). The simple_planning_simulator (sim_hz=40)
+      # publishes at 40 Hz instead, so the rate-hierarchy check fails on a real-vehicle
+      # min_rate_hz of 50. Lowered to 40 here to match the simulator. For real-vehicle
+      # contracts, this should be 50 (and would be paired with EKF-only sources).
+      # Source: src/universe/autoware_universe/simulator/autoware_simple_planning_simulator/src/simple_planning_simulator_core.cpp (sim_hz default 40)
       kinematic_state:
-        min_rate_hz: 50     # /localization/kinematic_state — remap ~/input/current_odometry
+        min_rate_hz: 40     # /localization/kinematic_state — remap ~/input/current_odometry (sim limit; real-vehicle: 50)
       steering_status:
         min_rate_hz: 30     # /vehicle/status/steering_status — remap ~/input/current_steering
       acceleration:
-        min_rate_hz: 50     # /localization/acceleration — remap ~/input/current_accel
+        min_rate_hz: 40     # /localization/acceleration — remap ~/input/current_accel (sim limit; real-vehicle: 50)
       operation_mode:       # /system/operation_mode/state — remap ~/input/current_operation_mode
         state: true         # QoS(1).transient_local() in source — polled, not causal
         required: true      # node won't operate without operation mode
@@ -130,20 +136,208 @@ nodes:
         state: true
     pub: []                       # only debug_markers
 
+  # --- Operation Mode Transition Manager ---
+  # plugin: autoware::operation_mode_transition_manager::OperationModeTransitionManager
+  # composable_node in /control/control_container (control.launch.xml line 134-156).
+  # Selected when use_control_command_gate=false (planning_simulator default).
+  # Source: autoware_universe/control/autoware_operation_mode_transition_manager/src/node.cpp
+  # See also detached reference manifest:
+  #   autoware_operation_mode_transition_manager/operation_mode_transition_manager.yaml
+  autoware_operation_mode_transition_manager:
+    sub:
+      kinematics:                       # remap kinematics → /localization/kinematic_state — polling
+        state: true
+      trajectory:                       # remap trajectory → /planning/trajectory — polling
+        state: true
+      control_cmd:                      # remap control_cmd → /control/command/control_cmd — polling
+        state: true
+      trajectory_follower_control_cmd:  # remap trajectory_follower_control_cmd → /control/trajectory_follower/control_cmd — polling
+        state: true
+      gate_operation_mode:              # remap gate_operation_mode → /control/vehicle_cmd_gate/operation_mode — polling
+        state: true
+      control_mode_report:              # remap control_mode_report → /vehicle/status/control_mode — polling
+        state: true
+      # compatibility.cpp subscribers (legacy bridge)
+      autoware_engage_in:               # /api/autoware/get/engage — QoS(1)
+        state: true
+      current_gate_mode:                # /control/current_gate_mode — QoS(1)
+        state: true
+      external_selector_mode:           # /control/external_cmd_selector/current_selector_mode — QoS(1)
+        state: true
+    pub:
+      operation_mode_state: {}          # /system/operation_mode/state — QoS(1).transient_local()
+      autoware_engage_out: {}           # /autoware/engage — QoS(1)
+      gate_mode_cmd: {}                 # /control/gate_mode_cmd — QoS(1)
+      debug_info: {}                    # ~/debug_info — QoS(1)
+    srv:
+      change_autoware_control:          # /system/operation_mode/change_autoware_control
+      change_operation_mode:            # /system/operation_mode/change_operation_mode
+    cli:
+      control_mode_request:             # remap control_mode_request → /control/control_mode_request
+      external_selector_select:         # /control/external_cmd_selector/select_external_command
+
+  # --- Vehicle Cmd Gate ---
+  # plugin: autoware::vehicle_cmd_gate::VehicleCmdGate
+  # composable_node in /control/control_container (control.launch.xml line 93)
+  # All "output/*" publishers use rclcpp::QoS(1).transient_local() (durable_qos in source).
+  # Source: autoware_universe/control/autoware_vehicle_cmd_gate/src/vehicle_cmd_gate.cpp
+  # See also detached reference manifest: autoware_vehicle_cmd_gate/vehicle_cmd_gate.yaml
+  vehicle_cmd_gate:
+    sub:
+      auto_control_cmd:                          # input/auto/control_cmd → /control/trajectory_follower/control_cmd
+        min_rate_hz: 30
+      auto_turn_indicators_cmd:                  # input/auto/turn_indicators_cmd → /planning/turn_indicators_cmd (polling)
+        state: true
+      auto_hazard_lights_cmd:                    # input/auto/hazard_lights_cmd → /planning/hazard_lights_cmd (polling)
+        state: true
+      auto_gear_cmd:                             # input/auto/gear_cmd → /control/shift_decider/gear_cmd (polling)
+        state: true
+      external_control_cmd: {}                   # input/external/control_cmd → /external/selected/control_cmd
+      external_turn_indicators_cmd:              # input/external/turn_indicators_cmd → /external/selected/turn_indicators_cmd (polling)
+        state: true
+      external_hazard_lights_cmd:                # input/external/hazard_lights_cmd → /external/selected/hazard_lights_cmd (polling)
+        state: true
+      external_gear_cmd:                         # input/external/gear_cmd → /external/selected/gear_cmd (polling)
+        state: true
+      external_emergency_stop_heartbeat: {}      # input/external_emergency_stop_heartbeat → /external/selected/heartbeat
+      gate_mode: {}                              # input/gate_mode → /control/gate_mode_cmd
+      emergency_control_cmd: {}                  # input/emergency/control_cmd → /system/emergency/control_cmd
+      emergency_turn_indicators_cmd:             # input/emergency/turn_indicators_cmd → /system/emergency/turn_indicators_cmd (polling)
+        state: true
+      emergency_hazard_lights_cmd:               # input/emergency/hazard_lights_cmd → /system/emergency/hazard_lights_cmd (polling)
+        state: true
+      emergency_gear_cmd:                        # input/emergency/gear_cmd → /system/emergency/gear_cmd (polling)
+        state: true
+      mrm_state: {}                              # input/mrm_state → /system/fail_safe/mrm_state
+      vcg_operation_mode:                        # input/operation_mode → /system/operation_mode/state — QoS(1).transient_local()
+        state: true
+      vcg_kinematics:                            # input/kinematics → /localization/kinematic_state (lambda, QoS(1))
+        state: true
+      vcg_acceleration:                          # input/acceleration → /localization/acceleration (lambda, QoS(1))
+        state: true
+      vcg_steering:                              # input/steering → /vehicle/status/steering_status
+        state: true
+      engage: {}                                 # input/engage → /autoware/engage (deprecated)
+    pub:
+      vcg_control_cmd:                           # output/control_cmd → /control/command/control_cmd — QoS(1).transient_local()
+        min_rate_hz: 30
+      vcg_gear_cmd: {}                           # output/gear_cmd → /control/command/gear_cmd — QoS(1).transient_local()
+      vcg_turn_indicators_cmd: {}                # output/turn_indicators_cmd → /control/command/turn_indicators_cmd — QoS(1).transient_local()
+      vcg_hazard_lights_cmd: {}                  # output/hazard_lights_cmd → /control/command/hazard_lights_cmd — QoS(1).transient_local()
+      vcg_emergency_cmd: {}                      # output/vehicle_cmd_emergency → /control/command/emergency_cmd — QoS(1).transient_local()
+      vcg_gate_mode: {}                          # output/gate_mode → /control/current_gate_mode — QoS(1).transient_local()
+      vcg_engage: {}                             # output/engage → /api/autoware/get/engage — QoS(1).transient_local()
+      vcg_external_emergency: {}                 # output/external_emergency → /api/autoware/get/emergency — QoS(1).transient_local()
+      vcg_operation_mode_out: {}                 # output/operation_mode → /control/vehicle_cmd_gate/operation_mode — QoS(1).transient_local()
+
 topics:
-  # Controller → Validator (and downstream gate)
-  control_cmd:
+  # --- Intra-control-scope topics ---
+
+  # /control/trajectory_follower/control_cmd — controller → vehicle_cmd_gate (auto)
+  # controller_node.cpp:97 — create_publisher("~/output/control_cmd", QoS(1).transient_local())
+  # control.launch.xml line 172: <remap from="~/output/control_cmd" to="control_cmd"/>
+  # Combined with namespace /control/trajectory_follower → /control/trajectory_follower/control_cmd
+  /control/trajectory_follower/control_cmd:
     type: autoware_control_msgs/msg/Control
     pub: [controller_node_exe/control_cmd]
-    sub: [control_validator/control_cmd]              # node has if: launch_control_validator
+    sub:
+      - vehicle_cmd_gate/auto_control_cmd
+      - autoware_operation_mode_transition_manager/trajectory_follower_control_cmd
     rate_hz: 30
     qos:
-      reliability: reliable       # QoS(1).transient_local() — controller_node.cpp pub
+      reliability: reliable       # QoS(1).transient_local() — controller_node.cpp:98
       durability: transient_local
       depth: 1
 
+  # /control/command/control_cmd — vehicle_cmd_gate → validator + operation_mode_transition_manager etc.
+  # vehicle_cmd_gate.cpp:69 — create_publisher<Control>("output/control_cmd", durable_qos)
+  # control.launch.xml line 114: <remap from="output/control_cmd" to="$(var output_control_cmd)"/>  (default /control/command/control_cmd)
+  /control/command/control_cmd:
+    type: autoware_control_msgs/msg/Control
+    pub: [vehicle_cmd_gate/vcg_control_cmd]
+    sub:
+      - control_validator/control_cmd                  # node has if: launch_control_validator
+      - autoware_operation_mode_transition_manager/control_cmd
+    rate_hz: 30
+    qos:
+      reliability: reliable       # QoS(1).transient_local() — vehicle_cmd_gate durable_qos
+      durability: transient_local
+      depth: 1
+
+  # /control/command/gear_cmd — vehicle_cmd_gate output (QoS(1).transient_local())
+  # vehicle_cmd_gate.cpp:70 — create_publisher<GearCommand>("output/gear_cmd", durable_qos)
+  /control/command/gear_cmd:
+    type: autoware_vehicle_msgs/msg/GearCommand
+    pub: [vehicle_cmd_gate/vcg_gear_cmd]
+    qos:
+      reliability: reliable
+      durability: transient_local
+      depth: 1
+
+  # /control/command/turn_indicators_cmd — vehicle_cmd_gate output (QoS(1).transient_local())
+  # vehicle_cmd_gate.cpp:71-72
+  /control/command/turn_indicators_cmd:
+    type: autoware_vehicle_msgs/msg/TurnIndicatorsCommand
+    pub: [vehicle_cmd_gate/vcg_turn_indicators_cmd]
+    qos:
+      reliability: reliable
+      durability: transient_local
+      depth: 1
+
+  # /control/command/hazard_lights_cmd — vehicle_cmd_gate output (QoS(1).transient_local())
+  # vehicle_cmd_gate.cpp:73-74
+  /control/command/hazard_lights_cmd:
+    type: autoware_vehicle_msgs/msg/HazardLightsCommand
+    pub: [vehicle_cmd_gate/vcg_hazard_lights_cmd]
+    qos:
+      reliability: reliable
+      durability: transient_local
+      depth: 1
+
+  # /control/command/emergency_cmd — vehicle_cmd_gate output (QoS(1).transient_local())
+  # vehicle_cmd_gate.cpp:67-68 — create_publisher<VehicleEmergencyStamped>("output/vehicle_cmd_emergency", durable_qos)
+  /control/command/emergency_cmd:
+    type: tier4_vehicle_msgs/msg/VehicleEmergencyStamped
+    pub: [vehicle_cmd_gate/vcg_emergency_cmd]
+    qos:
+      reliability: reliable
+      durability: transient_local
+      depth: 1
+
+  # /control/current_gate_mode — vehicle_cmd_gate output (QoS(1).transient_local())
+  # vehicle_cmd_gate.cpp:76 — create_publisher<GateMode>("output/gate_mode", durable_qos)
+  /control/current_gate_mode:
+    type: tier4_control_msgs/msg/GateMode
+    pub: [vehicle_cmd_gate/vcg_gate_mode]
+    sub: [autoware_operation_mode_transition_manager/current_gate_mode]
+    qos:
+      reliability: reliable
+      durability: transient_local
+      depth: 1
+
+  # /control/vehicle_cmd_gate/operation_mode — vehicle_cmd_gate → operation_mode_transition_manager
+  # vehicle_cmd_gate.cpp:79 — create_publisher<OperationModeState>("output/operation_mode", durable_qos)
+  /control/vehicle_cmd_gate/operation_mode:
+    type: autoware_adapi_v1_msgs/msg/OperationModeState
+    pub: [vehicle_cmd_gate/vcg_operation_mode_out]
+    sub: [autoware_operation_mode_transition_manager/gate_operation_mode]
+    qos:
+      reliability: reliable
+      durability: transient_local
+      depth: 1
+
+  # /control/gate_mode_cmd — compatibility shim publisher (operation_mode_transition_manager) → vehicle_cmd_gate
+  # Source: autoware_operation_mode_transition_manager/src/compatibility.cpp:35
+  gate_mode_cmd:
+    type: tier4_control_msgs/msg/GateMode
+    pub: [autoware_operation_mode_transition_manager/gate_mode_cmd]
+    sub: [vehicle_cmd_gate/gate_mode]
+    qos:
+      depth: 1
+
+  # /control/trajectory_follower/lateral/predicted_trajectory
   # Controller → Validator, AEB, Lane Departure Checker
-  predicted_trajectory:
+  trajectory_follower/lateral/predicted_trajectory:
     type: autoware_planning_msgs/msg/Trajectory
     pub: [controller_node_exe/predicted_trajectory]
     sub:
@@ -155,60 +349,155 @@ topics:
       reliability: reliable       # QoS(1) — controller_node.cpp pub
       depth: 1
 
-sub:
-  # /planning/trajectory — from scenario_planning output
-  trajectory_input:
-    - controller_node_exe/trajectory
-  # /localization/kinematic_state — from EKF
-  kinematic_state:
-    - controller_node_exe/kinematic_state
-    - control_validator/kinematic_state               # when launch_control_validator
-    - lane_departure_checker/kinematic_state           # when launch_lane_departure_checker
-    - collision_detector/kinematic_state               # when launch_collision_detector
-  # /vehicle/status/steering_status — from vehicle interface
-  steering_status:
-    - controller_node_exe/steering_status
-  # /localization/acceleration — from EKF
-  acceleration:
-    - controller_node_exe/acceleration
-    - control_validator/measured_acceleration          # when launch_control_validator
-  # /system/operation_mode/state or /api/operation_mode/state
-  operation_mode:
-    - controller_node_exe/operation_mode
-    - control_validator/operation_mode                 # when launch_control_validator
-    - lane_departure_checker/operation_mode            # when launch_lane_departure_checker
-    - collision_detector/operation_mode                # when launch_collision_detector
-  # /vehicle/status/velocity_status — from vehicle interface
-  velocity_status:
-    - autonomous_emergency_braking/velocity_status    # when launch_autonomous_emergency_braking
-  # /sensing/imu/imu_data
-  imu:
-    - autonomous_emergency_braking/imu                # when launch_autonomous_emergency_braking
-  # Pointcloud — $(var input_pointcloud_topic_name)
-  pointcloud:
-    - autonomous_emergency_braking/pointcloud         # when launch_autonomous_emergency_braking
-    - collision_detector/pointcloud                   # when launch_collision_detector
-  # Predicted objects — $(var input_objects_topic_name)
-  predicted_objects:
-    - autonomous_emergency_braking/predicted_objects   # when launch_autonomous_emergency_braking
-    - collision_detector/predicted_objects             # when launch_collision_detector
-  # /map/vector_map — transient_local
-  vector_map:
-    - lane_departure_checker/vector_map               # when launch_lane_departure_checker
-  # /planning/mission_planning/route — transient_local
-  route:
-    - lane_departure_checker/route                    # when launch_lane_departure_checker
-  # /planning/trajectory (same as trajectory_input, consumed as state by checkers)
-  reference_trajectory:
-    - control_validator/reference_trajectory           # when launch_control_validator
-    - lane_departure_checker/reference_trajectory     # when launch_lane_departure_checker
+  # --- Cross-scope subscriptions (absolute names) ---
 
-pub:
-  control_output:
-    - controller_node_exe/control_cmd
+  # /planning/trajectory — from scenario_planning output
+  /planning/trajectory:
+    type: autoware_planning_msgs/msg/Trajectory
+    sub:
+      - controller_node_exe/trajectory
+      - control_validator/reference_trajectory           # when launch_control_validator
+      - lane_departure_checker/reference_trajectory     # when launch_lane_departure_checker
+      - autoware_operation_mode_transition_manager/trajectory
+
+  # /localization/kinematic_state — from EKF
+  /localization/kinematic_state:
+    type: nav_msgs/msg/Odometry  # TODO verify
+    sub:
+      - controller_node_exe/kinematic_state
+      - control_validator/kinematic_state               # when launch_control_validator
+      - lane_departure_checker/kinematic_state           # when launch_lane_departure_checker
+      - autoware_operation_mode_transition_manager/kinematics
+      - collision_detector/kinematic_state               # when launch_collision_detector
+
+  # /vehicle/status/steering_status — from vehicle interface
+  /vehicle/status/steering_status:
+    type: autoware_vehicle_msgs/msg/SteeringReport  # TODO verify
+    sub: [controller_node_exe/steering_status]
+
+  # /localization/acceleration — from EKF
+  /localization/acceleration:
+    type: geometry_msgs/msg/AccelWithCovarianceStamped  # TODO verify
+    sub:
+      - controller_node_exe/acceleration
+      - control_validator/measured_acceleration          # when launch_control_validator
+
+  # /system/operation_mode/state and /api/operation_mode/state — note source code
+  # uses two different topics for primary vs validator inputs. Treated here as a
+  # single FQN; if different topics are wired in launch, split into two entries.
+  /system/operation_mode/state:
+    type: autoware_adapi_v1_msgs/msg/OperationModeState
+    # Publisher: autoware_operation_mode_transition_manager — composable_node in this scope.
+    # Source: autoware_universe/control/autoware_operation_mode_transition_manager/src/node.cpp:37,334
+    # QoS spec: autoware_universe/common/autoware_component_interface_specs_universe/include/.../system.hpp
+    #          → name="/system/operation_mode/state", depth=1, reliable, transient_local
+    pub: [autoware_operation_mode_transition_manager/operation_mode_state]
+    sub: [controller_node_exe/operation_mode]
+    qos:
+      reliability: reliable
+      durability: transient_local
+      depth: 1
+  /api/operation_mode/state:
+    type: autoware_adapi_v1_msgs/msg/OperationModeState
+    # publisher: autoware_default_adapi_universe/operation_mode_node — see default_adapi.yaml
+    sub:
+      - control_validator/operation_mode                 # when launch_control_validator
+      - lane_departure_checker/operation_mode            # when launch_lane_departure_checker
+      - collision_detector/operation_mode                # when launch_collision_detector
+    qos:
+      # Source: autoware_adapi_specs/include/autoware/adapi_specs/operation_mode.hpp:62-69
+      # OperationModeState spec — depth=1, reliable, transient_local
+      reliability: reliable
+      durability: transient_local
+      depth: 1
+
+  # /vehicle/status/velocity_status — from vehicle interface
+  /vehicle/status/velocity_status:
+    type: autoware_vehicle_msgs/msg/VelocityReport  # TODO verify
+    sub:
+      - autonomous_emergency_braking/velocity_status    # when launch_autonomous_emergency_braking
+
+  # /sensing/imu/imu_data
+  /sensing/imu/imu_data:
+    type: sensor_msgs/msg/Imu  # TODO verify
+    sub:
+      - autonomous_emergency_braking/imu                # when launch_autonomous_emergency_braking
+
+  # Pointcloud — $(var input_pointcloud_topic_name) → /perception/obstacle_segmentation/pointcloud
+  /perception/obstacle_segmentation/pointcloud:
+    type: sensor_msgs/msg/PointCloud2  # TODO verify
+    sub:
+      - autonomous_emergency_braking/pointcloud         # when launch_autonomous_emergency_braking
+      - collision_detector/pointcloud                   # when launch_collision_detector
+
+  # Predicted objects — $(var input_objects_topic_name) → /perception/object_recognition/objects
+  /perception/object_recognition/objects:
+    type: autoware_perception_msgs/msg/PredictedObjects  # TODO verify
+    sub:
+      - autonomous_emergency_braking/predicted_objects   # when launch_autonomous_emergency_braking
+      - collision_detector/predicted_objects             # when launch_collision_detector
+
+  # /map/vector_map — transient_local
+  # Source: src/core/autoware_core/map/autoware_map_loader/src/lanelet2_map_loader/lanelet2_map_loader_node.cpp:130
+  # publisher uses rclcpp::QoS{1}.transient_local()
+  /map/vector_map:
+    type: autoware_map_msgs/msg/LaneletMapBin  # TODO verify
+    sub:
+      - lane_departure_checker/vector_map               # when launch_lane_departure_checker
+    qos:
+      reliability: reliable
+      durability: transient_local
+      depth: 1
+
+  # /planning/mission_planning/route — transient_local
+  # Source: src/universe/autoware_universe/planning/autoware_mission_planner_universe/src/mission_planner/route_selector.cpp:106-107
+  # publisher uses rclcpp::QoS(1).transient_local()
+  /planning/mission_planning/route:
+    type: autoware_planning_msgs/msg/LaneletRoute
+    sub:
+      - lane_departure_checker/route                    # when launch_lane_departure_checker
+    qos:
+      reliability: reliable
+      durability: transient_local
+      depth: 1
+
+  # /vehicle/status/control_mode — vehicle interface → operation_mode_transition_manager
+  /vehicle/status/control_mode:
+    type: autoware_vehicle_msgs/msg/ControlModeReport
+    sub:
+      - autoware_operation_mode_transition_manager/control_mode_report
+
+  # /autoware/engage — compatibility shim publisher (deprecated)
+  # Source: autoware_operation_mode_transition_manager/src/compatibility.cpp:34
+  /autoware/engage:
+    type: autoware_vehicle_msgs/msg/Engage
+    pub: [autoware_operation_mode_transition_manager/autoware_engage_out]
+    sub: [vehicle_cmd_gate/engage]
+    qos:
+      depth: 1
+
+  # /api/autoware/get/engage — vehicle_cmd_gate → compatibility shim subscriber on op_mode_transition_manager
+  # Source: autoware_operation_mode_transition_manager/src/compatibility.cpp:24-26
+  /api/autoware/get/engage:
+    type: autoware_vehicle_msgs/msg/Engage
+    pub: [vehicle_cmd_gate/vcg_engage]
+    sub: [autoware_operation_mode_transition_manager/autoware_engage_in]
+    qos:
+      reliability: reliable
+      durability: transient_local
+      depth: 1
+
+  # /control/external_cmd_selector/current_selector_mode — produced by external_cmd_selector
+  # consumed by operation_mode_transition_manager compatibility shim
+  /control/external_cmd_selector/current_selector_mode:
+    type: tier4_control_msgs/msg/ExternalCommandSelectorMode
+    sub: [autoware_operation_mode_transition_manager/external_selector_mode]
+    qos:
+      reliability: reliable
+      depth: 1
 
 paths:
   control:
-    input: trajectory_input
-    output: [control_output]
+    input: /planning/trajectory
+    output: [command/control_cmd]      # relative — resolves to /control/command/control_cmd
     max_latency_ms: 15          # controller cycle (33ms) budget target

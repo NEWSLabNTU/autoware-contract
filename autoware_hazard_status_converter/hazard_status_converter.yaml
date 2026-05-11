@@ -8,14 +8,47 @@ version: 1
 nodes:
   hazard_status_converter:
     sub:
-      diagnostic_graph:                         # internal DiagGraph subscription
+      # DiagGraphSubscription internally creates two subscriptions:
+      #   /diagnostics_graph/struct (DiagGraphStruct)  and
+      #   /diagnostics_graph/status (DiagGraphStatus)
+      # Source: src/universe/autoware_universe/system/autoware_diagnostic_graph_utils/src/lib/subscription.cpp:38-42
+      # The ~/diagnostics_graph remap in hazard_status_converter.launch.xml is dead code — the
+      # subscriptions use absolute names internally and ignore the per-node remap.
+      diagnostic_graph_struct:
+        state: true
+      diagnostic_graph_status:
         state: true
       emergency_holding:                        # ~/input/emergency_holding — polling subscriber
         state: true
     pub:
       hazard_status: {}                         # ~/hazard_status — QoS(1)
-sub:
-  diagnostic_graph: [hazard_status_converter/diagnostic_graph]
-  emergency_holding: [hazard_status_converter/emergency_holding]
-pub:
-  hazard_status: [hazard_status_converter/hazard_status]
+
+topics:
+  # absolute — published by aggregator_node (remap: ~/struct → /diagnostics_graph/struct)
+  /diagnostics_graph/struct:
+    type: tier4_system_msgs/msg/DiagGraphStruct
+    sub: [hazard_status_converter/diagnostic_graph_struct]
+    qos:
+      reliability: reliable
+      durability: transient_local
+      depth: 1
+
+  # absolute — published by aggregator_node (remap: ~/status → /diagnostics_graph/status)
+  /diagnostics_graph/status:
+    type: tier4_system_msgs/msg/DiagGraphStatus
+    sub: [hazard_status_converter/diagnostic_graph_status]
+
+  # relative → /system/emergency_holding (publisher: mrm_handler — see autoware_mrm_handler/mrm_handler.yaml)
+  # Source: src/universe/autoware_universe/system/autoware_hazard_status_converter/src/converter.hpp:45
+  emergency_holding:
+    type: tier4_system_msgs/msg/EmergencyHoldingState
+    sub: [hazard_status_converter/emergency_holding]
+    qos:
+      reliability: reliable           # QoS(1)
+      depth: 1
+
+  # relative → /system/hazard_status
+  # TODO: type — HazardStatusStamped
+  hazard_status:
+    type: TODO/msg/TODO
+    pub: [hazard_status_converter/hazard_status]

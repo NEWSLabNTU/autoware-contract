@@ -9,25 +9,48 @@ nodes:
   # Converts external pedals+steering commands to autoware_control_msgs/Control
   external_cmd_converter:
     sub:
-      pedals_cmd: {}                            # in/pedals_cmd — QoS(1), callback trigger
-      heartbeat: {}                             # in/heartbeat — QoS(1), callback
-      steering_cmd:                             # in/steering_cmd — polling
+      pedals_cmd: {}                            # in/pedals_cmd → /external/selected/pedals_cmd
+      heartbeat: {}                             # in/heartbeat → /external/selected/heartbeat
+      steering_cmd:                             # in/steering_cmd → /external/selected/steering_cmd
         state: true
-      odometry:                                 # in/odometry — polling
+      odometry:                                 # in/odometry → /localization/kinematic_state
         state: true
-      gear_cmd:                                 # in/gear_cmd — polling
+      gear_cmd:                                 # in/gear_cmd → /external/selected/gear_cmd
         state: true
-      current_gate_mode:                        # in/current_gate_mode — polling
+      current_gate_mode:                        # in/current_gate_mode → /control/current_gate_mode
         state: true
     pub:
-      control_cmd: {}                           # out/control_cmd — QoS(1)
+      control_cmd: {}                           # out/control_cmd → /external/selected/control_cmd
     paths:
       main:
         input: pedals_cmd
         output: [control_cmd]
         max_latency_ms: 5                       # simple conversion, no heavy computation
-sub:
-  pedals_cmd: [external_cmd_converter/pedals_cmd]
-  odometry: [external_cmd_converter/odometry]
-pub:
-  control_cmd: [external_cmd_converter/control_cmd]
+
+topics:
+  # Cross-scope absolute paths after launch remaps
+  /external/selected/pedals_cmd:
+    type: autoware_adapi_v1_msgs/msg/PedalsCommand  # source: external_cmd_selector_node.hpp
+    sub: [external_cmd_converter/pedals_cmd]
+  /external/selected/heartbeat:
+    type: autoware_adapi_v1_msgs/msg/ManualOperatorHeartbeat  # source: external_cmd_selector.cpp pub_heartbeat_<OperatorHeartbeat>
+    sub: [external_cmd_converter/heartbeat]
+  /external/selected/steering_cmd:
+    type: autoware_adapi_v1_msgs/msg/SteeringCommand  # source: external_cmd_selector_node.hpp
+    sub: [external_cmd_converter/steering_cmd]
+  /localization/kinematic_state:
+    type: nav_msgs/msg/Odometry
+    sub: [external_cmd_converter/odometry]
+  /external/selected/gear_cmd:
+    type: autoware_vehicle_msgs/msg/GearCommand  # TODO verify
+    sub: [external_cmd_converter/gear_cmd]
+  /control/current_gate_mode:
+    type: tier4_control_msgs/msg/GateMode  # TODO verify
+    sub: [external_cmd_converter/current_gate_mode]
+  # out/control_cmd → /external/selected/control_cmd
+  /external/selected/control_cmd:
+    type: autoware_control_msgs/msg/Control
+    pub: [external_cmd_converter/control_cmd]
+    qos:
+      reliability: reliable           # QoS(1)
+      depth: 1

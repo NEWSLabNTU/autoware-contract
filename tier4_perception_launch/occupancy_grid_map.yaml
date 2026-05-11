@@ -10,11 +10,3 @@ version: 1
 includes:
   laserscan_based_occupancy_grid_map:
     manifest: autoware_probabilistic_occupancy_grid_map/laserscan_based_occupancy_grid_map.yaml
-
-sub:
-  pointcloud:
-    - laserscan_based_occupancy_grid_map/pointcloud
-
-pub:
-  occupancy_grid:
-    - laserscan_based_occupancy_grid_map/occupancy_grid

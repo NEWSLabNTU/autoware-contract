@@ -10,11 +10,3 @@ version: 1
 includes:
   multi_object_tracker:
     manifest: autoware_multi_object_tracker/multi_object_tracker.yaml
-
-sub:
-  detected_objects:
-    - multi_object_tracker/detected_objects
-
-pub:
-  objects:
-    - multi_object_tracker/tracked_objects

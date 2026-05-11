@@ -8,17 +8,39 @@ version: 1
 nodes:
   shape_estimation:
     sub:
-      detected_objects:                         # input detected objects — QoS(1)
+      input:                                    # input → /perception/object_recognition/detection/labeled_clusters
         min_rate_hz: 10
     pub:
-      objects_with_shape:                       # adds shape estimates — QoS(1)
+      objects_with_shape:                       # objects → /perception/object_recognition/detection/objects_with_feature
         min_rate_hz: 10
     paths:
       main:
-        input: detected_objects
+        input: input
         output: [objects_with_shape]
         max_latency_ms: 10                      # shape fitting per object
-sub:
-  detected_objects: [shape_estimation/detected_objects]
-pub:
-  objects: [shape_estimation/objects_with_shape]
+
+topics:
+  # absolute — input from upstream perception (remap: input → /perception/object_recognition/detection/labeled_clusters)
+  # TODO: type — needs source check (consumer side, type set by publisher)
+  # In planning_simulator the publisher is autoware_dummy_perception_publisher (real=true branch).
+  # Source (pub): autoware_dummy_perception_publisher/src/node.cpp:97-99 — QoS(1).transient_local()
+  /perception/object_recognition/detection/labeled_clusters:
+    type: tier4_perception_msgs/msg/DetectedObjectsWithFeature
+    sub: [shape_estimation/input]
+    qos:
+      reliability: reliable
+      durability: transient_local
+      depth: 1
+
+  # absolute — shape-augmented detected objects (remap: objects → /perception/object_recognition/detection/objects_with_feature)
+  # Source: src/universe/autoware_universe/perception/autoware_shape_estimation/src/shape_estimation_node.cpp:47
+  # publisher type confirmed: tier4_perception_msgs::msg::DetectedObjectsWithFeature
+  # (the existing autoware_perception_msgs/msg/DetectedObjects was a manifest authoring error —
+  # the topic name suffix _with_feature signals the WithFeature variant from tier4_perception_msgs).
+  /perception/object_recognition/detection/objects_with_feature:
+    type: tier4_perception_msgs/msg/DetectedObjectsWithFeature
+    pub: [shape_estimation/objects_with_shape]
+    rate_hz: 10
+    qos:
+      reliability: reliable           # QoS(1)
+      depth: 1

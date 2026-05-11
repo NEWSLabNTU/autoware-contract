@@ -1,0 +1,58 @@
+# autoware_dummy_perception_publisher/dummy_perception_publisher.launch.xml
+# Namespace: /simulation (push-ros-namespace from launch)
+#
+# This node feeds simulated perception output into the planning_simulator
+# launch tree. It replaces the real perception sensor pipeline (lidar +
+# clustering + ground filtering) so planning_simulator can drive without
+# a sensor stack.
+#
+# Sources:
+#   node:    autoware_universe/simulator/autoware_dummy_perception_publisher/src/node.cpp
+#   launch:  autoware_universe/simulator/autoware_dummy_perception_publisher/launch/dummy_perception_publisher.launch.xml
+#
+# Active branch in planning_simulator: real=true (default), so this manifest
+# models the `<group if="$(var real)">` branch (lines 12-34).
+version: 1
+
+args:
+  real:
+    type: bool
+
+nodes:
+  dummy_perception_publisher:
+    sub:
+      object_info:                    # remap: input/object → simulation/dummy_perception_publisher/object_info
+      reset:                          # remap: input/reset → simulation/input/reset
+      predicted_objects:              # remap: input/predicted_objects → /perception/object_recognition/objects
+        state: true
+    pub:
+      labeled_clusters: {}            # remap: output/dynamic_object → /perception/object_recognition/detection/labeled_clusters — QoS(1).transient_local()
+      pointcloud: {}                  # remap: output/points_raw → /perception/obstacle_segmentation/pointcloud — QoS(1).transient_local()
+      object_pose: {}                 # remap: output/objects_pose → simulation/debug/object_pose
+      ground_truth_objects: {}        # remap: output/debug/ground_truth_objects → simulation/debug/ground_truth_objects (when publish_ground_truth=true)
+
+topics:
+  # absolute — simulated lidar pointcloud, replaces real obstacle segmentation
+  # Source: autoware_dummy_perception_publisher/src/node.cpp:95-100 — rclcpp::QoS{1}.transient_local()
+  /perception/obstacle_segmentation/pointcloud:
+    type: sensor_msgs/msg/PointCloud2
+    pub: [dummy_perception_publisher/pointcloud]
+    qos:
+      reliability: reliable
+      durability: transient_local
+      depth: 1
+
+  # absolute — simulated detection clusters (DetectedObjectsWithFeature)
+  # Source: autoware_dummy_perception_publisher/src/node.cpp:97-99
+  /perception/object_recognition/detection/labeled_clusters:
+    type: tier4_perception_msgs/msg/DetectedObjectsWithFeature
+    pub: [dummy_perception_publisher/labeled_clusters]
+    qos:
+      reliability: reliable
+      durability: transient_local
+      depth: 1
+
+  # absolute — feedback loop: tracker output flows back into the dummy publisher
+  /perception/object_recognition/objects:
+    type: autoware_perception_msgs/msg/PredictedObjects
+    sub: [dummy_perception_publisher/predicted_objects]

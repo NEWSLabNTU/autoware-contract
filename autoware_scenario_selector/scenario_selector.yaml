@@ -3,9 +3,20 @@
 #
 # Sources:
 #   launch:  /opt/autoware/1.5.0/share/autoware_scenario_selector/launch/scenario_selector.launch.xml
+#   parent:  /opt/autoware/1.5.0/share/tier4_planning_launch/launch/scenario_planning/scenario_planning.launch.xml
 #   source:  autoware_universe/planning/autoware_scenario_selector/src/node.cpp (line 455-495)
 
 # Args from scenario_selector.launch.xml — topic remappings via $(var ...)
+# Resolved values (from scenario_planning.launch.xml include):
+#   input_lane_driving_trajectory  = /planning/scenario_planning/lane_driving/trajectory
+#   input_parking_trajectory       = /planning/scenario_planning/parking/trajectory
+#   input_lanelet_map              = /map/vector_map
+#   input_route                    = /planning/mission_planning/route
+#   input_odometry                 = /localization/kinematic_state
+#   input_operation_mode_state     = /system/operation_mode/state
+#   is_parking_completed           = /planning/scenario_planning/parking/is_completed
+#   output_scenario                = /planning/scenario_planning/scenario
+#   output_trajectory              = /planning/scenario_planning/scenario_selector/trajectory
 args:
   input_lane_driving_trajectory:
   input_parking_trajectory:
@@ -13,6 +24,7 @@ args:
   input_route:
   input_odometry:
   input_operation_mode_state:
+  is_parking_completed:
   output_scenario:
   output_trajectory:
 
@@ -48,20 +60,87 @@ nodes:
         output: [output_trajectory]
         max_latency_ms: 5           # simple selection, no computation
 
-sub:
-  lane_driving_trajectory:
-    - scenario_selector/lane_driving_trajectory
-  parking_trajectory:
-    - scenario_selector/parking_trajectory
-  odometry:
-    - scenario_selector/odometry
-  route:
-    - scenario_selector/route
-  lanelet_map:
-    - scenario_selector/lanelet_map
-  operation_mode:
-    - scenario_selector/operation_mode
+topics:
+  # Inputs — topic names come from launch args (remappings)
+  /planning/scenario_planning/lane_driving/trajectory:
+    type: autoware_planning_msgs/msg/Trajectory
+    sub: [scenario_selector/lane_driving_trajectory]
+    qos:
+      reliability: reliable           # QoS(1)
+      depth: 1
 
-pub:
-  planning_trajectory:
-    - scenario_selector/output_trajectory
+  /planning/scenario_planning/parking/trajectory:
+    type: autoware_planning_msgs/msg/Trajectory
+    sub: [scenario_selector/parking_trajectory]
+    qos:
+      reliability: reliable           # QoS(1)
+      depth: 1
+
+  # UPSTREAM: scenario_selector subscribes with QoS(100) polling subscriber but the
+  # publisher (simple_planning_simulator / EKF on real vehicle) uses QoS(1). Authoritative
+  # QoS = publisher; aligned to depth=1.
+  # Source: src/universe/autoware_universe/simulator/autoware_simple_planning_simulator/src/simple_planning_simulator_core.cpp (publishes QoS(1))
+  /localization/kinematic_state:
+    type: nav_msgs/msg/Odometry
+    sub: [scenario_selector/odometry]
+    qos:
+      reliability: reliable           # publisher: QoS(1) (subscriber source: QoS(100))
+      depth: 1
+
+  /planning/mission_planning/route:
+    type: autoware_planning_msgs/msg/LaneletRoute
+    sub: [scenario_selector/route]
+    qos:
+      reliability: reliable           # QoS(1).transient_local()
+      durability: transient_local
+      depth: 1
+
+  /map/vector_map:
+    type: autoware_map_msgs/msg/LaneletMapBin
+    sub: [scenario_selector/lanelet_map]
+    qos:
+      reliability: reliable           # QoS(1).transient_local()
+      durability: transient_local
+      depth: 1
+
+  /system/operation_mode/state:
+    type: autoware_adapi_v1_msgs/msg/OperationModeState
+    sub: [scenario_selector/operation_mode]
+    qos:
+      reliability: reliable           # QoS(1).transient_local()
+      durability: transient_local
+      depth: 1
+
+  # is_parking_completed — published by autoware_freespace_planner as ~/is_completed,
+  # remapped by parking.launch.xml to /planning/scenario_planning/parking/is_completed,
+  # consumed by scenario_selector via the is_parking_completed launch arg.
+  # Source (publisher): src/universe/autoware_universe/planning/autoware_freespace_planner/src/autoware_freespace_planner/freespace_planner_node.cpp:97
+  # Type: std_msgs/msg/Bool
+  /planning/scenario_planning/parking/is_completed:
+    type: std_msgs/msg/Bool
+    sub: [scenario_selector/is_parking_completed]
+    qos:
+      reliability: reliable           # QoS(1) polling
+      depth: 1
+
+  # Selected trajectory output → consumed by motion_velocity_smoother.
+  # Source remap: scenario_planning.launch.xml output_trajectory =
+  #   /planning/scenario_planning/scenario_selector/trajectory
+  /planning/scenario_planning/scenario_selector/trajectory:
+    type: autoware_planning_msgs/msg/Trajectory
+    pub: [scenario_selector/output_trajectory]
+    rate_hz: 10
+    qos:
+      reliability: reliable           # QoS(1)
+      depth: 1
+
+  # Scenario decision output
+  # Source: src/universe/autoware_universe/planning/autoware_scenario_selector/src/node.cpp:482
+  # publishes autoware_internal_planning_msgs::msg::Scenario (NOT tier4_planning_msgs/Scenario,
+  # NOT autoware_planning_msgs/Scenario — both incorrect package names appeared in earlier manifests).
+  /planning/scenario_planning/scenario:
+    type: autoware_internal_planning_msgs/msg/Scenario
+    pub: [scenario_selector/scenario]
+    qos:
+      reliability: reliable           # QoS(1)
+      depth: 1

@@ -17,16 +17,24 @@ includes:
   # twist2accel: converts twist to acceleration
   # pose_instability_detector: monitors pose stability
 
-sub:
-  # Pose/twist inputs from estimators
+# TODO: leaf manifests for ekf_localizer/stop_filter/twist2accel/
+# pose_instability_detector are not yet authored; topics below are
+# placeholders capturing the scope's external interface.
+topics:
+  # Pose/twist inputs from estimators (consumed by ekf_localizer)
   pose_with_covariance:
-    - []  # from pose_twist_estimator output
+    type: geometry_msgs/msg/PoseWithCovarianceStamped  # TODO verify
+    # sub: []  # populated by ekf_localizer leaf manifest when authored
   twist_with_covariance:
-    - []  # from gyro_odometer or eagleye
+    type: geometry_msgs/msg/TwistWithCovarianceStamped  # TODO verify
+    # sub: []  # populated by gyro_odometer/eagleye leaf manifest when authored
 
-pub:
-  # Fused outputs to planning/control
-  kinematic_state:
-    - []  # /localization/kinematic_state
-  acceleration:
-    - []  # /localization/acceleration
+  # Fused outputs to planning/control — published from /localization scope
+  # Declared absolute since these resolve to /localization/* (not the
+  # fusion_filter sub-namespace).
+  /localization/kinematic_state:
+    type: nav_msgs/msg/Odometry  # TODO verify
+    # pub: []  # populated by ekf_localizer leaf manifest when authored
+  /localization/acceleration:
+    type: geometry_msgs/msg/AccelWithCovarianceStamped  # TODO verify
+    # pub: []  # populated by twist2accel leaf manifest when authored

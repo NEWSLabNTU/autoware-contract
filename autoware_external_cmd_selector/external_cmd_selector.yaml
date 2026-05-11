@@ -9,35 +9,128 @@ nodes:
   # Selects between local and remote manual control inputs
   external_cmd_selector:
     sub:
-      local_pedals_cmd:                         # ~/input/local/pedals_cmd — QoS(1)
+      local_pedals_cmd:                         # ~/input/local/pedals_cmd → /external/local/pedals_cmd
         state: true
-      local_steering_cmd:                       # ~/input/local/steering_cmd — QoS(1)
+      local_steering_cmd:                       # ~/input/local/steering_cmd → /external/local/steering_cmd
         state: true
-      local_heartbeat:                          # ~/input/local/heartbeat — QoS(1)
+      local_heartbeat:                          # ~/input/local/heartbeat → /external/local/heartbeat
         state: true
-      remote_pedals_cmd:                        # ~/input/remote/pedals_cmd — QoS(1)
+      remote_pedals_cmd:                        # ~/input/remote/pedals_cmd → /external/remote/pedals_cmd
         state: true
-      remote_steering_cmd:                      # ~/input/remote/steering_cmd — QoS(1)
+      remote_steering_cmd:                      # ~/input/remote/steering_cmd → /external/remote/steering_cmd
         state: true
-      remote_heartbeat:                         # ~/input/remote/heartbeat — QoS(1)
+      remote_heartbeat:                         # ~/input/remote/heartbeat → /external/remote/heartbeat
+        state: true
+      local_gear_cmd:                           # ~/input/local/gear_cmd → /external/local/gear_cmd
+        state: true
+      local_turn_indicators_cmd:                # ~/input/local/turn_indicators_cmd → /external/local/turn_indicators_cmd
+        state: true
+      local_hazard_lights_cmd:                  # ~/input/local/hazard_lights_cmd → /external/local/hazard_lights_cmd
+        state: true
+      remote_gear_cmd:                          # ~/input/remote/gear_cmd → /external/remote/gear_cmd
+        state: true
+      remote_turn_indicators_cmd:               # ~/input/remote/turn_indicators_cmd → /external/remote/turn_indicators_cmd
+        state: true
+      remote_hazard_lights_cmd:                 # ~/input/remote/hazard_lights_cmd → /external/remote/hazard_lights_cmd
         state: true
     pub:
-      current_selector_mode: {}                 # ~/output/current_selector_mode — QoS(1)
-      selected_pedals_cmd: {}                   # ~/output/pedals_cmd — QoS(1)
-      selected_steering_cmd: {}                 # ~/output/steering_cmd — QoS(1)
-      selected_heartbeat: {}                    # ~/output/heartbeat — QoS(1)
+      current_selector_mode: {}                 # ~/output/current_selector_mode → ~/current_selector_mode (node-relative)
+      selected_pedals_cmd: {}                   # ~/output/pedals_cmd → /external/selected/pedals_cmd
+      selected_steering_cmd: {}                 # ~/output/steering_cmd → /external/selected/steering_cmd
+      selected_heartbeat: {}                    # ~/output/heartbeat → /external/selected/heartbeat
+      selected_gear_cmd: {}                     # ~/output/gear_cmd → /external/selected/gear_cmd
+      selected_turn_indicators_cmd: {}          # ~/output/turn_indicators_cmd → /external/selected/turn_indicators_cmd
+      selected_hazard_lights_cmd: {}            # ~/output/hazard_lights_cmd → /external/selected/hazard_lights_cmd
     srv:
-      select_external_command: {}               # ~/service/select_external_command — ExternalCommandSelect
+      select_external_command: {}               # ~/service/select_external_command → ~/select_external_command
+
+topics:
+  # Cross-scope absolute paths (after launch remap)
+  /external/local/pedals_cmd:
+    type: autoware_adapi_v1_msgs/msg/PedalsCommand  # source: external_cmd_selector_node.hpp
+    sub: [external_cmd_selector/local_pedals_cmd]
+  /external/local/steering_cmd:
+    type: autoware_adapi_v1_msgs/msg/SteeringCommand  # source: external_cmd_selector_node.hpp
+    sub: [external_cmd_selector/local_steering_cmd]
+  /external/local/heartbeat:
+    type: autoware_adapi_v1_msgs/msg/ManualOperatorHeartbeat  # source: external_cmd_selector_node.hpp
+    sub: [external_cmd_selector/local_heartbeat]
+  /external/remote/pedals_cmd:
+    type: autoware_adapi_v1_msgs/msg/PedalsCommand  # source: external_cmd_selector_node.hpp
+    sub: [external_cmd_selector/remote_pedals_cmd]
+  /external/remote/steering_cmd:
+    type: autoware_adapi_v1_msgs/msg/SteeringCommand  # source: external_cmd_selector_node.hpp
+    sub: [external_cmd_selector/remote_steering_cmd]
+  /external/remote/heartbeat:
+    type: autoware_adapi_v1_msgs/msg/ManualOperatorHeartbeat  # source: external_cmd_selector_node.hpp
+    sub: [external_cmd_selector/remote_heartbeat]
+  # Node-relative output → /control/external_cmd_selector/current_selector_mode
+  /control/external_cmd_selector/current_selector_mode:
+    type: tier4_control_msgs/msg/ExternalCommandSelectorMode  # TODO verify
+    pub: [external_cmd_selector/current_selector_mode]
+    qos:
+      reliability: reliable           # QoS(1)
+      depth: 1
+  /external/selected/pedals_cmd:
+    type: autoware_adapi_v1_msgs/msg/PedalsCommand  # source: external_cmd_selector_node.hpp
+    pub: [external_cmd_selector/selected_pedals_cmd]
+  /external/selected/steering_cmd:
+    type: autoware_adapi_v1_msgs/msg/SteeringCommand  # source: external_cmd_selector_node.hpp
+    pub: [external_cmd_selector/selected_steering_cmd]
+  /external/selected/heartbeat:
+    type: autoware_adapi_v1_msgs/msg/ManualOperatorHeartbeat  # source: pub_heartbeat_<OperatorHeartbeat>
+    pub: [external_cmd_selector/selected_heartbeat]
+    qos:
+      reliability: reliable           # QoS(1)
+      depth: 1
+  # ~/output/gear_cmd → /external/selected/gear_cmd — QoS(1)
+  /external/selected/gear_cmd:
+    type: autoware_vehicle_msgs/msg/GearCommand
+    pub: [external_cmd_selector/selected_gear_cmd]
+    qos:
+      reliability: reliable
+      depth: 1
+  # ~/output/turn_indicators_cmd → /external/selected/turn_indicators_cmd — QoS(1)
+  /external/selected/turn_indicators_cmd:
+    type: autoware_vehicle_msgs/msg/TurnIndicatorsCommand
+    pub: [external_cmd_selector/selected_turn_indicators_cmd]
+    qos:
+      reliability: reliable
+      depth: 1
+  # ~/output/hazard_lights_cmd → /external/selected/hazard_lights_cmd — QoS(1)
+  /external/selected/hazard_lights_cmd:
+    type: autoware_vehicle_msgs/msg/HazardLightsCommand
+    pub: [external_cmd_selector/selected_hazard_lights_cmd]
+    qos:
+      reliability: reliable
+      depth: 1
+  # ~/input/local/gear_cmd → /external/local/gear_cmd
+  /external/local/gear_cmd:
+    type: autoware_vehicle_msgs/msg/GearCommand
+    sub: [external_cmd_selector/local_gear_cmd]
+  # ~/input/local/turn_indicators_cmd → /external/local/turn_indicators_cmd
+  /external/local/turn_indicators_cmd:
+    type: autoware_vehicle_msgs/msg/TurnIndicatorsCommand
+    sub: [external_cmd_selector/local_turn_indicators_cmd]
+  # ~/input/local/hazard_lights_cmd → /external/local/hazard_lights_cmd
+  /external/local/hazard_lights_cmd:
+    type: autoware_vehicle_msgs/msg/HazardLightsCommand
+    sub: [external_cmd_selector/local_hazard_lights_cmd]
+  # ~/input/remote/gear_cmd → /external/remote/gear_cmd
+  /external/remote/gear_cmd:
+    type: autoware_vehicle_msgs/msg/GearCommand
+    sub: [external_cmd_selector/remote_gear_cmd]
+  # ~/input/remote/turn_indicators_cmd → /external/remote/turn_indicators_cmd
+  /external/remote/turn_indicators_cmd:
+    type: autoware_vehicle_msgs/msg/TurnIndicatorsCommand
+    sub: [external_cmd_selector/remote_turn_indicators_cmd]
+  # ~/input/remote/hazard_lights_cmd → /external/remote/hazard_lights_cmd
+  /external/remote/hazard_lights_cmd:
+    type: autoware_vehicle_msgs/msg/HazardLightsCommand
+    sub: [external_cmd_selector/remote_hazard_lights_cmd]
 
 services:
+  # ~/service/select_external_command → ~/select_external_command (node-relative)
   select_external_command:
     type: tier4_control_msgs/srv/ExternalCommandSelect
     server: [external_cmd_selector/select_external_command]
-
-pub:
-  selector_mode: [external_cmd_selector/current_selector_mode]
-
-srv:
-  # Command source selection service
-  select_external_command:
-    - external_cmd_selector/select_external_command

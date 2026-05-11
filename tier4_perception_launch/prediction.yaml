@@ -15,13 +15,3 @@ version: 1
 includes:
   map_based_prediction:
     manifest: autoware_map_based_prediction/map_based_prediction.yaml
-
-sub:
-  objects:
-    - map_based_prediction/tracked_objects
-  vector_map:
-    - map_based_prediction/vector_map
-
-pub:
-  objects:
-    - map_based_prediction/predicted_objects

@@ -1,0 +1,146 @@
+# Reference manifest for autoware_operation_mode_transition_manager.
+#
+# NOTE: this composable_node is loaded directly inside control.launch.xml
+# (no <include> wraps it), so the manifest format's `includes:` mechanism
+# can't attach it as a child scope. The actual wiring lives in
+# tier4_control_launch/control.yaml under
+# nodes.autoware_operation_mode_transition_manager. This file is kept as a
+# detached reference (per the same convention used for vehicle_cmd_gate.yaml).
+#
+# autoware_operation_mode_transition_manager — composable_node loaded
+# into /control/control_container.
+#
+# Plugin (default — when use_control_command_gate=false, the planning_simulator
+# default): autoware::operation_mode_transition_manager::OperationModeTransitionManager
+#
+# Sources:
+#   node:          autoware_universe/control/autoware_operation_mode_transition_manager/src/node.cpp
+#                  autoware_universe/control/autoware_operation_mode_transition_manager/src/node.hpp
+#   compatibility: autoware_universe/control/autoware_operation_mode_transition_manager/src/compatibility.cpp
+#   spec (state):  autoware_universe/common/autoware_component_interface_specs_universe/include/.../system.hpp
+#                  topic="/system/operation_mode/state", QoS depth=1, reliable, transient_local
+#   launch wiring: autoware_universe/launch/tier4_control_launch/launch/control.launch.xml:134-156
+#
+# Loaded namespace: /control (push-ros-namespace from control.launch.xml)
+# Composable node name: autoware_operation_mode_transition_manager
+# FQN: /control/autoware_operation_mode_transition_manager
+version: 1
+
+nodes:
+  autoware_operation_mode_transition_manager:
+    sub:
+      kinematics:                       # remap: kinematics → /localization/kinematic_state — polling
+        state: true
+      trajectory:                       # remap: trajectory → /planning/trajectory — polling
+        state: true
+      control_cmd:                      # remap: control_cmd → /control/command/control_cmd — polling
+        state: true
+      trajectory_follower_control_cmd:  # remap: trajectory_follower_control_cmd → /control/trajectory_follower/control_cmd — polling
+        state: true
+      gate_operation_mode:              # remap: gate_operation_mode → /control/vehicle_cmd_gate/operation_mode — polling
+        state: true
+      control_mode_report:              # remap: control_mode_report → /vehicle/status/control_mode — polling
+        state: true
+      # Compatibility subscriptions (compatibility.cpp)
+      autoware_engage:                  # /api/autoware/get/engage — QoS(1)
+        state: true
+      current_gate_mode:                # /control/current_gate_mode — QoS(1)
+        state: true
+      external_selector_mode:           # /control/external_cmd_selector/current_selector_mode — QoS(1)
+        state: true
+    pub:
+      operation_mode_state: {}          # /system/operation_mode/state — QoS(1).transient_local() (component_interface_specs_universe)
+      autoware_engage: {}               # /autoware/engage — QoS(1) (compatibility shim)
+      gate_mode_cmd: {}                 # /control/gate_mode_cmd — QoS(1) (compatibility shim)
+      debug_info: {}                    # ~/debug_info — QoS(1)
+    srv:
+      change_autoware_control:          # /system/operation_mode/change_autoware_control
+        # autoware_system_msgs/srv/ChangeAutowareControl — admin transition
+      change_operation_mode:            # /system/operation_mode/change_operation_mode
+        # autoware_system_msgs/srv/ChangeOperationMode — admin transition
+    cli:
+      control_mode_request:             # remap: control_mode_request → /control/control_mode_request
+        # autoware_vehicle_msgs/srv/ControlModeCommand — request control mode change to vehicle interface
+      external_selector_select:         # /control/external_cmd_selector/select_external_command (compatibility)
+
+topics:
+  # absolute — published by this node, consumed by many planning/control nodes
+  # Source: component_interface_specs_universe/system.hpp:OperationModeState
+  /system/operation_mode/state:
+    type: autoware_adapi_v1_msgs/msg/OperationModeState
+    pub: [autoware_operation_mode_transition_manager/operation_mode_state]
+    qos:
+      reliability: reliable
+      durability: transient_local
+      depth: 1
+
+  # absolute — input, polling subscriber
+  /localization/kinematic_state:
+    type: nav_msgs/msg/Odometry
+    sub: [autoware_operation_mode_transition_manager/kinematics]
+
+  /planning/trajectory:
+    type: autoware_planning_msgs/msg/Trajectory
+    sub: [autoware_operation_mode_transition_manager/trajectory]
+
+  /control/command/control_cmd:
+    type: autoware_control_msgs/msg/Control
+    sub: [autoware_operation_mode_transition_manager/control_cmd]
+
+  /control/trajectory_follower/control_cmd:
+    type: autoware_control_msgs/msg/Control
+    sub: [autoware_operation_mode_transition_manager/trajectory_follower_control_cmd]
+
+  /control/vehicle_cmd_gate/operation_mode:
+    type: autoware_adapi_v1_msgs/msg/OperationModeState
+    sub: [autoware_operation_mode_transition_manager/gate_operation_mode]
+
+  /vehicle/status/control_mode:
+    type: autoware_vehicle_msgs/msg/ControlModeReport
+    sub: [autoware_operation_mode_transition_manager/control_mode_report]
+
+  # absolute — compatibility shim publishers (legacy /autoware/engage, /control/gate_mode_cmd)
+  /autoware/engage:
+    type: autoware_vehicle_msgs/msg/Engage
+    pub: [autoware_operation_mode_transition_manager/autoware_engage]
+    qos:
+      depth: 1
+
+  /control/gate_mode_cmd:
+    type: tier4_control_msgs/msg/GateMode
+    pub: [autoware_operation_mode_transition_manager/gate_mode_cmd]
+    qos:
+      depth: 1
+
+  # absolute — compatibility shim subscriptions (uses /api/autoware/get/engage etc.)
+  /api/autoware/get/engage:
+    type: autoware_vehicle_msgs/msg/Engage
+    sub: [autoware_operation_mode_transition_manager/autoware_engage]
+
+  /control/current_gate_mode:
+    type: tier4_control_msgs/msg/GateMode
+    sub: [autoware_operation_mode_transition_manager/current_gate_mode]
+
+  /control/external_cmd_selector/current_selector_mode:
+    type: tier4_control_msgs/msg/ExternalCommandSelectorMode
+    sub: [autoware_operation_mode_transition_manager/external_selector_mode]
+    qos:
+      reliability: reliable
+      depth: 1
+
+services:
+  /system/operation_mode/change_autoware_control:
+    type: autoware_system_msgs/srv/ChangeAutowareControl
+    server: [autoware_operation_mode_transition_manager/change_autoware_control]
+
+  /system/operation_mode/change_operation_mode:
+    type: autoware_system_msgs/srv/ChangeOperationMode
+    server: [autoware_operation_mode_transition_manager/change_operation_mode]
+
+  /control/control_mode_request:
+    type: autoware_vehicle_msgs/srv/ControlModeCommand
+    client: [autoware_operation_mode_transition_manager/control_mode_request]
+
+  /control/external_cmd_selector/select_external_command:
+    type: tier4_control_msgs/srv/ExternalCommandSelect
+    client: [autoware_operation_mode_transition_manager/external_selector_select]

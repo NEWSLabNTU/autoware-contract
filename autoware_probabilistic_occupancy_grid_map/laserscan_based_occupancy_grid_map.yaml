@@ -32,7 +32,9 @@ nodes:
         max_latency_ms: 20                      # ExactTime sync + grid computation
 
 topics:
-  laserscan:
+  # Intra-scope: pointcloud_to_laserscan output → occupancy_grid_map input
+  # remap: ~/output/laserscan → virtual_scan/laserscan, ~/input/laserscan → virtual_scan/laserscan
+  virtual_scan/laserscan:
     type: sensor_msgs/msg/LaserScan
     pub: [pointcloud_to_laserscan/laserscan]
     sub: [occupancy_grid_map/laserscan]
@@ -40,14 +42,49 @@ topics:
       reliability: best_effort                  # SensorDataQoS
       depth: 1
 
-sub:
-  pointcloud: [pointcloud_to_laserscan/pointcloud]
-  obstacle_pointcloud: [occupancy_grid_map/obstacle_pointcloud]
-  raw_pointcloud: [occupancy_grid_map/raw_pointcloud]
-pub:
-  occupancy_grid: [occupancy_grid_map/occupancy_grid]
+  # Cross-scope input from perception (remap: ~/input/pointcloud → /perception/obstacle_segmentation/pointcloud)
+  # Publisher: dummy_perception_publisher (planning_simulator) — QoS(1).transient_local() reliable
+  # Source (pub): autoware_dummy_perception_publisher/src/node.cpp:95-100
+  # Source (sub): autoware_probabilistic_occupancy_grid_map/.../laserscan_based_occupancy_grid_map_node.cpp:73 — SensorDataQoS{}.keep_last(1)
+  # Topic-level QoS reflects the publisher offer (reliable durable); SensorDataQoS subscribers
+  # remain DDS-compatible because reliable offers satisfy best_effort requests.
+  /perception/obstacle_segmentation/pointcloud:
+    type: sensor_msgs/msg/PointCloud2
+    sub:
+      - pointcloud_to_laserscan/pointcloud
+      - occupancy_grid_map/obstacle_pointcloud
+    qos:
+      reliability: reliable
+      durability: transient_local
+      depth: 1
+
+  # Intra-scope: raw pointcloud subscription. The launch.py default for
+  #   ~/input/raw_pointcloud is "concatenated/pointcloud" (not "no_ground/oneshot/pointcloud" —
+  # that earlier default was for obstacle_pointcloud, before this leaf manifest was authored).
+  # In planning_simulator the launch arg `input_obstacle_and_raw_pointcloud=false`, so the
+  # subscription is created (the rclcpp Subscriber object exists) but `passthrough_` replaces it
+  # in the synchronizer — no data ever flows through it. We intentionally keep the (unused)
+  # subscription declared so the wiring graph stays accurate; it has no upstream publisher in
+  # planning_simulator and is therefore reported as a dangling-entity warning. This is expected:
+  # in a real-vehicle launch (with input_obstacle_and_raw_pointcloud=true) a concatenator node
+  # supplies the data.
+  concatenated/pointcloud:
+    type: sensor_msgs/msg/PointCloud2
+    sub: [occupancy_grid_map/raw_pointcloud]
+    qos:
+      reliability: best_effort                  # SensorDataQoS
+      depth: 1
+
+  # Cross-scope output (remap: ~/output/occupancy_grid_map → /perception/occupancy_grid_map/map)
+  /perception/occupancy_grid_map/map:
+    type: nav_msgs/msg/OccupancyGrid
+    pub: [occupancy_grid_map/occupancy_grid]
+    qos:
+      reliability: reliable           # QoS(1)
+      depth: 1
+
 paths:
   grid_map:
-    input: pointcloud
-    output: [occupancy_grid]
+    input: /perception/obstacle_segmentation/pointcloud
+    output: [/perception/occupancy_grid_map/map]
     max_latency_ms: 30

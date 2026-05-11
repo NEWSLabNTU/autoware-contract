@@ -1,4 +1,9 @@
+# autoware_processing_time_checker/processing_time_checker.launch.xml
+# Namespace: /system
+#
+# Aggregates processing-time messages from monitored nodes and publishes a diagnostic.
 version: 1
+
 nodes:
   processing_time_checker:
     sub:
@@ -6,7 +11,15 @@ nodes:
         state: true
     pub:
       diagnostic: {}
-sub:
-  processing_times: [processing_time_checker/processing_times]
-pub:
-  diagnostic: [processing_time_checker/diagnostic]
+
+topics:
+  # The set of processing-time topics aggregated is configured per invocation
+  # via launch args; the actual ROS names vary. The `processing_times`
+  # endpoint above is the contract — per-invocation wiring is validated at
+  # runtime by the processing_time_checker itself. No placeholder topic entry
+  # here.
+
+  # absolute — global diagnostics aggregation channel
+  /diagnostics:
+    type: diagnostic_msgs/msg/DiagnosticArray
+    pub: [processing_time_checker/diagnostic]

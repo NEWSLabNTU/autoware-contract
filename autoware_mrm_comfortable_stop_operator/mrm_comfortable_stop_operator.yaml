@@ -14,16 +14,31 @@ nodes:
     srv:
       operate:                                  # ~/input/mrm/comfortable_stop/operate — OperateMrm
         # safety-critical — no documented response time requirement
+
+topics:
+  # relative → /system/mrm/comfortable_stop/status
+  mrm/comfortable_stop/status:
+    type: tier4_system_msgs/msg/MrmBehaviorStatus  # TODO verify
+    pub: [mrm_comfortable_stop_operator/mrm_status]
+    qos:
+      reliability: reliable           # QoS(1)
+      depth: 1
+
+  # relative → /system/velocity_limit (consumed by external_velocity_limit_selector)
+  # TODO: type — VelocityLimit message
+  velocity_limit:
+    type: TODO/msg/TODO
+    pub: [mrm_comfortable_stop_operator/velocity_limit]
+
+  # relative → /system/velocity_limit/clear
+  # TODO: type — VelocityLimitClearCommand message
+  velocity_limit/clear:
+    type: TODO/msg/TODO
+    pub: [mrm_comfortable_stop_operator/velocity_limit_clear]
+
 services:
-  operate:
+  # relative → /system/mrm/comfortable_stop/operate
+  mrm/comfortable_stop/operate:
     type: tier4_system_msgs/srv/OperateMrm
     server: [mrm_comfortable_stop_operator/operate]
-    # client is mrm_handler (cross-scope)
-
-pub:
-  mrm_status: [mrm_comfortable_stop_operator/mrm_status]
-
-srv:
-  # Service server exposed to mrm_handler (cross-scope)
-  operate:
-    - mrm_comfortable_stop_operator/operate
+    # client is mrm_handler (cross-scope, declared in tier4_system_launch/system.yaml)

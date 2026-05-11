@@ -1,9 +1,19 @@
+# autoware_diagnostic_graph_utils/logging.launch.xml
+# Namespace: /system
+#
+# Logs the diagnostic graph status to ROS log.
 version: 1
+
 nodes:
   logging_diag_graph:
     sub:
       diagnostic_graph:
         state: true
     pub: []
-sub:
-  diagnostic_graph: [logging_diag_graph/diagnostic_graph]
+
+topics:
+  # absolute — published by aggregator_node (remap: ~/status → /diagnostics_graph/status)
+  # Source (type): src/universe/autoware_universe/system/autoware_diagnostic_graph_aggregator/src/common/types/diagnostics.hpp:32
+  /diagnostics_graph/status:
+    type: tier4_system_msgs/msg/DiagGraphStatus
+    sub: [logging_diag_graph/diagnostic_graph]

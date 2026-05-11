@@ -7,12 +7,31 @@
 
 version: 1
 
-sub:
-  camera_images:
-    - []  # from sensing cameras
-  vector_map:
-    - []  # from map
+# Leaf manifests for the traffic-light recognition pipeline (detector, classifier,
+# arbiter, occlusion predictor, fine detector, etc.) are not yet authored. We do
+# document the final output topic + its publisher here so that consumers
+# (motion_velocity_planner, behavior_velocity_planner, map_based_prediction)
+# wire up correctly when use_traffic_light_recognition=true.
+#
+# In planning_simulator the parent (tier4_perception_launch/perception.yaml)
+# only includes this manifest under `if: $(var use_traffic_light_recognition)`,
+# which is `false` by default. When disabled, the publisher is also excluded —
+# so the consumers' subscriptions become dangling-entity warnings (expected).
 
-pub:
-  traffic_signals:
-    - []  # recognized traffic signals → planning
+nodes:
+  # Real-vehicle producer of the final traffic_signals topic.
+  # Source: src/universe/autoware_universe/perception/autoware_traffic_light_arbiter/src/traffic_light_arbiter.cpp
+  #   pub_ = create_publisher<TrafficSignalArray>("~/pub/traffic_signals", rclcpp::QoS(1));
+  # remap (traffic_light.launch.xml line 112): ~/pub/traffic_signals → /perception/traffic_light_recognition/traffic_signals
+  traffic_light_arbiter:
+    pub:
+      traffic_signals: {}                       # /perception/traffic_light_recognition/traffic_signals — QoS(1)
+
+topics:
+  # absolute — /perception/traffic_light_recognition/traffic_signals (output to planning + prediction)
+  /perception/traffic_light_recognition/traffic_signals:
+    type: autoware_perception_msgs/msg/TrafficLightGroupArray
+    pub: [traffic_light_arbiter/traffic_signals]
+    qos:
+      reliability: reliable
+      depth: 1
