@@ -305,12 +305,18 @@ documented inline near the manifest declaration with `# UPSTREAM:` comments.
   used by `planning_simulator.launch.xml`. For real-vehicle contracts this
   should be 50; comment in the file flags the divergence.
 
-## 13. External Topics — Format Has No Way to Declare Them
+## 13. External Topics — Resolved by `external_topics:` (Phase 35.10)
 
-After Phase 9 the checker reports zero errors but **39 dangling-entity
-warnings**. Every remaining warning is a topic with zero publishers
-across the manifest tree. Tracked as
-[play_launch design issue #51](../../play_launch/src/ros-launch-manifest/docs/design-issues.md#51-no-way-to-declare-external-topics--producers).
+After Phase 9 the checker initially reported 39 dangling-entity
+warnings. The block was tracked as play_launch design issue #51 and
+resolved by adding a top-level `external_topics:` block to the
+manifest format (Phase 35.10). The new block is now declared at
+`autoware_launch/planning_simulator.yaml` and silences all
+truly-external producers + consumers. The repo currently builds
+clean (`0 errors, 0 warnings`).
+
+This section is preserved as a historical record of the categorization
+and the path from "many warnings" to "clean repo".
 
 ### Why this happens
 
@@ -407,23 +413,27 @@ authoring backlog, not as noise.
   pattern.
 - `/system/processing_time_checker/processing_times` — same.
 
-### Next steps
+### Resolution (all done)
 
-1. **Spec side**: implement #51 (`external_topics:` block) in
-   play_launch.
-2. **Repo side**: when #51 is available, add `external_topics:` to
-   the closest scope (likely
-   `autoware_launch/planning_simulator.yaml`) listing the ~5 truly
-   external topics.
-3. **Repo side**: file follow-up tasks per producer for the ~28
-   incomplete-coverage cases; author the missing leaf manifests over
-   time.
-4. **Repo side**: resolve TODO placeholder types (~6) by checking
-   the relevant Autoware source files.
+1. **Spec side**: #51 landed in play_launch Phase 35.10
+   (`external_topics:` block + per-topic `external:` flag).
+2. **Repo side**: 49 entries added to
+   `autoware_launch/planning_simulator.yaml` covering all categories
+   (system frame, vehicle interface, sensor drivers, map loader,
+   external cmd sources, conditional excludes, out-of-tree
+   consumers/producers).
+3. **Repo side**: Phase 9.x backlog cleared — incomplete-coverage
+   topics either authored as new leaf manifests
+   (`autoware_vehicle_cmd_gate`,
+   `autoware_operation_mode_transition_manager`,
+   `autoware_dummy_perception_publisher`) or marked external in the
+   block where appropriate.
+4. **Repo side**: TODO placeholder types resolved against Autoware
+   source — see §1–§7 of this doc for the upstream divergences logged.
 
-CI policy: until #51 lands, dangling-entity warnings do not gate
-merges. The repo-level success criterion is `0 errors`, which is
-currently met.
+CI policy: `0 errors` AND `0 warnings` is now the gate. Both
+currently met (`63 manifests checked: 63 clean, 0 errors, 0
+warnings`).
 
 ### Inventory of accepted external topics (post Phase 9)
 
@@ -436,9 +446,10 @@ coverage (Autoware producers not yet authored — see the table above)
 and **truly external** (no Autoware producer in
 `planning_simulator.launch.xml`).
 
-The inventory below documents the truly-external set. These cannot
-be silenced cleanly until #51 (`external_topics:` block) lands; until
-then they are accepted noise.
+The inventory below documents the truly-external set. All entries
+are now declared in `autoware_launch/planning_simulator.yaml` under
+`external_topics:` and silenced cleanly via Phase 35.10's
+`external_topics:` block. Preserved here for reference.
 
 | Topic | External producer | Notes |
 |---|---|---|
@@ -459,7 +470,6 @@ The `/external/local/*` and `/external/remote/*` families are inputs to
 or simulated deployment because they originate at human-driver input
 devices.
 
-Action: do **not** modify these manifests to silence the warnings.
-When #51 ships, declare them via `external_topics:` in the closest
-ancestor scope (likely
-`autoware_launch/planning_simulator.yaml`).
+Action: leaf manifests stay unchanged — the truly-external entries
+all live in `autoware_launch/planning_simulator.yaml`'s
+`external_topics:` block (Phase 35.10).
