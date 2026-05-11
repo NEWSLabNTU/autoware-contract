@@ -27,7 +27,7 @@ play_launch check --manifest-dir . \
 
 The checker parses the launch file to build the scope table (which launch file
 includes which, under what namespace), loads manifest files for each scope,
-applies namespace prefixes, and runs 9 static validation rules with
+applies namespace prefixes, and runs 15 static validation rules with
 source-annotated diagnostics.
 
 ## Repository Layout
@@ -86,17 +86,27 @@ topics:
 
 ## What Gets Checked
 
+The checker runs 15 static validation rules. See the
+[upstream spec](https://github.com/NEWSLabNTU/play_launch/blob/main/src/ros-launch-manifest/docs/launch-manifest.md#static-validation)
+for full descriptions, severities, and example diagnostics.
+
 | Rule | What it catches |
 |------|----------------|
 | **endpoint-unique** | Duplicate endpoint names within a node |
 | **wiring** | Path endpoints not connected by any topic |
-| **qos-compat** | Invalid QoS values (reliability, durability) |
+| **qos-compat** | Invalid QoS values |
+| **qos-match** | Publisher/subscriber QoS incompatible per DDS offered ≥ requested rule |
 | **rate-hierarchy** | Publisher rate < topic rate < subscriber rate |
-| **rate-chain** | Export rate unachievable from upstream |
-| **scope-budget** | Scope latency < sum of node latencies; age < latency |
-| **causal-dag** | Cycles in the dataflow graph (state endpoints break cycles) |
-| **drop-rate** | Scope drop budget tighter than chain delivery rate |
-| **drop-consecutive** | Consecutive drop bound statistically infeasible |
+| **rate-chain** | Output rate unachievable from upstream |
+| **budget-overflow** | Descendant budget exceeds ancestor budget (part > whole) |
+| **scope-budget** | Sum of children exceeds scope budget |
+| **causal-dag** | Cycles in the dataflow graph (`state:` breaks cycles) |
+| **drop-sanity** | Scope drop rate tighter than child topic; delivery rate < subscriber demand |
+| **service-wiring** | Service client with no matching server across tree |
+| **service-type** | Service with no type; server/client not on node |
+| **dangling-entity** | Topic with 0 publishers / service or action with 0 servers across tree |
+| **satisfiability** | Arg combination produces dangling entities or unreachable nodes (Z3) |
+| **consistency** | Same resolved topic/service has conflicting `type:`, `rate_hz:`, or topic-level `qos:` across scopes |
 
 ## Autoware Version
 

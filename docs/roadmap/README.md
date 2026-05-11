@@ -15,6 +15,8 @@ See [../status.md](../status.md) for per-launch-file implementation status.
 | 5 | [Service Wiring](5-service-wiring.md) | Add scope-level `services:` entries | Complete (cross-scope documented as gap) |
 | 6 | [Optional Refs](6-optional-refs.md) | Add `?` suffix on conditional endpoint refs | Complete |
 | 7 | [Format v2 Adoption](7-format-v2-adoption.md) | Adopt unified interface, arg types, satisfiability | Blocked on play_launch Phase 33 |
+| 8 | [Intermediate Manifests](8-intermediate-manifests.md) | Cover orchestrator launch files | Complete |
+| 9 | [Format Up-to-Date Migration](9-format-up-to-date-migration.md) | Migrate to current spec (post-Phase 35); add lifecycle, transport, endpoint qos | Complete (9.1–9.8) — 9.9/9.13 no-op; 9.10–9.12 deferred to runtime/source review |
 
 ## Phase Order
 
@@ -26,7 +28,12 @@ See [../status.md](../status.md) for per-launch-file implementation status.
 4 (end-to-end validation) ──────────────┤
                                         │
 5 (service wiring) ─────────────────────┘
+
+9 (format migration) — reopens 1, 4, 7; required before further authoring
 ```
 
 1 is independent. 2 must precede 3. 4 can run after any phase to validate.
 5 is independent but benefits from 1 (service contracts on endpoints first).
+9 supersedes the format pieces of phases 5–8 by aligning with the
+post-Phase-35 play_launch spec; later phases (e.g. reopened 1, 4) build
+on 9.
