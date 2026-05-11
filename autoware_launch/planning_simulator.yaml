@@ -8,6 +8,99 @@
 
 version: 1
 
+# Topics produced/consumed by systems outside this manifest tree.
+# `dangling-entity` skips the listed side; `consistency` cross-checks
+# any internal `topics:` decl of the same FQN.
+#
+# Categories:
+#   - System / hardware bridge: /tf, /vehicle/*, /gnss_pose, /sensing/*
+#   - Map loader (separate package, not in this contract repo): /map/*,
+#     /point_cloud_map
+#   - External cmd source (joystick / web teleop / remote driver):
+#     /external/{local,remote}/*
+#   - Conditional excluded (use_traffic_light_recognition=false):
+#     /perception/traffic_light_recognition/traffic_signals
+#   - Out-of-tree producer (Autoware node not yet manifested in this
+#     repo — autoware_planning_validator etc.): /planning/trajectory,
+#     /planning/scenario_planning/max_velocity_default
+external_topics:
+  # System frame
+  /tf: { external: pub, type: tf2_msgs/msg/TFMessage }
+  /tf_static: { external: pub, type: tf2_msgs/msg/TFMessage }
+
+  # Vehicle interface (real hardware bridge or CARLA bridge)
+  /vehicle/engage: { external: pub, type: autoware_vehicle_msgs/msg/Engage }
+
+  # Sensor drivers (absent in planning_simulator)
+  /gnss_pose: { external: pub, type: geometry_msgs/msg/PoseWithCovarianceStamped }
+
+  # Map loader package (separate)
+  /map/vector_map: { external: pub, type: autoware_map_msgs/msg/LaneletMapBin }
+  /point_cloud_map: { external: pub, type: sensor_msgs/msg/PointCloud2 }
+
+  # External cmd source (joystick / web teleop / remote driver)
+  /external/local/heartbeat: { external: pub, type: autoware_adapi_v1_msgs/msg/ManualOperatorHeartbeat }
+  /external/local/pedals_cmd: { external: pub, type: autoware_adapi_v1_msgs/msg/PedalsCommand }
+  /external/local/steering_cmd: { external: pub, type: autoware_adapi_v1_msgs/msg/SteeringCommand }
+  /external/local/gear_cmd: { external: pub, type: autoware_vehicle_msgs/msg/GearCommand }
+  /external/local/turn_indicators_cmd: { external: pub, type: autoware_vehicle_msgs/msg/TurnIndicatorsCommand }
+  /external/local/hazard_lights_cmd: { external: pub, type: autoware_vehicle_msgs/msg/HazardLightsCommand }
+  /external/remote/heartbeat: { external: pub, type: autoware_adapi_v1_msgs/msg/ManualOperatorHeartbeat }
+  /external/remote/pedals_cmd: { external: pub, type: autoware_adapi_v1_msgs/msg/PedalsCommand }
+  /external/remote/steering_cmd: { external: pub, type: autoware_adapi_v1_msgs/msg/SteeringCommand }
+  /external/remote/gear_cmd: { external: pub, type: autoware_vehicle_msgs/msg/GearCommand }
+  /external/remote/turn_indicators_cmd: { external: pub, type: autoware_vehicle_msgs/msg/TurnIndicatorsCommand }
+  /external/remote/hazard_lights_cmd: { external: pub, type: autoware_vehicle_msgs/msg/HazardLightsCommand }
+
+  # Traffic light excluded by use_traffic_light_recognition=false in this launch
+  /perception/traffic_light_recognition/traffic_signals: { external: pub }
+
+  # Out-of-tree producers (Autoware nodes whose leaf manifests are not
+  # yet authored in this repo)
+  /planning/trajectory: { external: pub }
+  /planning/scenario_planning/max_velocity_default: { external: pub }
+  /occupancy_grid_map/concatenated/pointcloud: { external: pub }
+
+  # External consumers (rviz / monitoring / hardware bridge / debug
+  # subscribers). Producers are in the manifest tree; the consuming side
+  # is outside.
+  #
+  # Visualization / debug
+  /visualization: { external: sub }
+  /planning/mission_planning/manual_lane_change_handler/debug/processing_time_ms: { external: sub }
+  /planning/mission_planning/manual_lane_change_handler/debug/shift_number: { external: sub }
+  /planning/mission_planning/echo_back_goal_pose: { external: sub }
+  /planning/mission_remaining_distance_time: { external: sub }
+  # Hardware status (consumed by external monitors / dashboards)
+  /vehicle/status/gear_status: { external: sub }
+  /vehicle/status/hazard_lights_status: { external: sub }
+  /vehicle/status/turn_indicators_status: { external: sub }
+  /vehicle/doors/status: { external: sub }
+  # System monitors (consumed by external diagnostics dashboard)
+  /system/component_state_monitor/component_state: { external: sub }
+  /system/fail_safe/mrm_state: { external: sub }
+  /system/hazard_status: { external: sub }
+  /system/gear_cmd: { external: sub }
+  /system/turn_indicators_cmd: { external: sub }
+  /system/mrm/emergency_stop/control_cmd: { external: sub }
+  /system/velocity_limit: { external: sub }
+  /system/velocity_limit/clear: { external: sub }
+  /diagnostics_graph/unknowns: { external: sub }
+  # Out-of-tree consumers (downstream Autoware nodes not yet manifested)
+  /control/command/emergency_cmd: { external: sub }
+  /external/selected/control_cmd: { external: sub }
+  /external/selected/hazard_lights_cmd: { external: sub }
+  /external/selected/turn_indicators_cmd: { external: sub }
+  /perception/object_recognition/detection/objects: { external: sub }
+  /planning/hazard_lights_cmd: { external: sub }
+  /planning/turn_indicators_cmd: { external: sub }
+  /planning/scenario_planning/current_max_velocity: { external: sub }
+  /planning/scenario_planning/parking/costmap_generator/grid_map: { external: sub }
+  /planning/scenario_planning/velocity_smoother/trajectory: { external: sub }
+  /map/map_projector_info: { external: sub }
+  /map_hash: { external: sub }
+  /pointcloud_map: { external: sub }
+
 includes:
   system:
     manifest: autoware_launch/tier4_system_component.yaml
