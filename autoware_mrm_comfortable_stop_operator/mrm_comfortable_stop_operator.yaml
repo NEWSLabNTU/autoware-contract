@@ -25,31 +25,16 @@ topics:
       depth: 1
 
   # relative → /system/velocity_limit (consumed by external_velocity_limit_selector)
-  # Source: autoware_mrm_comfortable_stop_operator/src/mrm_comfortable_stop_operator.cpp
+  # TODO: type — VelocityLimit message
   velocity_limit:
-    type: autoware_internal_planning_msgs/msg/VelocityLimit
+    type: TODO/msg/TODO
     pub: [mrm_comfortable_stop_operator/velocity_limit]
-    qos: { reliability: reliable, durability: transient_local, depth: 1 }
 
   # relative → /system/velocity_limit/clear
+  # TODO: type — VelocityLimitClearCommand message
   velocity_limit/clear:
-    type: autoware_internal_planning_msgs/msg/VelocityLimitClearCommand
+    type: TODO/msg/TODO
     pub: [mrm_comfortable_stop_operator/velocity_limit_clear]
-    qos: { reliability: reliable, durability: transient_local, depth: 1 }
-
-  # Pre-remap aliases — node-namespace forms observed at runtime.
-  /system/mrm_comfortable_stop_operator/output/mrm/comfortable_stop/status:
-    type: tier4_system_msgs/msg/MrmBehaviorStatus
-    pub: [mrm_comfortable_stop_operator/mrm_status]
-    qos: { reliability: reliable, depth: 1 }
-  /system/mrm_comfortable_stop_operator/output/velocity_limit:
-    type: autoware_internal_planning_msgs/msg/VelocityLimit
-    pub: [mrm_comfortable_stop_operator/velocity_limit]
-    qos: { reliability: reliable, durability: transient_local, depth: 1 }
-  /system/mrm_comfortable_stop_operator/output/velocity_limit/clear:
-    type: autoware_internal_planning_msgs/msg/VelocityLimitClearCommand
-    pub: [mrm_comfortable_stop_operator/velocity_limit_clear]
-    qos: { reliability: reliable, durability: transient_local, depth: 1 }
 
 services:
   # relative → /system/mrm/comfortable_stop/operate

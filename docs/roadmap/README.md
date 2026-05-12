@@ -17,6 +17,7 @@ See [../status.md](../status.md) for per-launch-file implementation status.
 | 7 | [Format v2 Adoption](7-format-v2-adoption.md) | Adopt unified interface, arg types, satisfiability | Blocked on play_launch Phase 33 |
 | 8 | [Intermediate Manifests](8-intermediate-manifests.md) | Cover orchestrator launch files | Complete |
 | 9 | [Format Up-to-Date Migration](9-format-up-to-date-migration.md) | Migrate to current spec (post-Phase 35); add lifecycle, transport, endpoint qos | Complete (9.1–9.8) — 9.9/9.13 no-op; 9.10–9.12 deferred to runtime/source review |
+| 10 | [Topic Promotion](10-topic-promotion.md) | Promote `external_topics:` orphans into first-class `topics:` declarations with QoS | In progress (rounds 1–6 done, 60+ promoted; ~700 orphans remain) |
 
 ## Phase Order
 

@@ -44,20 +44,6 @@ topics:
       reliability: reliable           # QoS(1)
       depth: 1
 
-  # Pre-remap aliases — node-namespace forms observed at runtime.
-  /system/mrm_emergency_stop_operator/input/control/control_cmd:
-    type: autoware_control_msgs/msg/Control
-    sub: [mrm_emergency_stop_operator/control_cmd]
-    qos: { reliability: reliable, durability: transient_local, depth: 1 }
-  /system/mrm_emergency_stop_operator/output/mrm/emergency_stop/status:
-    type: tier4_system_msgs/msg/MrmBehaviorStatus
-    pub: [mrm_emergency_stop_operator/mrm_status]
-    qos: { reliability: reliable, depth: 1 }
-  /system/mrm_emergency_stop_operator/output/mrm/emergency_stop/control_cmd:
-    type: autoware_control_msgs/msg/Control
-    pub: [mrm_emergency_stop_operator/mrm_control_cmd]
-    qos: { reliability: reliable, depth: 1 }
-
 services:
   # relative → /system/mrm/emergency_stop/operate
   mrm/emergency_stop/operate:
