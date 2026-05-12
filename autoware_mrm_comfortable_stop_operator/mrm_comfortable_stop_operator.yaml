@@ -18,7 +18,7 @@ nodes:
 topics:
   # relative → /system/mrm/comfortable_stop/status
   mrm/comfortable_stop/status:
-    type: tier4_system_msgs/msg/MrmBehaviorStatus  # TODO verify
+    type: tier4_system_msgs/msg/MrmBehaviorStatus  # declared from upstream msg pkg / cross-leaf consistency
     pub: [mrm_comfortable_stop_operator/mrm_status]
     qos:
       reliability: reliable           # QoS(1)

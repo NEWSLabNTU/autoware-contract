@@ -76,7 +76,7 @@ topics:
 
   # relative → /system/operation_mode/availability (consumed by mrm_handler)
   operation_mode/availability:
-    type: tier4_system_msgs/msg/OperationModeAvailability  # TODO verify
+    type: tier4_system_msgs/msg/OperationModeAvailability  # confirmed by Phase 36 runtime enforcement
     pub: [converter_node/operation_mode_availability]
     qos:
       reliability: reliable           # QoS(1)

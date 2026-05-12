@@ -46,5 +46,5 @@ topics:
 
   # absolute — ~/output/mission_remaining_distance_time → /planning/mission_remaining_distance_time
   /planning/mission_remaining_distance_time:
-    type: TODO/msg/TODO  # TODO: identify message type from autoware_remaining_distance_time_calculator
+    type: autoware_internal_msgs/msg/MissionRemainingDistanceTime  # confirmed by Phase 36 runtime enforcement
     pub: [remaining_distance_time_calculator/mission_remaining_distance_time]

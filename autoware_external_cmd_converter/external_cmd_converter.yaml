@@ -42,10 +42,10 @@ topics:
     type: nav_msgs/msg/Odometry
     sub: [external_cmd_converter/odometry]
   /external/selected/gear_cmd:
-    type: autoware_vehicle_msgs/msg/GearCommand  # TODO verify
+    type: autoware_vehicle_msgs/msg/GearCommand  # declared from upstream msg pkg / cross-leaf consistency
     sub: [external_cmd_converter/gear_cmd]
   /control/current_gate_mode:
-    type: tier4_control_msgs/msg/GateMode  # TODO verify
+    type: tier4_control_msgs/msg/GateMode  # confirmed by Phase 36 runtime enforcement
     sub: [external_cmd_converter/current_gate_mode]
   # out/control_cmd → /external/selected/control_cmd
   /external/selected/control_cmd:

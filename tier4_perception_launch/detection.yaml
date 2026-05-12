@@ -30,7 +30,7 @@ topics:
     # sub: filled in once detector leaf manifests are authored
 
   # relative — /perception/object_recognition/detection/objects (output to tracking)
-  # TODO: type — needs source check (varies by detector pipeline)
+  # Type confirmed by Phase 36 runtime enforcement (live snapshot).
   objects:
-    type: TODO/msg/TODO
+    type: autoware_perception_msgs/msg/DetectedObjects
     # pub: filled in once detector leaf manifests are authored

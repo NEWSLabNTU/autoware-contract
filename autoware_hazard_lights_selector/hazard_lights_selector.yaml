@@ -19,7 +19,7 @@ nodes:
 topics:
   # absolute — hazard signal from behavior planner
   /planning/behavior_path_planner/hazard_lights_cmd:
-    type: autoware_vehicle_msgs/msg/HazardLightsCommand  # TODO verify
+    type: autoware_vehicle_msgs/msg/HazardLightsCommand  # declared from upstream msg pkg / cross-leaf consistency
     sub: [hazard_lights_selector/hazard_lights_from_planning]
     qos:
       reliability: reliable           # QoS(1)
@@ -27,7 +27,7 @@ topics:
 
   # absolute — hazard signal from system (mrm_handler)
   /system/hazard_lights_cmd:
-    type: autoware_vehicle_msgs/msg/HazardLightsCommand  # TODO verify
+    type: autoware_vehicle_msgs/msg/HazardLightsCommand  # declared from upstream msg pkg / cross-leaf consistency
     sub: [hazard_lights_selector/hazard_lights_from_system]
     qos:
       reliability: reliable           # QoS(1)
@@ -35,7 +35,7 @@ topics:
 
   # absolute — selected hazard signal published to vehicle
   /planning/hazard_lights_cmd:
-    type: autoware_vehicle_msgs/msg/HazardLightsCommand  # TODO verify
+    type: autoware_vehicle_msgs/msg/HazardLightsCommand  # declared from upstream msg pkg / cross-leaf consistency
     pub: [hazard_lights_selector/hazard_lights_cmd]
     qos:
       reliability: reliable           # QoS(1)

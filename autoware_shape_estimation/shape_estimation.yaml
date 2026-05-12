@@ -21,7 +21,6 @@ nodes:
 
 topics:
   # absolute — input from upstream perception (remap: input → /perception/object_recognition/detection/labeled_clusters)
-  # TODO: type — needs source check (consumer side, type set by publisher)
   # In planning_simulator the publisher is autoware_dummy_perception_publisher (real=true branch).
   # Source (pub): autoware_dummy_perception_publisher/src/node.cpp:97-99 — QoS(1).transient_local()
   /perception/object_recognition/detection/labeled_clusters:

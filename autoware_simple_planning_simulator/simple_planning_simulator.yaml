@@ -145,8 +145,9 @@ topics:
     qos:
       reliability: reliable           # QoS(1)
       depth: 1
-  /localization/acceleration:                   # TODO: confirm topic name from launch remap
-    type: geometry_msgs/msg/AccelWithCovarianceStamped  # TODO
+  # /localization/acceleration — confirmed by Phase 36 runtime enforcement
+  /localization/acceleration:
+    type: geometry_msgs/msg/AccelWithCovarianceStamped
     pub: [simple_planning_simulator/acceleration]
     rate_hz: 40
     qos:

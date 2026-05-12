@@ -45,7 +45,7 @@ includes:
 topics:
   # /map/vector_map — published by lanelet2_map_loader, consumed locally too
   vector_map:
-    type: autoware_map_msgs/msg/LaneletMapBin  # TODO verify
+    type: autoware_map_msgs/msg/LaneletMapBin  # confirmed by Phase 36 runtime enforcement
     pub: [lanelet2_map_loader/vector_map]
     sub:
       - lanelet2_map_visualization/vector_map
@@ -57,17 +57,17 @@ topics:
 
   # /map/pointcloud_map — published by pointcloud_map_loader
   pointcloud_map:
-    type: sensor_msgs/msg/PointCloud2  # TODO verify
+    type: sensor_msgs/msg/PointCloud2  # declared from upstream msg pkg / cross-leaf consistency
     pub: [pointcloud_map_loader/pointcloud_map]
 
   # /map/map_hash — map fingerprint
   map_hash:
-    type: tier4_external_api_msgs/msg/MapHash  # TODO verify
+    type: tier4_external_api_msgs/msg/MapHash  # declared from upstream msg pkg / cross-leaf consistency
     pub: [map_hash_generator/map_hash]
 
   # /map/lanelet2_map_visualization output marker stream
   visualization:
-    type: visualization_msgs/msg/MarkerArray  # TODO verify
+    type: visualization_msgs/msg/MarkerArray  # declared from upstream msg pkg / cross-leaf consistency
     pub: [lanelet2_map_visualization/visualization]
 
   # Pre-remap and additional published aliases. lanelet2_map_loader,
@@ -95,11 +95,11 @@ topics:
 services:
   # /map/get_partial_pcd_map — pcd map slice retrieval
   get_partial_pcd_map:
-    type: autoware_map_msgs/srv/GetPartialPointCloudMap  # TODO verify
+    type: autoware_map_msgs/srv/GetPartialPointCloudMap  # declared from upstream msg pkg / cross-leaf consistency
     server: [pointcloud_map_loader/get_partial_pcd_map]
   get_differential_pcd_map:
-    type: autoware_map_msgs/srv/GetDifferentialPointCloudMap  # TODO verify
+    type: autoware_map_msgs/srv/GetDifferentialPointCloudMap  # declared from upstream msg pkg / cross-leaf consistency
     server: [pointcloud_map_loader/get_differential_pcd_map]
   get_selected_pcd_map:
-    type: autoware_map_msgs/srv/GetSelectedPointCloudMap  # TODO verify
+    type: autoware_map_msgs/srv/GetSelectedPointCloudMap  # declared from upstream msg pkg / cross-leaf consistency
     server: [pointcloud_map_loader/get_selected_pcd_map]

@@ -42,7 +42,7 @@ nodes:
 topics:
   # absolute — operation_mode_availability published by aggregator's converter (also in /system)
   /system/operation_mode/availability:
-    type: tier4_system_msgs/msg/OperationModeAvailability  # TODO verify
+    type: tier4_system_msgs/msg/OperationModeAvailability  # confirmed by Phase 36 runtime enforcement
     sub: [mrm_handler/operation_mode_availability]
     qos:
       reliability: reliable           # QoS(1)
@@ -55,17 +55,17 @@ topics:
 
   # absolute — control mode from vehicle
   /vehicle/status/control_mode:
-    type: autoware_vehicle_msgs/msg/ControlModeReport  # TODO verify
+    type: autoware_vehicle_msgs/msg/ControlModeReport  # confirmed by Phase 36 runtime enforcement
     sub: [mrm_handler/control_mode]
 
   # relative → /system/mrm/comfortable_stop/status (published by mrm_comfortable_stop_operator)
   mrm/comfortable_stop/status:
-    type: tier4_system_msgs/msg/MrmBehaviorStatus  # TODO verify
+    type: tier4_system_msgs/msg/MrmBehaviorStatus  # declared from upstream msg pkg / cross-leaf consistency
     sub: [mrm_handler/comfortable_stop_status]
 
   # relative → /system/mrm/emergency_stop/status (published by mrm_emergency_stop_operator)
   mrm/emergency_stop/status:
-    type: tier4_system_msgs/msg/MrmBehaviorStatus  # TODO verify
+    type: tier4_system_msgs/msg/MrmBehaviorStatus  # declared from upstream msg pkg / cross-leaf consistency
     sub: [mrm_handler/emergency_stop_status]
 
   # absolute — operation_mode/state from API
@@ -98,9 +98,9 @@ topics:
       depth: 1
 
   # relative → /system/turn_indicators_cmd (or vehicle topic)
-  # TODO: confirm topic name and type
+  # confirmed by Phase 36 runtime enforcement (pre-remap → /system/mrm_handler/output/turn_indicators)
   turn_indicators_cmd:
-    type: TODO/msg/TODO
+    type: autoware_vehicle_msgs/msg/TurnIndicatorsCommand
     pub: [mrm_handler/turn_indicators]
 
   # relative → /system/hazard_lights_cmd
@@ -110,10 +110,9 @@ topics:
     type: autoware_vehicle_msgs/msg/HazardLightsCommand
     pub: [mrm_handler/hazard_lights]
 
-  # relative → /system/gear_cmd
-  # TODO: confirm topic name and type
+  # relative → /system/gear_cmd — confirmed by Phase 36 runtime enforcement
   gear_cmd:
-    type: TODO/msg/TODO
+    type: autoware_vehicle_msgs/msg/GearCommand
     pub: [mrm_handler/gear_cmd]
 
   # Pre-remap aliases — Autoware 1.5.0 publishes/subscribes the

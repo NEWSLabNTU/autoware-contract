@@ -362,7 +362,7 @@ topics:
 
   # /localization/kinematic_state — from EKF
   /localization/kinematic_state:
-    type: nav_msgs/msg/Odometry  # TODO verify
+    type: nav_msgs/msg/Odometry  # confirmed by Phase 36 runtime enforcement
     sub:
       - controller_node_exe/kinematic_state
       - control_validator/kinematic_state               # when launch_control_validator
@@ -372,12 +372,12 @@ topics:
 
   # /vehicle/status/steering_status — from vehicle interface
   /vehicle/status/steering_status:
-    type: autoware_vehicle_msgs/msg/SteeringReport  # TODO verify
+    type: autoware_vehicle_msgs/msg/SteeringReport  # confirmed by Phase 36 runtime enforcement
     sub: [controller_node_exe/steering_status]
 
   # /localization/acceleration — from EKF
   /localization/acceleration:
-    type: geometry_msgs/msg/AccelWithCovarianceStamped  # TODO verify
+    type: geometry_msgs/msg/AccelWithCovarianceStamped  # confirmed by Phase 36 runtime enforcement
     sub:
       - controller_node_exe/acceleration
       - control_validator/measured_acceleration          # when launch_control_validator
@@ -413,26 +413,26 @@ topics:
 
   # /vehicle/status/velocity_status — from vehicle interface
   /vehicle/status/velocity_status:
-    type: autoware_vehicle_msgs/msg/VelocityReport  # TODO verify
+    type: autoware_vehicle_msgs/msg/VelocityReport  # confirmed by Phase 36 runtime enforcement
     sub:
       - autonomous_emergency_braking/velocity_status    # when launch_autonomous_emergency_braking
 
   # /sensing/imu/imu_data
   /sensing/imu/imu_data:
-    type: sensor_msgs/msg/Imu  # TODO verify
+    type: sensor_msgs/msg/Imu  # declared from upstream msg pkg / cross-leaf consistency
     sub:
       - autonomous_emergency_braking/imu                # when launch_autonomous_emergency_braking
 
   # Pointcloud — $(var input_pointcloud_topic_name) → /perception/obstacle_segmentation/pointcloud
   /perception/obstacle_segmentation/pointcloud:
-    type: sensor_msgs/msg/PointCloud2  # TODO verify
+    type: sensor_msgs/msg/PointCloud2  # declared from upstream msg pkg / cross-leaf consistency
     sub:
       - autonomous_emergency_braking/pointcloud         # when launch_autonomous_emergency_braking
       - collision_detector/pointcloud                   # when launch_collision_detector
 
   # Predicted objects — $(var input_objects_topic_name) → /perception/object_recognition/objects
   /perception/object_recognition/objects:
-    type: autoware_perception_msgs/msg/PredictedObjects  # TODO verify
+    type: autoware_perception_msgs/msg/PredictedObjects  # confirmed by Phase 36 runtime enforcement
     sub:
       - autonomous_emergency_braking/predicted_objects   # when launch_autonomous_emergency_braking
       - collision_detector/predicted_objects             # when launch_collision_detector
@@ -441,7 +441,7 @@ topics:
   # Source: src/core/autoware_core/map/autoware_map_loader/src/lanelet2_map_loader/lanelet2_map_loader_node.cpp:130
   # publisher uses rclcpp::QoS{1}.transient_local()
   /map/vector_map:
-    type: autoware_map_msgs/msg/LaneletMapBin  # TODO verify
+    type: autoware_map_msgs/msg/LaneletMapBin  # confirmed by Phase 36 runtime enforcement
     sub:
       - lane_departure_checker/vector_map               # when launch_lane_departure_checker
     qos:

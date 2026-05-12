@@ -13,7 +13,6 @@ nodes:
 
 topics:
   # absolute — /tf (or /tf_static) — actual selection comes from launch args.
-  # TODO: type — tf2_msgs/msg/TFMessage
   /tf:
     type: tf2_msgs/msg/TFMessage
     sub: [topic_state_monitor_tf/input_topic]

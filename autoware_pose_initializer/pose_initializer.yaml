@@ -21,15 +21,15 @@ nodes:
 topics:
   # gnss_pose — relative; resolves via scope ns
   gnss_pose:
-    type: geometry_msgs/msg/PoseWithCovarianceStamped  # TODO verify
+    type: geometry_msgs/msg/PoseWithCovarianceStamped  # declared from upstream msg pkg / cross-leaf consistency
     sub: [pose_initializer/gnss_pose]
   # point_cloud_map — pcd map source for NDT initialization
   point_cloud_map:
-    type: sensor_msgs/msg/PointCloud2  # TODO verify
+    type: sensor_msgs/msg/PointCloud2  # declared from upstream msg pkg / cross-leaf consistency
     sub: [pose_initializer/point_cloud_map]
   # initialpose3d — published initialization result
   initialpose3d:
-    type: geometry_msgs/msg/PoseWithCovarianceStamped  # TODO verify
+    type: geometry_msgs/msg/PoseWithCovarianceStamped  # confirmed by Phase 36 runtime enforcement
     pub: [pose_initializer/initialpose3d]
 
 services:
