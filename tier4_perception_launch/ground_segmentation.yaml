@@ -7,30 +7,13 @@
 
 version: 1
 
-# Leaf manifests for the ground segmentation composable nodes
-# (ransac_ground_filter, scan_ground_filter, etc.) are not yet authored.
-# This file currently captures only the scope's input/output topic
-# surface as placeholders so the graph wiring can be expressed once
-# those leaves land.
+# Production-deployment ground filter wiring (not exercised by
+# planning_simulator, which uses dummy_perception_publisher for the
+# /perception/obstacle_segmentation/pointcloud topic). The scan
+# ground filter is the default Autoware implementation; other
+# variants (ransac, ray_ground_filter) share the same input/output
+# interface and can be added as alternative includes.
 
-topics:
-  # /sensing/lidar/concatenated/pointcloud — sensor input (cross-scope)
-  # TODO: confirm exact source topic name once detector leaves are authored
-  /sensing/lidar/concatenated/pointcloud:
-    type: sensor_msgs/msg/PointCloud2
-    qos:
-      reliability: best_effort                  # SensorDataQoS
-      depth: 1
-    # sub: filled in once leaf manifests are authored
-
-  # relative — /perception/obstacle_segmentation/pointcloud (filtered output)
-  # In planning_simulator, this topic is published by autoware_dummy_perception_publisher
-  # (QoS(1).transient_local()), not by a real ground filter. See
-  # autoware_dummy_perception_publisher/dummy_perception_publisher.yaml.
-  pointcloud:
-    type: sensor_msgs/msg/PointCloud2
-    qos:
-      reliability: reliable
-      durability: transient_local
-      depth: 1
-    # pub: filled in once leaf manifests are authored (real ground-filter pipeline)
+includes:
+  scan_ground_filter:
+    manifest: autoware_ground_segmentation/scan_ground_filter.yaml

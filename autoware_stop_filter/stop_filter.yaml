@@ -1,0 +1,41 @@
+# autoware_stop_filter/stop_filter.launch.xml
+# Namespace: /localization/pose_twist_fusion_filter
+#
+# Detects vehicle stop state and clamps small twist to zero to reduce
+# noise in low-speed operations.
+#
+# Sources:
+#   source: autoware.universe/localization/autoware_stop_filter/src/stop_filter.cpp
+#
+# NOT exercised by planning_simulator. Authored for production-Autoware
+# contract completeness.
+version: 1
+
+nodes:
+  stop_filter:
+    sub:
+      input_odom:                               # ~/input/odom ← /localization/kinematic_state (raw EKF)
+        state: true
+    pub:
+      filtered_odom:                            # ~/output/odom → /localization/kinematic_state (filtered)
+        min_rate_hz: 50
+      stop_flag:                                # ~/output/stop_flag (debug)
+        state: true
+
+topics:
+  # Subscribes to raw EKF output; republishes filtered.
+  /localization/pose_twist_fusion_filter/kinematic_state:
+    type: nav_msgs/msg/Odometry
+    sub: [stop_filter/input_odom]
+    qos: { reliability: reliable, depth: 1 }
+
+  # Filtered output replaces raw /localization/kinematic_state via remap.
+  # The canonical kinematic_state pub for downstream consumers is
+  # declared by ekf_localizer/stop_filter pair as a fan-in (only one
+  # publishes at a time per launch config). For contract purposes,
+  # the topics: entry here documents the filtered alternative.
+  /localization/kinematic_state/filtered:
+    type: nav_msgs/msg/Odometry
+    pub: [stop_filter/filtered_odom]
+    rate_hz: 50
+    qos: { reliability: reliable, depth: 1 }

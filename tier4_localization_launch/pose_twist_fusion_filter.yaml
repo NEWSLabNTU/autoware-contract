@@ -9,17 +9,19 @@
 
 version: 1
 
-# No leaf manifests for these children yet — they are simple single-node
-# launch files. Listed as includes for tree completeness.
 includes:
-  # ekf_localizer: EKF fusion node
-  # stop_filter: detects vehicle stop state
-  # twist2accel: converts twist to acceleration
-  # pose_instability_detector: monitors pose stability
+  ekf_localizer:
+    manifest: autoware_ekf_localizer/ekf_localizer.yaml
+  stop_filter:
+    manifest: autoware_stop_filter/stop_filter.yaml
+  twist2accel:
+    manifest: autoware_twist2accel/twist2accel.yaml
+  pose_instability_detector:
+    manifest: autoware_pose_instability_detector/pose_instability_detector.yaml
 
-# TODO: leaf manifests for ekf_localizer/stop_filter/twist2accel/
-# pose_instability_detector are not yet authored; topics below are
-# placeholders capturing the scope's external interface.
+# Topics here document scope-edge inputs/outputs that aren't owned
+# by any single child. The actual pub/sub wiring lives in the
+# included leaf manifests.
 topics:
   # Pose/twist inputs from estimators (consumed by ekf_localizer)
   pose_with_covariance:

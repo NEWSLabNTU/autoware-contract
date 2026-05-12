@@ -1,0 +1,83 @@
+# autoware_ekf_localizer/ekf_localizer.launch.xml
+# Namespace: /localization/pose_twist_fusion_filter
+#
+# EKF-based pose/twist fusion. Subscribes to pose+twist estimator
+# outputs, publishes fused kinematic state.
+#
+# Sources:
+#   source: autoware.universe/localization/autoware_ekf_localizer/src/ekf_localizer.cpp
+#
+# NOT exercised by planning_simulator (simple_planning_simulator
+# publishes /localization/kinematic_state directly). Authored for
+# completeness of the production-Autoware contract.
+version: 1
+
+nodes:
+  ekf_localizer:
+    sub:
+      in_pose_with_covariance:                  # ~/in_pose_with_covariance ← pose estimator
+        state: true
+      in_twist_with_covariance:                 # ~/in_twist_with_covariance ← twist estimator
+        state: true
+      initialpose:                              # ~/initialpose ← pose_initializer
+        state: true
+    pub:
+      kinematic_state:                          # ~/kinematic_state → /localization/kinematic_state — QoS(1)
+        min_rate_hz: 50                         # ekf_rate param (default 50)
+      biased_pose:                              # ~/biased_pose
+        min_rate_hz: 50
+      biased_pose_with_covariance:              # ~/biased_pose_with_covariance
+        min_rate_hz: 50
+      pose:                                     # ~/pose → /localization/pose
+        min_rate_hz: 50
+      pose_with_covariance:                     # ~/pose_with_covariance
+        min_rate_hz: 50
+      twist:                                    # ~/twist → /localization/twist
+        min_rate_hz: 50
+      twist_with_covariance:                    # ~/twist_with_covariance
+        min_rate_hz: 50
+      ekf_diagnostics:                          # ~/diagnostics (debug)
+        state: true
+    paths:
+      main:
+        input: in_pose_with_covariance
+        output: [kinematic_state, pose, twist]
+        max_latency_ms: 20                      # ekf step + publish
+
+topics:
+  # Inputs (cross-scope from pose/twist estimators)
+  /localization/pose_estimator/pose_with_covariance:
+    type: geometry_msgs/msg/PoseWithCovarianceStamped
+    sub: [ekf_localizer/in_pose_with_covariance]
+    qos: { reliability: reliable, depth: 1 }
+  /localization/twist_estimator/twist_with_covariance:
+    type: geometry_msgs/msg/TwistWithCovarianceStamped
+    sub: [ekf_localizer/in_twist_with_covariance]
+    qos: { reliability: reliable, depth: 1 }
+  /initialpose:
+    type: geometry_msgs/msg/PoseWithCovarianceStamped
+    sub: [ekf_localizer/initialpose]
+    qos: { reliability: reliable, depth: 1 }
+
+  # Outputs (absolute)
+  /localization/kinematic_state:
+    type: nav_msgs/msg/Odometry
+    pub: [ekf_localizer/kinematic_state]
+    rate_hz: 50
+    qos: { reliability: reliable, depth: 1 }
+  /localization/pose:
+    type: geometry_msgs/msg/PoseStamped
+    pub: [ekf_localizer/pose]
+    qos: { reliability: reliable, depth: 1 }
+  /localization/twist:
+    type: geometry_msgs/msg/TwistStamped
+    pub: [ekf_localizer/twist]
+    qos: { reliability: reliable, depth: 1 }
+  /localization/pose_with_covariance:
+    type: geometry_msgs/msg/PoseWithCovarianceStamped
+    pub: [ekf_localizer/pose_with_covariance]
+    qos: { reliability: reliable, depth: 1 }
+  /localization/twist_with_covariance:
+    type: geometry_msgs/msg/TwistWithCovarianceStamped
+    pub: [ekf_localizer/twist_with_covariance]
+    qos: { reliability: reliable, depth: 1 }

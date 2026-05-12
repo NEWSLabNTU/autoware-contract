@@ -1,0 +1,41 @@
+# autoware_twist2accel/twist2accel.launch.xml
+# Namespace: /localization/pose_twist_fusion_filter
+#
+# Differentiates twist to derive linear acceleration. Subscribes to
+# /localization/kinematic_state and /localization/twist_with_covariance,
+# publishes /localization/acceleration.
+#
+# Sources:
+#   source: autoware.universe/localization/autoware_twist2accel/src/twist2accel.cpp
+#
+# NOT exercised by planning_simulator (simple_planning_simulator
+# publishes /localization/acceleration directly). Authored for
+# production-Autoware contract completeness.
+version: 1
+
+nodes:
+  twist2accel:
+    sub:
+      odom:                                     # ~/input/odom ← /localization/kinematic_state
+        state: true
+      twist_with_covariance:                    # ~/input/twist ← /localization/twist_with_covariance
+        state: true
+    pub:
+      acceleration:                             # ~/output/accel → /localization/acceleration
+        min_rate_hz: 50
+
+topics:
+  /localization/kinematic_state:
+    type: nav_msgs/msg/Odometry
+    sub: [twist2accel/odom]
+    qos: { reliability: reliable, depth: 1 }
+  /localization/twist_with_covariance:
+    type: geometry_msgs/msg/TwistWithCovarianceStamped
+    sub: [twist2accel/twist_with_covariance]
+    qos: { reliability: reliable, depth: 1 }
+
+  /localization/acceleration:
+    type: geometry_msgs/msg/AccelWithCovarianceStamped
+    pub: [twist2accel/acceleration]
+    rate_hz: 50
+    qos: { reliability: reliable, depth: 1 }

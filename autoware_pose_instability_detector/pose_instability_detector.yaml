@@ -1,0 +1,38 @@
+# autoware_pose_instability_detector/pose_instability_detector.launch.xml
+# Namespace: /localization/pose_twist_fusion_filter
+#
+# Monitors EKF pose stability; emits diagnostic when pose jumps
+# exceed thresholds.
+#
+# Sources:
+#   source: autoware.universe/localization/autoware_pose_instability_detector/src/pose_instability_detector.cpp
+#
+# NOT exercised by planning_simulator. Authored for production-Autoware
+# contract completeness.
+version: 1
+
+nodes:
+  pose_instability_detector:
+    sub:
+      odometry:                                 # ~/input/odometry ← /localization/kinematic_state
+        state: true
+      twist:                                    # ~/input/twist ← /localization/twist_with_covariance
+        state: true
+    pub:
+      diff_pose:                                # ~/debug/diff_pose
+        state: true
+
+topics:
+  /localization/kinematic_state:
+    type: nav_msgs/msg/Odometry
+    sub: [pose_instability_detector/odometry]
+    qos: { reliability: reliable, depth: 1 }
+  /localization/twist_with_covariance:
+    type: geometry_msgs/msg/TwistWithCovarianceStamped
+    sub: [pose_instability_detector/twist]
+    qos: { reliability: reliable, depth: 1 }
+
+  /localization/pose_instability_detector/debug/diff_pose:
+    type: geometry_msgs/msg/PoseStamped
+    pub: [pose_instability_detector/diff_pose]
+    qos: { reliability: reliable, depth: 1 }
