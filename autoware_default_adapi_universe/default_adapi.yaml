@@ -65,7 +65,7 @@ nodes:
     pub: []
   manual_remote_node:
     sub: { operation_mode: { state: true } }
-    pub: []
+    pub: [control_mode_status]
 
 # Cross-scope publisher decls — these absolute topics are published by the
 # adapi nodes and consumed across the system. Source citations refer to the
@@ -211,6 +211,26 @@ topics:
   /api/fail_safe/mrm_request/list:
     type: autoware_adapi_v1_msgs/msg/MrmRequestList
     pub: [mrm_request_node/mrm_request_list]
+    qos:
+      reliability: reliable
+      durability: transient_local
+      depth: 1
+
+  /api/manual/remote/control_mode/status:
+    type: autoware_adapi_v1_msgs/msg/ManualControlModeStatus
+    pub: [manual_remote_node/control_mode_status]
+    qos:
+      reliability: reliable
+      durability: transient_local
+      depth: 1
+
+  # /autoware/state is a legacy AutowareState topic published by the
+  # autoware_state_node (ADAPI's internal aggregator of localization,
+  # routing, operation_mode and MRM state). Lives at the root namespace
+  # for compatibility with older consumers.
+  /autoware/state:
+    type: autoware_system_msgs/msg/AutowareState
+    pub: [autoware_state_node/autoware_state]
     qos:
       reliability: reliable
       durability: transient_local

@@ -123,7 +123,7 @@ external_topics:
   /api/fail_safe/mrm_request/list: { external: sub, type: autoware_adapi_v1_msgs/msg/MrmRequestList }
   /api/fail_safe/mrm_state: { external: sub, type: autoware_adapi_v1_msgs/msg/MrmState }
   /api/localization/initialization_state: { external: sub, type: autoware_adapi_v1_msgs/msg/LocalizationInitializationState }
-  /api/manual/remote/control_mode/status: { external: both, type: autoware_adapi_v1_msgs/msg/ManualControlModeStatus }
+  /api/manual/remote/control_mode/status: { external: sub, type: autoware_adapi_v1_msgs/msg/ManualControlModeStatus }
   /api/motion/state: { external: sub, type: autoware_adapi_v1_msgs/msg/MotionState }
   /api/perception/objects: { external: sub, type: autoware_adapi_v1_msgs/msg/DynamicObjectArray }
   /api/planning/steering_factors: { external: sub, type: autoware_adapi_v1_msgs/msg/SteeringFactorArray }
@@ -138,8 +138,7 @@ external_topics:
   /api/vehicle/metrics: { external: sub, type: autoware_adapi_v1_msgs/msg/VehicleMetrics }
   /api/vehicle/status: { external: sub, type: autoware_adapi_v1_msgs/msg/VehicleStatus }
   # ── /autoware ──
-  /autoware/state: { external: both, type: autoware_system_msgs/msg/AutowareState }
-
+  /autoware/state: { external: sub, type: autoware_system_msgs/msg/AutowareState }
   # ── /awapi ──
   /awapi/tmp/virtual_traffic_light_states: { external: both, type: tier4_v2x_msgs/msg/VirtualTrafficLightStateArray }
 
@@ -577,22 +576,22 @@ external_topics:
 
   # ── /system ──
   /system/command_mode/availability: { external: both, type: tier4_system_msgs/msg/CommandModeAvailability }
-  /system/component_state_monitor/component/autonomous/control: { external: both, type: tier4_system_msgs/msg/ModeChangeAvailable }
-  /system/component_state_monitor/component/autonomous/localization: { external: both, type: tier4_system_msgs/msg/ModeChangeAvailable }
-  /system/component_state_monitor/component/autonomous/map: { external: both, type: tier4_system_msgs/msg/ModeChangeAvailable }
-  /system/component_state_monitor/component/autonomous/perception: { external: both, type: tier4_system_msgs/msg/ModeChangeAvailable }
-  /system/component_state_monitor/component/autonomous/planning: { external: both, type: tier4_system_msgs/msg/ModeChangeAvailable }
-  /system/component_state_monitor/component/autonomous/sensing: { external: both, type: tier4_system_msgs/msg/ModeChangeAvailable }
-  /system/component_state_monitor/component/autonomous/system: { external: both, type: tier4_system_msgs/msg/ModeChangeAvailable }
-  /system/component_state_monitor/component/autonomous/vehicle: { external: both, type: tier4_system_msgs/msg/ModeChangeAvailable }
-  /system/component_state_monitor/component/launch/control: { external: both, type: tier4_system_msgs/msg/ModeChangeAvailable }
-  /system/component_state_monitor/component/launch/localization: { external: both, type: tier4_system_msgs/msg/ModeChangeAvailable }
-  /system/component_state_monitor/component/launch/map: { external: both, type: tier4_system_msgs/msg/ModeChangeAvailable }
-  /system/component_state_monitor/component/launch/perception: { external: both, type: tier4_system_msgs/msg/ModeChangeAvailable }
-  /system/component_state_monitor/component/launch/planning: { external: both, type: tier4_system_msgs/msg/ModeChangeAvailable }
-  /system/component_state_monitor/component/launch/sensing: { external: both, type: tier4_system_msgs/msg/ModeChangeAvailable }
-  /system/component_state_monitor/component/launch/system: { external: both, type: tier4_system_msgs/msg/ModeChangeAvailable }
-  /system/component_state_monitor/component/launch/vehicle: { external: both, type: tier4_system_msgs/msg/ModeChangeAvailable }
+  /system/component_state_monitor/component/autonomous/control: { external: sub, type: tier4_system_msgs/msg/ModeChangeAvailable }
+  /system/component_state_monitor/component/autonomous/localization: { external: sub, type: tier4_system_msgs/msg/ModeChangeAvailable }
+  /system/component_state_monitor/component/autonomous/map: { external: sub, type: tier4_system_msgs/msg/ModeChangeAvailable }
+  /system/component_state_monitor/component/autonomous/perception: { external: sub, type: tier4_system_msgs/msg/ModeChangeAvailable }
+  /system/component_state_monitor/component/autonomous/planning: { external: sub, type: tier4_system_msgs/msg/ModeChangeAvailable }
+  /system/component_state_monitor/component/autonomous/sensing: { external: sub, type: tier4_system_msgs/msg/ModeChangeAvailable }
+  /system/component_state_monitor/component/autonomous/system: { external: sub, type: tier4_system_msgs/msg/ModeChangeAvailable }
+  /system/component_state_monitor/component/autonomous/vehicle: { external: sub, type: tier4_system_msgs/msg/ModeChangeAvailable }
+  /system/component_state_monitor/component/launch/control: { external: sub, type: tier4_system_msgs/msg/ModeChangeAvailable }
+  /system/component_state_monitor/component/launch/localization: { external: sub, type: tier4_system_msgs/msg/ModeChangeAvailable }
+  /system/component_state_monitor/component/launch/map: { external: sub, type: tier4_system_msgs/msg/ModeChangeAvailable }
+  /system/component_state_monitor/component/launch/perception: { external: sub, type: tier4_system_msgs/msg/ModeChangeAvailable }
+  /system/component_state_monitor/component/launch/planning: { external: sub, type: tier4_system_msgs/msg/ModeChangeAvailable }
+  /system/component_state_monitor/component/launch/sensing: { external: sub, type: tier4_system_msgs/msg/ModeChangeAvailable }
+  /system/component_state_monitor/component/launch/system: { external: sub, type: tier4_system_msgs/msg/ModeChangeAvailable }
+  /system/component_state_monitor/component/launch/vehicle: { external: sub, type: tier4_system_msgs/msg/ModeChangeAvailable }
   /system/emergency/control_cmd: { external: both, type: autoware_control_msgs/msg/Control }
   /system/emergency/gear_cmd: { external: both, type: autoware_vehicle_msgs/msg/GearCommand }
   /system/emergency/hazard_lights_cmd: { external: both, type: autoware_vehicle_msgs/msg/HazardLightsCommand }

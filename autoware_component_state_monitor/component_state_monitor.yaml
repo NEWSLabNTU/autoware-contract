@@ -1,16 +1,45 @@
 # autoware_component_state_monitor/component_state_monitor.launch.xml
 # Namespace: /system
 #
-# Maps subsystem diagnostics into per-component state.
+# Maps subsystem diagnostics into per-component state. The node reads
+# /diagnostics and publishes one `ModeChangeAvailable` topic per
+# (mode, subsystem) pair under
+# /system/component_state_monitor/component/{autonomous,launch}/<subsystem>.
+#
+# Modes:
+#   - autonomous: required for autonomous mode transitions
+#   - launch:     required at launch time (boot-up checks)
+#
+# Subsystems: control, localization, map, perception, planning, sensing,
+# system, vehicle (8 subsystems × 2 modes = 16 topics).
+#
+# QoS contract: reliable + transient_local + depth=1 — typical state-
+# availability pattern so late subscribers see the latest readiness flag.
 version: 1
 
 nodes:
   component_state_monitor:
     sub:
-      diagnostics:
-        state: true
+      diagnostics: { state: true }
     pub:
-      component_state: {}
+      # autonomous mode availability flags
+      autonomous_control: {}
+      autonomous_localization: {}
+      autonomous_map: {}
+      autonomous_perception: {}
+      autonomous_planning: {}
+      autonomous_sensing: {}
+      autonomous_system: {}
+      autonomous_vehicle: {}
+      # launch mode availability flags
+      launch_control: {}
+      launch_localization: {}
+      launch_map: {}
+      launch_perception: {}
+      launch_planning: {}
+      launch_sensing: {}
+      launch_system: {}
+      launch_vehicle: {}
 
 topics:
   # absolute — global /diagnostics aggregated stream
@@ -18,8 +47,70 @@ topics:
     type: diagnostic_msgs/msg/DiagnosticArray
     sub: [component_state_monitor/diagnostics]
 
-  # relative → /system/component_state_monitor/component_state
-  # TODO: type — ModeChangeAvailable / component-state message
-  component_state_monitor/component_state:
-    type: TODO/msg/TODO
-    pub: [component_state_monitor/component_state]
+  # /system/component_state_monitor/component/autonomous/<subsystem>
+  /system/component_state_monitor/component/autonomous/control:
+    type: tier4_system_msgs/msg/ModeChangeAvailable
+    pub: [component_state_monitor/autonomous_control]
+    qos: { reliability: reliable, durability: transient_local, depth: 1 }
+  /system/component_state_monitor/component/autonomous/localization:
+    type: tier4_system_msgs/msg/ModeChangeAvailable
+    pub: [component_state_monitor/autonomous_localization]
+    qos: { reliability: reliable, durability: transient_local, depth: 1 }
+  /system/component_state_monitor/component/autonomous/map:
+    type: tier4_system_msgs/msg/ModeChangeAvailable
+    pub: [component_state_monitor/autonomous_map]
+    qos: { reliability: reliable, durability: transient_local, depth: 1 }
+  /system/component_state_monitor/component/autonomous/perception:
+    type: tier4_system_msgs/msg/ModeChangeAvailable
+    pub: [component_state_monitor/autonomous_perception]
+    qos: { reliability: reliable, durability: transient_local, depth: 1 }
+  /system/component_state_monitor/component/autonomous/planning:
+    type: tier4_system_msgs/msg/ModeChangeAvailable
+    pub: [component_state_monitor/autonomous_planning]
+    qos: { reliability: reliable, durability: transient_local, depth: 1 }
+  /system/component_state_monitor/component/autonomous/sensing:
+    type: tier4_system_msgs/msg/ModeChangeAvailable
+    pub: [component_state_monitor/autonomous_sensing]
+    qos: { reliability: reliable, durability: transient_local, depth: 1 }
+  /system/component_state_monitor/component/autonomous/system:
+    type: tier4_system_msgs/msg/ModeChangeAvailable
+    pub: [component_state_monitor/autonomous_system]
+    qos: { reliability: reliable, durability: transient_local, depth: 1 }
+  /system/component_state_monitor/component/autonomous/vehicle:
+    type: tier4_system_msgs/msg/ModeChangeAvailable
+    pub: [component_state_monitor/autonomous_vehicle]
+    qos: { reliability: reliable, durability: transient_local, depth: 1 }
+
+  # /system/component_state_monitor/component/launch/<subsystem>
+  /system/component_state_monitor/component/launch/control:
+    type: tier4_system_msgs/msg/ModeChangeAvailable
+    pub: [component_state_monitor/launch_control]
+    qos: { reliability: reliable, durability: transient_local, depth: 1 }
+  /system/component_state_monitor/component/launch/localization:
+    type: tier4_system_msgs/msg/ModeChangeAvailable
+    pub: [component_state_monitor/launch_localization]
+    qos: { reliability: reliable, durability: transient_local, depth: 1 }
+  /system/component_state_monitor/component/launch/map:
+    type: tier4_system_msgs/msg/ModeChangeAvailable
+    pub: [component_state_monitor/launch_map]
+    qos: { reliability: reliable, durability: transient_local, depth: 1 }
+  /system/component_state_monitor/component/launch/perception:
+    type: tier4_system_msgs/msg/ModeChangeAvailable
+    pub: [component_state_monitor/launch_perception]
+    qos: { reliability: reliable, durability: transient_local, depth: 1 }
+  /system/component_state_monitor/component/launch/planning:
+    type: tier4_system_msgs/msg/ModeChangeAvailable
+    pub: [component_state_monitor/launch_planning]
+    qos: { reliability: reliable, durability: transient_local, depth: 1 }
+  /system/component_state_monitor/component/launch/sensing:
+    type: tier4_system_msgs/msg/ModeChangeAvailable
+    pub: [component_state_monitor/launch_sensing]
+    qos: { reliability: reliable, durability: transient_local, depth: 1 }
+  /system/component_state_monitor/component/launch/system:
+    type: tier4_system_msgs/msg/ModeChangeAvailable
+    pub: [component_state_monitor/launch_system]
+    qos: { reliability: reliable, durability: transient_local, depth: 1 }
+  /system/component_state_monitor/component/launch/vehicle:
+    type: tier4_system_msgs/msg/ModeChangeAvailable
+    pub: [component_state_monitor/launch_vehicle]
+    qos: { reliability: reliable, durability: transient_local, depth: 1 }
