@@ -74,9 +74,79 @@ nodes:
 # Source (operation_mode publisher): autoware_universe/system/autoware_default_adapi_universe/src/operation_mode.cpp:32 — adaptor.init_pub(pub_state_)
 # Source (spec/QoS): autoware_core/api/autoware_adapi_specs/include/autoware/adapi_specs/operation_mode.hpp:62-69 — name="/api/operation_mode/state", depth=1, reliable, transient_local
 topics:
+  # All ADAPI state publishers follow the same QoS contract specified in
+  # autoware_adapi_specs: reliable + transient_local + depth=1. Late
+  # subscribers (rqt, web UIs, external monitoring) receive the last
+  # state automatically. Source: autoware_core/api/autoware_adapi_specs/
+  # include/autoware/adapi_specs/*.hpp — each spec class sets the same
+  # `RELIABLE_TRANSIENT_LOCAL(1)` profile.
   /api/operation_mode/state:
     type: autoware_adapi_v1_msgs/msg/OperationModeState
     pub: [operation_mode_node/operation_mode]
+    qos:
+      reliability: reliable
+      durability: transient_local
+      depth: 1
+
+  /api/routing/state:
+    type: autoware_adapi_v1_msgs/msg/RouteState
+    pub: [routing_node/routing_state]
+    qos:
+      reliability: reliable
+      durability: transient_local
+      depth: 1
+
+  /api/localization/initialization_state:
+    type: autoware_adapi_v1_msgs/msg/LocalizationInitializationState
+    pub: [localization_node/localization_state]
+    qos:
+      reliability: reliable
+      durability: transient_local
+      depth: 1
+
+  /api/fail_safe/mrm_state:
+    type: autoware_adapi_v1_msgs/msg/MrmState
+    pub: [fail_safe_node/fail_safe_state]
+    qos:
+      reliability: reliable
+      durability: transient_local
+      depth: 1
+
+  /api/motion/state:
+    type: autoware_adapi_v1_msgs/msg/MotionState
+    pub: [motion_node/motion_state]
+    qos:
+      reliability: reliable
+      durability: transient_local
+      depth: 1
+
+  /api/system/heartbeat:
+    type: autoware_adapi_v1_msgs/msg/Heartbeat
+    pub: [heartbeat_node/heartbeat]
+    qos:
+      reliability: reliable
+      durability: transient_local
+      depth: 1
+
+  /api/vehicle/status:
+    type: autoware_adapi_v1_msgs/msg/VehicleStatus
+    pub: [vehicle_status_node/vehicle_status]
+    qos:
+      reliability: reliable
+      durability: transient_local
+      depth: 1
+
+  /api/vehicle/metrics:
+    type: autoware_adapi_v1_msgs/msg/VehicleMetrics
+    pub: [vehicle_metrics_node/vehicle_metrics]
+    qos:
+      reliability: reliable
+      durability: transient_local
+      depth: 1
+
+  /api/vehicle/doors/status:
+    type: autoware_adapi_v1_msgs/msg/DoorStatusArray
+    pub: [vehicle_door_node/door_state]
     qos:
       reliability: reliable
       durability: transient_local
