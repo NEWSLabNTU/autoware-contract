@@ -106,9 +106,8 @@ external_topics:
   # `external: both` is safe (the leaf still owns pub/sub, this entry
   # just satisfies the runtime topic_hash → FQN coverage check).
   /control/gate_mode_cmd: { external: both, type: tier4_control_msgs/msg/GateMode }
-  /control/trajectory_follower/lateral/predicted_trajectory: { external: both, type: autoware_planning_msgs/msg/Trajectory }
-  /planning/route: { external: both, type: autoware_planning_msgs/msg/LaneletRoute }
-
+  /control/trajectory_follower/lateral/predicted_trajectory: { external: sub, type: autoware_planning_msgs/msg/Trajectory }
+  /planning/route: { external: pub, type: autoware_planning_msgs/msg/LaneletRoute }
 # ───────────────────────────────────────────────────────────
 # Topics observed at runtime but not declared by any manifest
 # in the include tree. Recorded as external (both sides) so
@@ -189,8 +188,7 @@ external_topics:
   /control/vehicle_cmd_gate/is_filter_activated/marker_raw: { external: sub, type: filter_activated/marker_raw }
   /control/vehicle_cmd_gate/is_paused: { external: sub, type: paused }
   /control/vehicle_cmd_gate/is_start_requested: { external: sub, type: start_requested }
-  /control/vehicle_cmd_gate/is_stopped: { external: both, type: tier4_control_msgs/msg/IsStopped }
-
+  /control/vehicle_cmd_gate/is_stopped: { external: sub, type: tier4_control_msgs/msg/IsStopped }
   # ── /external ──
   /external/selected/gear_cmd: { external: sub, type: autoware_vehicle_msgs/msg/GearCommand }
   /external/selected/heartbeat: { external: sub, type: autoware_adapi_v1_msgs/msg/ManualOperatorHeartbeat }
@@ -220,93 +218,92 @@ external_topics:
   /parameter_events: { external: both, type: rcl_interfaces/msg/ParameterEvent }
 
   # ── /perception ──
-  /perception/object_recognition/detection/objects_with_feature: { external: both, type: tier4_perception_msgs/msg/DetectedObjectsWithFeature }
-  /perception/object_recognition/objects/debug/published_time: { external: both, type: autoware_internal_msgs/msg/PublishedTime }
-  /perception/object_recognition/prediction/maneuver: { external: both, type: visualization_msgs/msg/MarkerArray }
-  /perception/object_recognition/prediction/map_based_prediction/debug/cyclic_time_ms: { external: both, type: autoware_internal_debug_msgs/msg/Float64Stamped }
+  /perception/object_recognition/detection/objects_with_feature: { external: sub, type: tier4_perception_msgs/msg/DetectedObjectsWithFeature }
+  /perception/object_recognition/objects/debug/published_time: { external: sub, type: autoware_internal_msgs/msg/PublishedTime }
+  /perception/object_recognition/prediction/maneuver: { external: sub, type: visualization_msgs/msg/MarkerArray }
+  /perception/object_recognition/prediction/map_based_prediction/debug/cyclic_time_ms: { external: sub, type: autoware_internal_debug_msgs/msg/Float64Stamped }
   /perception/object_recognition/prediction/map_based_prediction/debug/processing_time_detail_ms: { external: both, type: autoware_internal_debug_msgs/msg/ProcessingTimeTree }
   /perception/object_recognition/prediction/map_based_prediction/debug/processing_time_ms: { external: both, type: autoware_internal_debug_msgs/msg/Float64Stamped }
   /perception/object_recognition/tracking/decorative_object_merger_node/debug/processing_time_ms: { external: both, type: autoware_internal_debug_msgs/msg/Float64Stamped }
   /perception/object_recognition/tracking/multi_object_tracker/debug/meas_to_tracked_object_ms: { external: both, type: autoware_internal_debug_msgs/msg/Float64Stamped }
   /perception/object_recognition/tracking/multi_object_tracker/debug/processing_time_ms: { external: both, type: autoware_internal_debug_msgs/msg/Float64Stamped }
-  /perception/object_recognition/tracking/objects/debug/published_time: { external: both, type: autoware_internal_msgs/msg/PublishedTime }
-  /perception/perception_analytics_publisher/perception_analytics: { external: both, type: tier4_metric_msgs/msg/MetricArray }
-
+  /perception/object_recognition/tracking/objects/debug/published_time: { external: sub, type: autoware_internal_msgs/msg/PublishedTime }
+  /perception/perception_analytics_publisher/perception_analytics: { external: sub, type: tier4_metric_msgs/msg/MetricArray }
   # ── /planning ──
-  /planning/auto_mode_status/avoidance_by_lane_change_left: { external: both, type: tier4_rtc_msgs/msg/AutoModeStatus }
-  /planning/auto_mode_status/avoidance_by_lane_change_right: { external: both, type: tier4_rtc_msgs/msg/AutoModeStatus }
-  /planning/auto_mode_status/blind_spot: { external: both, type: tier4_rtc_msgs/msg/AutoModeStatus }
-  /planning/auto_mode_status/crosswalk: { external: both, type: tier4_rtc_msgs/msg/AutoModeStatus }
-  /planning/auto_mode_status/detection_area: { external: both, type: tier4_rtc_msgs/msg/AutoModeStatus }
-  /planning/auto_mode_status/external_request_lane_change_left: { external: both, type: tier4_rtc_msgs/msg/AutoModeStatus }
-  /planning/auto_mode_status/external_request_lane_change_right: { external: both, type: tier4_rtc_msgs/msg/AutoModeStatus }
-  /planning/auto_mode_status/goal_planner: { external: both, type: tier4_rtc_msgs/msg/AutoModeStatus }
-  /planning/auto_mode_status/intersection: { external: both, type: tier4_rtc_msgs/msg/AutoModeStatus }
-  /planning/auto_mode_status/intersection_occlusion: { external: both, type: tier4_rtc_msgs/msg/AutoModeStatus }
-  /planning/auto_mode_status/lane_change_left: { external: both, type: tier4_rtc_msgs/msg/AutoModeStatus }
-  /planning/auto_mode_status/lane_change_right: { external: both, type: tier4_rtc_msgs/msg/AutoModeStatus }
-  /planning/auto_mode_status/no_stopping_area: { external: both, type: tier4_rtc_msgs/msg/AutoModeStatus }
-  /planning/auto_mode_status/occlusion_spot: { external: both, type: tier4_rtc_msgs/msg/AutoModeStatus }
-  /planning/auto_mode_status/start_planner: { external: both, type: tier4_rtc_msgs/msg/AutoModeStatus }
-  /planning/auto_mode_status/static_obstacle_avoidance_left: { external: both, type: tier4_rtc_msgs/msg/AutoModeStatus }
-  /planning/auto_mode_status/static_obstacle_avoidance_right: { external: both, type: tier4_rtc_msgs/msg/AutoModeStatus }
-  /planning/auto_mode_status/traffic_light: { external: both, type: tier4_rtc_msgs/msg/AutoModeStatus }
-  /planning/auto_mode_status/virtual_traffic_light: { external: both, type: tier4_rtc_msgs/msg/AutoModeStatus }
-  /planning/cooperate_status/avoidance_by_lane_change_left: { external: both, type: tier4_rtc_msgs/msg/CooperateStatusArray }
-  /planning/cooperate_status/avoidance_by_lane_change_right: { external: both, type: tier4_rtc_msgs/msg/CooperateStatusArray }
-  /planning/cooperate_status/blind_spot: { external: both, type: tier4_rtc_msgs/msg/CooperateStatusArray }
-  /planning/cooperate_status/crosswalk: { external: both, type: tier4_rtc_msgs/msg/CooperateStatusArray }
-  /planning/cooperate_status/detection_area: { external: both, type: tier4_rtc_msgs/msg/CooperateStatusArray }
-  /planning/cooperate_status/external_request_lane_change_left: { external: both, type: tier4_rtc_msgs/msg/CooperateStatusArray }
-  /planning/cooperate_status/external_request_lane_change_right: { external: both, type: tier4_rtc_msgs/msg/CooperateStatusArray }
-  /planning/cooperate_status/goal_planner: { external: both, type: tier4_rtc_msgs/msg/CooperateStatusArray }
-  /planning/cooperate_status/intersection: { external: both, type: tier4_rtc_msgs/msg/CooperateStatusArray }
-  /planning/cooperate_status/intersection_occlusion: { external: both, type: tier4_rtc_msgs/msg/CooperateStatusArray }
-  /planning/cooperate_status/lane_change_left: { external: both, type: tier4_rtc_msgs/msg/CooperateStatusArray }
-  /planning/cooperate_status/lane_change_right: { external: both, type: tier4_rtc_msgs/msg/CooperateStatusArray }
-  /planning/cooperate_status/no_stopping_area: { external: both, type: tier4_rtc_msgs/msg/CooperateStatusArray }
-  /planning/cooperate_status/occlusion_spot: { external: both, type: tier4_rtc_msgs/msg/CooperateStatusArray }
-  /planning/cooperate_status/start_planner: { external: both, type: tier4_rtc_msgs/msg/CooperateStatusArray }
-  /planning/cooperate_status/static_obstacle_avoidance_left: { external: both, type: tier4_rtc_msgs/msg/CooperateStatusArray }
-  /planning/cooperate_status/static_obstacle_avoidance_right: { external: both, type: tier4_rtc_msgs/msg/CooperateStatusArray }
-  /planning/cooperate_status/traffic_light: { external: both, type: tier4_rtc_msgs/msg/CooperateStatusArray }
-  /planning/cooperate_status/virtual_traffic_light: { external: both, type: tier4_rtc_msgs/msg/CooperateStatusArray }
-  /planning/debug/objects_of_interest/avoidance_by_lane_change_left: { external: both, type: visualization_msgs/msg/MarkerArray }
-  /planning/debug/objects_of_interest/avoidance_by_lane_change_right: { external: both, type: visualization_msgs/msg/MarkerArray }
-  /planning/debug/objects_of_interest/blind_spot: { external: both, type: visualization_msgs/msg/MarkerArray }
-  /planning/debug/objects_of_interest/crosswalk: { external: both, type: visualization_msgs/msg/MarkerArray }
-  /planning/debug/objects_of_interest/detection_area: { external: both, type: visualization_msgs/msg/MarkerArray }
-  /planning/debug/objects_of_interest/goal_planner: { external: both, type: visualization_msgs/msg/MarkerArray }
-  /planning/debug/objects_of_interest/intersection: { external: both, type: visualization_msgs/msg/MarkerArray }
-  /planning/debug/objects_of_interest/lane_change_left: { external: both, type: visualization_msgs/msg/MarkerArray }
-  /planning/debug/objects_of_interest/lane_change_right: { external: both, type: visualization_msgs/msg/MarkerArray }
-  /planning/debug/objects_of_interest/no_stopping_area: { external: both, type: visualization_msgs/msg/MarkerArray }
-  /planning/debug/objects_of_interest/obstacle_cruise: { external: both, type: visualization_msgs/msg/MarkerArray }
-  /planning/debug/objects_of_interest/obstacle_slow_down: { external: both, type: visualization_msgs/msg/MarkerArray }
-  /planning/debug/objects_of_interest/obstacle_stop: { external: both, type: visualization_msgs/msg/MarkerArray }
-  /planning/debug/objects_of_interest/run_out: { external: both, type: visualization_msgs/msg/MarkerArray }
-  /planning/debug/objects_of_interest/start_planner: { external: both, type: visualization_msgs/msg/MarkerArray }
-  /planning/debug/objects_of_interest/static_obstacle_avoidance_left: { external: both, type: visualization_msgs/msg/MarkerArray }
-  /planning/debug/objects_of_interest/static_obstacle_avoidance_right: { external: both, type: visualization_msgs/msg/MarkerArray }
-  /planning/debug/objects_of_interest/traffic_light: { external: both, type: visualization_msgs/msg/MarkerArray }
-  /planning/mission_planning/checkpoint: { external: both, type: geometry_msgs/msg/PoseStamped }
-  /planning/mission_planning/goal: { external: both, type: geometry_msgs/msg/PoseStamped }
+  /planning/auto_mode_status/avoidance_by_lane_change_left: { external: sub, type: tier4_rtc_msgs/msg/AutoModeStatus }
+  /planning/auto_mode_status/avoidance_by_lane_change_right: { external: sub, type: tier4_rtc_msgs/msg/AutoModeStatus }
+  /planning/auto_mode_status/blind_spot: { external: sub, type: tier4_rtc_msgs/msg/AutoModeStatus }
+  /planning/auto_mode_status/crosswalk: { external: sub, type: tier4_rtc_msgs/msg/AutoModeStatus }
+  /planning/auto_mode_status/detection_area: { external: sub, type: tier4_rtc_msgs/msg/AutoModeStatus }
+  /planning/auto_mode_status/external_request_lane_change_left: { external: sub, type: tier4_rtc_msgs/msg/AutoModeStatus }
+  /planning/auto_mode_status/external_request_lane_change_right: { external: sub, type: tier4_rtc_msgs/msg/AutoModeStatus }
+  /planning/auto_mode_status/goal_planner: { external: sub, type: tier4_rtc_msgs/msg/AutoModeStatus }
+  /planning/auto_mode_status/intersection: { external: sub, type: tier4_rtc_msgs/msg/AutoModeStatus }
+  /planning/auto_mode_status/intersection_occlusion: { external: sub, type: tier4_rtc_msgs/msg/AutoModeStatus }
+  /planning/auto_mode_status/lane_change_left: { external: sub, type: tier4_rtc_msgs/msg/AutoModeStatus }
+  /planning/auto_mode_status/lane_change_right: { external: sub, type: tier4_rtc_msgs/msg/AutoModeStatus }
+  /planning/auto_mode_status/no_stopping_area: { external: sub, type: tier4_rtc_msgs/msg/AutoModeStatus }
+  /planning/auto_mode_status/occlusion_spot: { external: sub, type: tier4_rtc_msgs/msg/AutoModeStatus }
+  /planning/auto_mode_status/start_planner: { external: sub, type: tier4_rtc_msgs/msg/AutoModeStatus }
+  /planning/auto_mode_status/static_obstacle_avoidance_left: { external: sub, type: tier4_rtc_msgs/msg/AutoModeStatus }
+  /planning/auto_mode_status/static_obstacle_avoidance_right: { external: sub, type: tier4_rtc_msgs/msg/AutoModeStatus }
+  /planning/auto_mode_status/traffic_light: { external: sub, type: tier4_rtc_msgs/msg/AutoModeStatus }
+  /planning/auto_mode_status/virtual_traffic_light: { external: sub, type: tier4_rtc_msgs/msg/AutoModeStatus }
+  /planning/cooperate_status/avoidance_by_lane_change_left: { external: sub, type: tier4_rtc_msgs/msg/CooperateStatusArray }
+  /planning/cooperate_status/avoidance_by_lane_change_right: { external: sub, type: tier4_rtc_msgs/msg/CooperateStatusArray }
+  /planning/cooperate_status/blind_spot: { external: sub, type: tier4_rtc_msgs/msg/CooperateStatusArray }
+  /planning/cooperate_status/crosswalk: { external: sub, type: tier4_rtc_msgs/msg/CooperateStatusArray }
+  /planning/cooperate_status/detection_area: { external: sub, type: tier4_rtc_msgs/msg/CooperateStatusArray }
+  /planning/cooperate_status/external_request_lane_change_left: { external: sub, type: tier4_rtc_msgs/msg/CooperateStatusArray }
+  /planning/cooperate_status/external_request_lane_change_right: { external: sub, type: tier4_rtc_msgs/msg/CooperateStatusArray }
+  /planning/cooperate_status/goal_planner: { external: sub, type: tier4_rtc_msgs/msg/CooperateStatusArray }
+  /planning/cooperate_status/intersection: { external: sub, type: tier4_rtc_msgs/msg/CooperateStatusArray }
+  /planning/cooperate_status/intersection_occlusion: { external: sub, type: tier4_rtc_msgs/msg/CooperateStatusArray }
+  /planning/cooperate_status/lane_change_left: { external: sub, type: tier4_rtc_msgs/msg/CooperateStatusArray }
+  /planning/cooperate_status/lane_change_right: { external: sub, type: tier4_rtc_msgs/msg/CooperateStatusArray }
+  /planning/cooperate_status/no_stopping_area: { external: sub, type: tier4_rtc_msgs/msg/CooperateStatusArray }
+  /planning/cooperate_status/occlusion_spot: { external: sub, type: tier4_rtc_msgs/msg/CooperateStatusArray }
+  /planning/cooperate_status/start_planner: { external: sub, type: tier4_rtc_msgs/msg/CooperateStatusArray }
+  /planning/cooperate_status/static_obstacle_avoidance_left: { external: sub, type: tier4_rtc_msgs/msg/CooperateStatusArray }
+  /planning/cooperate_status/static_obstacle_avoidance_right: { external: sub, type: tier4_rtc_msgs/msg/CooperateStatusArray }
+  /planning/cooperate_status/traffic_light: { external: sub, type: tier4_rtc_msgs/msg/CooperateStatusArray }
+  /planning/cooperate_status/virtual_traffic_light: { external: sub, type: tier4_rtc_msgs/msg/CooperateStatusArray }
+  /planning/debug/objects_of_interest/avoidance_by_lane_change_left: { external: sub, type: visualization_msgs/msg/MarkerArray }
+  /planning/debug/objects_of_interest/avoidance_by_lane_change_right: { external: sub, type: visualization_msgs/msg/MarkerArray }
+  /planning/debug/objects_of_interest/blind_spot: { external: sub, type: visualization_msgs/msg/MarkerArray }
+  /planning/debug/objects_of_interest/crosswalk: { external: sub, type: visualization_msgs/msg/MarkerArray }
+  /planning/debug/objects_of_interest/detection_area: { external: sub, type: visualization_msgs/msg/MarkerArray }
+  /planning/debug/objects_of_interest/goal_planner: { external: sub, type: visualization_msgs/msg/MarkerArray }
+  /planning/debug/objects_of_interest/intersection: { external: sub, type: visualization_msgs/msg/MarkerArray }
+  /planning/debug/objects_of_interest/lane_change_left: { external: sub, type: visualization_msgs/msg/MarkerArray }
+  /planning/debug/objects_of_interest/lane_change_right: { external: sub, type: visualization_msgs/msg/MarkerArray }
+  /planning/debug/objects_of_interest/no_stopping_area: { external: sub, type: visualization_msgs/msg/MarkerArray }
+  /planning/debug/objects_of_interest/obstacle_cruise: { external: sub, type: visualization_msgs/msg/MarkerArray }
+  /planning/debug/objects_of_interest/obstacle_slow_down: { external: sub, type: visualization_msgs/msg/MarkerArray }
+  /planning/debug/objects_of_interest/obstacle_stop: { external: sub, type: visualization_msgs/msg/MarkerArray }
+  /planning/debug/objects_of_interest/run_out: { external: sub, type: visualization_msgs/msg/MarkerArray }
+  /planning/debug/objects_of_interest/start_planner: { external: sub, type: visualization_msgs/msg/MarkerArray }
+  /planning/debug/objects_of_interest/static_obstacle_avoidance_left: { external: sub, type: visualization_msgs/msg/MarkerArray }
+  /planning/debug/objects_of_interest/static_obstacle_avoidance_right: { external: sub, type: visualization_msgs/msg/MarkerArray }
+  /planning/debug/objects_of_interest/traffic_light: { external: sub, type: visualization_msgs/msg/MarkerArray }
+  /planning/mission_planning/checkpoint: { external: pub, type: geometry_msgs/msg/PoseStamped }
+  /planning/mission_planning/goal: { external: pub, type: geometry_msgs/msg/PoseStamped }
   /planning/mission_planning/manual_lane_change_handler/debug/goal_footprint: { external: sub, type: visualization_msgs/msg/MarkerArray }
   /planning/mission_planning/mission_planner/debug/goal_footprint: { external: sub, type: visualization_msgs/msg/MarkerArray }
   /planning/mission_planning/mission_planner/debug/processing_time_ms: { external: sub, type: autoware_internal_debug_msgs/msg/Float64Stamped }
-  /planning/mission_planning/route_marker: { external: both, type: visualization_msgs/msg/MarkerArray }
+  /planning/mission_planning/route_marker: { external: sub, type: visualization_msgs/msg/MarkerArray }
   /planning/mission_planning/route_selector/debug/processing_time_ms: { external: sub, type: autoware_internal_debug_msgs/msg/Float64Stamped }
-  /planning/mission_planning/route_selector/mrm/route: { external: both, type: autoware_planning_msgs/msg/LaneletRoute }
-  /planning/mission_planning/route_selector/mrm/state: { external: both, type: autoware_planning_msgs/msg/RouteState }
-  /planning/mission_planning/state: { external: both, type: autoware_planning_msgs/msg/RouteState }
-  /planning/path_candidate/avoidance_by_lane_change: { external: both, type: autoware_planning_msgs/msg/Path }
-  /planning/path_candidate/bidirectional_traffic: { external: both, type: autoware_planning_msgs/msg/Path }
-  /planning/path_candidate/goal_planner: { external: both, type: autoware_planning_msgs/msg/Path }
-  /planning/path_candidate/lane_change_left: { external: both, type: autoware_planning_msgs/msg/Path }
-  /planning/path_candidate/lane_change_right: { external: both, type: autoware_planning_msgs/msg/Path }
-  /planning/path_candidate/side_shift: { external: both, type: autoware_planning_msgs/msg/Path }
-  /planning/path_candidate/start_planner: { external: both, type: autoware_planning_msgs/msg/Path }
-  /planning/path_candidate/static_obstacle_avoidance: { external: both, type: autoware_planning_msgs/msg/Path }
+  /planning/mission_planning/route_selector/mrm/route: { external: sub, type: autoware_planning_msgs/msg/LaneletRoute }
+  /planning/mission_planning/route_selector/mrm/state: { external: sub, type: autoware_planning_msgs/msg/RouteState }
+  /planning/mission_planning/state: { external: sub, type: autoware_planning_msgs/msg/RouteState }
+  /planning/path_candidate/avoidance_by_lane_change: { external: sub, type: autoware_planning_msgs/msg/Path }
+  /planning/path_candidate/bidirectional_traffic: { external: sub, type: autoware_planning_msgs/msg/Path }
+  /planning/path_candidate/goal_planner: { external: sub, type: autoware_planning_msgs/msg/Path }
+  /planning/path_candidate/lane_change_left: { external: sub, type: autoware_planning_msgs/msg/Path }
+  /planning/path_candidate/lane_change_right: { external: sub, type: autoware_planning_msgs/msg/Path }
+  /planning/path_candidate/side_shift: { external: sub, type: autoware_planning_msgs/msg/Path }
+  /planning/path_candidate/start_planner: { external: sub, type: autoware_planning_msgs/msg/Path }
+  /planning/path_candidate/static_obstacle_avoidance: { external: sub, type: autoware_planning_msgs/msg/Path }
   /planning/path_reference/avoidance_by_lane_change: { external: both, type: autoware_planning_msgs/msg/Path }
   /planning/path_reference/bidirectional_traffic: { external: both, type: autoware_planning_msgs/msg/Path }
   /planning/path_reference/goal_planner: { external: both, type: autoware_planning_msgs/msg/Path }
@@ -333,7 +330,7 @@ external_topics:
   /planning/planning_factors/lane_change_right: { external: both, type: autoware_internal_planning_msgs/msg/PlanningFactorArray }
   /planning/planning_factors/merge_from_private: { external: both, type: autoware_internal_planning_msgs/msg/PlanningFactorArray }
   /planning/planning_factors/motion_velocity_planner: { external: both, type: autoware_internal_planning_msgs/msg/PlanningFactorArray }
-  /planning/planning_factors/no_drivable_lane: { external: both, type: autoware_internal_planning_msgs/msg/PlanningFactorArray }
+  /planning/planning_factors/no_drivable_lane: { external: sub, type: autoware_internal_planning_msgs/msg/PlanningFactorArray }
   /planning/planning_factors/no_stopping_area: { external: both, type: autoware_internal_planning_msgs/msg/PlanningFactorArray }
   /planning/planning_factors/obstacle_cruise: { external: both, type: autoware_internal_planning_msgs/msg/PlanningFactorArray }
   /planning/planning_factors/obstacle_cruise_planner: { external: both, type: autoware_internal_planning_msgs/msg/PlanningFactorArray }
@@ -398,32 +395,32 @@ external_topics:
   /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/debug/static_obstacle_avoidance/processing_time_ms: { external: sub, type: autoware_internal_debug_msgs/msg/Float64Stamped }
   /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/debug/total_time/processing_time_ms: { external: sub, type: autoware_internal_debug_msgs/msg/Float64Stamped }
   /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/debug/turn_signal_info: { external: sub, type: visualization_msgs/msg/MarkerArray }
-  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/drivable_lanes/avoidance_by_lane_change: { external: both, type: visualization_msgs/msg/MarkerArray }
-  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/drivable_lanes/bidirectional_traffic: { external: both, type: visualization_msgs/msg/MarkerArray }
-  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/drivable_lanes/goal_planner: { external: both, type: visualization_msgs/msg/MarkerArray }
-  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/drivable_lanes/lane_change_left: { external: both, type: visualization_msgs/msg/MarkerArray }
-  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/drivable_lanes/lane_change_right: { external: both, type: visualization_msgs/msg/MarkerArray }
-  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/drivable_lanes/side_shift: { external: both, type: visualization_msgs/msg/MarkerArray }
-  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/drivable_lanes/start_planner: { external: both, type: visualization_msgs/msg/MarkerArray }
-  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/drivable_lanes/static_obstacle_avoidance: { external: both, type: visualization_msgs/msg/MarkerArray }
-  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/info/avoidance_by_lane_change: { external: both, type: visualization_msgs/msg/MarkerArray }
-  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/info/bidirectional_traffic: { external: both, type: visualization_msgs/msg/MarkerArray }
-  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/info/goal_planner: { external: both, type: visualization_msgs/msg/MarkerArray }
-  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/info/lane_change_left: { external: both, type: visualization_msgs/msg/MarkerArray }
-  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/info/lane_change_right: { external: both, type: visualization_msgs/msg/MarkerArray }
-  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/info/side_shift: { external: both, type: visualization_msgs/msg/MarkerArray }
-  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/info/start_planner: { external: both, type: visualization_msgs/msg/MarkerArray }
-  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/info/static_obstacle_avoidance: { external: both, type: visualization_msgs/msg/MarkerArray }
-  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/input/lateral_offset: { external: both, type: tier4_planning_msgs/msg/LateralOffset }
-  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/output/is_reroute_available: { external: both, type: tier4_planning_msgs/msg/RerouteAvailability }
-  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/virtual_wall/avoidance_by_lane_change: { external: both, type: visualization_msgs/msg/MarkerArray }
-  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/virtual_wall/bidirectional_traffic: { external: both, type: visualization_msgs/msg/MarkerArray }
-  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/virtual_wall/goal_planner: { external: both, type: visualization_msgs/msg/MarkerArray }
-  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/virtual_wall/lane_change_left: { external: both, type: visualization_msgs/msg/MarkerArray }
-  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/virtual_wall/lane_change_right: { external: both, type: visualization_msgs/msg/MarkerArray }
-  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/virtual_wall/side_shift: { external: both, type: visualization_msgs/msg/MarkerArray }
-  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/virtual_wall/start_planner: { external: both, type: visualization_msgs/msg/MarkerArray }
-  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/virtual_wall/static_obstacle_avoidance: { external: both, type: visualization_msgs/msg/MarkerArray }
+  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/drivable_lanes/avoidance_by_lane_change: { external: sub, type: visualization_msgs/msg/MarkerArray }
+  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/drivable_lanes/bidirectional_traffic: { external: sub, type: visualization_msgs/msg/MarkerArray }
+  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/drivable_lanes/goal_planner: { external: sub, type: visualization_msgs/msg/MarkerArray }
+  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/drivable_lanes/lane_change_left: { external: sub, type: visualization_msgs/msg/MarkerArray }
+  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/drivable_lanes/lane_change_right: { external: sub, type: visualization_msgs/msg/MarkerArray }
+  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/drivable_lanes/side_shift: { external: sub, type: visualization_msgs/msg/MarkerArray }
+  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/drivable_lanes/start_planner: { external: sub, type: visualization_msgs/msg/MarkerArray }
+  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/drivable_lanes/static_obstacle_avoidance: { external: sub, type: visualization_msgs/msg/MarkerArray }
+  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/info/avoidance_by_lane_change: { external: sub, type: visualization_msgs/msg/MarkerArray }
+  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/info/bidirectional_traffic: { external: sub, type: visualization_msgs/msg/MarkerArray }
+  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/info/goal_planner: { external: sub, type: visualization_msgs/msg/MarkerArray }
+  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/info/lane_change_left: { external: sub, type: visualization_msgs/msg/MarkerArray }
+  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/info/lane_change_right: { external: sub, type: visualization_msgs/msg/MarkerArray }
+  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/info/side_shift: { external: sub, type: visualization_msgs/msg/MarkerArray }
+  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/info/start_planner: { external: sub, type: visualization_msgs/msg/MarkerArray }
+  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/info/static_obstacle_avoidance: { external: sub, type: visualization_msgs/msg/MarkerArray }
+  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/input/lateral_offset: { external: pub, type: tier4_planning_msgs/msg/LateralOffset }
+  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/output/is_reroute_available: { external: sub, type: tier4_planning_msgs/msg/RerouteAvailability }
+  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/virtual_wall/avoidance_by_lane_change: { external: sub, type: visualization_msgs/msg/MarkerArray }
+  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/virtual_wall/bidirectional_traffic: { external: sub, type: visualization_msgs/msg/MarkerArray }
+  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/virtual_wall/goal_planner: { external: sub, type: visualization_msgs/msg/MarkerArray }
+  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/virtual_wall/lane_change_left: { external: sub, type: visualization_msgs/msg/MarkerArray }
+  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/virtual_wall/lane_change_right: { external: sub, type: visualization_msgs/msg/MarkerArray }
+  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/virtual_wall/side_shift: { external: sub, type: visualization_msgs/msg/MarkerArray }
+  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/virtual_wall/start_planner: { external: sub, type: visualization_msgs/msg/MarkerArray }
+  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/virtual_wall/static_obstacle_avoidance: { external: sub, type: visualization_msgs/msg/MarkerArray }
   /planning/scenario_planning/lane_driving/behavior_planning/behavior_velocity_planner/debug/blind_spot: { external: sub, type: visualization_msgs/msg/MarkerArray }
   /planning/scenario_planning/lane_driving/behavior_planning/behavior_velocity_planner/debug/blind_spot/decision_state: { external: sub, type: std_msgs/msg/String }
   /planning/scenario_planning/lane_driving/behavior_planning/behavior_velocity_planner/debug/blind_spot/processing_time_ms: { external: sub, type: autoware_internal_debug_msgs/msg/Float64Stamped }
@@ -456,24 +453,24 @@ external_topics:
   /planning/scenario_planning/lane_driving/behavior_planning/behavior_velocity_planner/debug/virtual_traffic_light/processing_time_ms: { external: sub, type: autoware_internal_debug_msgs/msg/Float64Stamped }
   /planning/scenario_planning/lane_driving/behavior_planning/behavior_velocity_planner/debug/walkway: { external: sub, type: visualization_msgs/msg/MarkerArray }
   /planning/scenario_planning/lane_driving/behavior_planning/behavior_velocity_planner/debug/walkway/processing_time_ms: { external: sub, type: autoware_internal_debug_msgs/msg/Float64Stamped }
-  /planning/scenario_planning/lane_driving/behavior_planning/behavior_velocity_planner/virtual_wall/blind_spot: { external: both, type: visualization_msgs/msg/MarkerArray }
-  /planning/scenario_planning/lane_driving/behavior_planning/behavior_velocity_planner/virtual_wall/crosswalk: { external: both, type: visualization_msgs/msg/MarkerArray }
-  /planning/scenario_planning/lane_driving/behavior_planning/behavior_velocity_planner/virtual_wall/detection_area: { external: both, type: visualization_msgs/msg/MarkerArray }
-  /planning/scenario_planning/lane_driving/behavior_planning/behavior_velocity_planner/virtual_wall/intersection: { external: both, type: visualization_msgs/msg/MarkerArray }
-  /planning/scenario_planning/lane_driving/behavior_planning/behavior_velocity_planner/virtual_wall/no_stopping_area: { external: both, type: visualization_msgs/msg/MarkerArray }
-  /planning/scenario_planning/lane_driving/behavior_planning/behavior_velocity_planner/virtual_wall/stop_line: { external: both, type: visualization_msgs/msg/MarkerArray }
-  /planning/scenario_planning/lane_driving/behavior_planning/behavior_velocity_planner/virtual_wall/traffic_light: { external: both, type: visualization_msgs/msg/MarkerArray }
-  /planning/scenario_planning/lane_driving/behavior_planning/behavior_velocity_planner/virtual_wall/virtual_traffic_light: { external: both, type: visualization_msgs/msg/MarkerArray }
-  /planning/scenario_planning/lane_driving/behavior_planning/behavior_velocity_planner/virtual_wall/walkway: { external: both, type: visualization_msgs/msg/MarkerArray }
+  /planning/scenario_planning/lane_driving/behavior_planning/behavior_velocity_planner/virtual_wall/blind_spot: { external: sub, type: visualization_msgs/msg/MarkerArray }
+  /planning/scenario_planning/lane_driving/behavior_planning/behavior_velocity_planner/virtual_wall/crosswalk: { external: sub, type: visualization_msgs/msg/MarkerArray }
+  /planning/scenario_planning/lane_driving/behavior_planning/behavior_velocity_planner/virtual_wall/detection_area: { external: sub, type: visualization_msgs/msg/MarkerArray }
+  /planning/scenario_planning/lane_driving/behavior_planning/behavior_velocity_planner/virtual_wall/intersection: { external: sub, type: visualization_msgs/msg/MarkerArray }
+  /planning/scenario_planning/lane_driving/behavior_planning/behavior_velocity_planner/virtual_wall/no_stopping_area: { external: sub, type: visualization_msgs/msg/MarkerArray }
+  /planning/scenario_planning/lane_driving/behavior_planning/behavior_velocity_planner/virtual_wall/stop_line: { external: sub, type: visualization_msgs/msg/MarkerArray }
+  /planning/scenario_planning/lane_driving/behavior_planning/behavior_velocity_planner/virtual_wall/traffic_light: { external: sub, type: visualization_msgs/msg/MarkerArray }
+  /planning/scenario_planning/lane_driving/behavior_planning/behavior_velocity_planner/virtual_wall/virtual_traffic_light: { external: sub, type: visualization_msgs/msg/MarkerArray }
+  /planning/scenario_planning/lane_driving/behavior_planning/behavior_velocity_planner/virtual_wall/walkway: { external: sub, type: visualization_msgs/msg/MarkerArray }
   /planning/scenario_planning/lane_driving/behavior_planning/debug/traffic_signal: { external: sub, type: autoware_perception_msgs/msg/TrafficLightGroup }
   /planning/scenario_planning/lane_driving/behavior_planning/path_generator/debug/processing_time_ms: { external: sub, type: autoware_internal_debug_msgs/msg/Float64Stamped }
-  /planning/scenario_planning/lane_driving/behavior_planning/path_with_lane_id: { external: both, type: autoware_internal_planning_msgs/msg/PathWithLaneId }
+  /planning/scenario_planning/lane_driving/behavior_planning/path_with_lane_id: { external: sub, type: autoware_internal_planning_msgs/msg/PathWithLaneId }
   /planning/scenario_planning/lane_driving/motion_planning/elastic_band_smoother/debug/calculation_time: { external: sub, type: autoware_internal_debug_msgs/msg/StringStamped }
   /planning/scenario_planning/lane_driving/motion_planning/elastic_band_smoother/debug/eb_fixed_traj: { external: sub, type: autoware_planning_msgs/msg/Trajectory }
   /planning/scenario_planning/lane_driving/motion_planning/elastic_band_smoother/debug/eb_traj: { external: sub, type: autoware_planning_msgs/msg/Trajectory }
   /planning/scenario_planning/lane_driving/motion_planning/elastic_band_smoother/debug/extended_traj: { external: sub, type: autoware_planning_msgs/msg/Trajectory }
   /planning/scenario_planning/lane_driving/motion_planning/elastic_band_smoother/debug/processing_time_ms: { external: sub, type: autoware_internal_debug_msgs/msg/Float64Stamped }
-  /planning/scenario_planning/lane_driving/motion_planning/elastic_band_smoother/output/traj: { external: both, type: autoware_planning_msgs/msg/Trajectory }
+  /planning/scenario_planning/lane_driving/motion_planning/elastic_band_smoother/output/traj: { external: sub, type: autoware_planning_msgs/msg/Trajectory }
   /planning/scenario_planning/lane_driving/motion_planning/motion_velocity_planner/boundary_departure_prevention/debug_markers: { external: sub, type: visualization_msgs/msg/MarkerArray }
   /planning/scenario_planning/lane_driving/motion_planning/motion_velocity_planner/boundary_departure_prevention/virtual_walls: { external: sub, type: visualization_msgs/msg/MarkerArray }
   /planning/scenario_planning/lane_driving/motion_planning/motion_velocity_planner/debug/boundary_departure_prevention/processing_time_ms: { external: sub, type: autoware_internal_debug_msgs/msg/Float64Stamped }
@@ -515,7 +512,7 @@ external_topics:
   /planning/scenario_planning/lane_driving/motion_planning/motion_velocity_planner/road_user_stop/debug_markers: { external: sub, type: visualization_msgs/msg/MarkerArray }
   /planning/scenario_planning/lane_driving/motion_planning/motion_velocity_planner/road_user_stop/virtual_walls: { external: sub, type: visualization_msgs/msg/MarkerArray }
   /planning/scenario_planning/lane_driving/motion_planning/motion_velocity_planner/run_out/debug_markers: { external: sub, type: visualization_msgs/msg/MarkerArray }
-  /planning/scenario_planning/lane_driving/motion_planning/motion_velocity_planner/run_out/processing_time_detail_ms: { external: both, type: tier4_debug_msgs/msg/ProcessingTimeTree }
+  /planning/scenario_planning/lane_driving/motion_planning/motion_velocity_planner/run_out/processing_time_detail_ms: { external: sub, type: tier4_debug_msgs/msg/ProcessingTimeTree }
   /planning/scenario_planning/lane_driving/motion_planning/motion_velocity_planner/run_out/virtual_walls: { external: sub, type: visualization_msgs/msg/MarkerArray }
   /planning/scenario_planning/lane_driving/motion_planning/path_optimizer/debug/calculation_time: { external: sub, type: autoware_internal_debug_msgs/msg/StringStamped }
   /planning/scenario_planning/lane_driving/motion_planning/path_optimizer/debug/extended_traj: { external: sub, type: autoware_planning_msgs/msg/Trajectory }
@@ -525,9 +522,9 @@ external_topics:
   /planning/scenario_planning/lane_driving/motion_planning/path_optimizer/debug/mpt_traj: { external: sub, type: autoware_planning_msgs/msg/Trajectory }
   /planning/scenario_planning/lane_driving/motion_planning/path_optimizer/debug/processing_time_detail_ms: { external: sub, type: autoware_internal_debug_msgs/msg/ProcessingTimeTree }
   /planning/scenario_planning/lane_driving/motion_planning/path_optimizer/debug/processing_time_ms: { external: sub, type: autoware_internal_debug_msgs/msg/Float64Stamped }
-  /planning/scenario_planning/lane_driving/motion_planning/path_optimizer/trajectory: { external: both, type: autoware_planning_msgs/msg/Trajectory }
+  /planning/scenario_planning/lane_driving/motion_planning/path_optimizer/trajectory: { external: sub, type: autoware_planning_msgs/msg/Trajectory }
   /planning/scenario_planning/lane_driving/motion_planning/path_optimizer/virtual_wall: { external: sub, type: visualization_msgs/msg/MarkerArray }
-  /planning/scenario_planning/lane_driving/motion_planning/path_smoother/path: { external: both, type: autoware_planning_msgs/msg/Path }
+  /planning/scenario_planning/lane_driving/motion_planning/path_smoother/path: { external: sub, type: autoware_planning_msgs/msg/Path }
   /planning/scenario_planning/lane_driving/motion_planning/surround_obstacle_checker/debug/processing_time_ms: { external: sub, type: autoware_internal_debug_msgs/msg/Float64Stamped }
   /planning/scenario_planning/parking/costmap_generator/debug/processing_time_ms: { external: sub, type: autoware_internal_debug_msgs/msg/Float64Stamped }
   /planning/scenario_planning/parking/freespace_planner/debug/partial_pose_array: { external: sub, type: geometry_msgs/msg/PoseArray }
@@ -535,7 +532,7 @@ external_topics:
   /planning/scenario_planning/parking/freespace_planner/debug/processing_time_ms: { external: sub, type: autoware_internal_debug_msgs/msg/Float64Stamped }
   /planning/scenario_planning/parking/processing_time: { external: both, type: autoware_internal_debug_msgs/msg/ProcessingTimeTree }
   /planning/scenario_planning/scenario_selector/debug/processing_time_ms: { external: sub, type: autoware_internal_debug_msgs/msg/Float64Stamped }
-  /planning/scenario_planning/status/infrastructure_commands: { external: both, type: tier4_v2x_msgs/msg/InfrastructureCommandArray }
+  /planning/scenario_planning/status/infrastructure_commands: { external: sub, type: tier4_v2x_msgs/msg/InfrastructureCommandArray }
   /planning/scenario_planning/trajectory: { external: both, type: autoware_planning_msgs/msg/Trajectory }
   /planning/scenario_planning/velocity_smoother/closest_acceleration: { external: both, type: autoware_internal_debug_msgs/msg/Float32Stamped }
   /planning/scenario_planning/velocity_smoother/closest_jerk: { external: both, type: autoware_internal_debug_msgs/msg/Float32Stamped }
@@ -618,57 +615,57 @@ external_topics:
   # CLI's default visibility rules). Treated the same as round 1.
   # ───────────────────────────────────────────────────────────
   # ── /control (round 2) ──
-  /control/autonomous_emergency_braking/input/imu: { external: both, type: sensor_msgs/msg/Imu }
-  /control/autonomous_emergency_braking/input/objects: { external: both, type: autoware_perception_msgs/msg/PredictedObjects }
-  /control/autonomous_emergency_braking/input/pointcloud: { external: both, type: sensor_msgs/msg/PointCloud2 }
-  /control/autonomous_emergency_braking/input/predicted_trajectory: { external: both, type: autoware_planning_msgs/msg/Trajectory }
-  /control/autonomous_emergency_braking/input/velocity: { external: both, type: autoware_vehicle_msgs/msg/VelocityReport }
-  /control/collision_detector/input/objects: { external: both, type: autoware_perception_msgs/msg/PredictedObjects }
-  /control/collision_detector/input/odometry: { external: both, type: nav_msgs/msg/Odometry }
-  /control/collision_detector/input/pointcloud: { external: both, type: sensor_msgs/msg/PointCloud2 }
-  /control/control_cmd: { external: both, type: autoware_control_msgs/msg/Control }
-  /control/control_evaluator/input/acceleration: { external: both, type: geometry_msgs/msg/AccelWithCovarianceStamped }
-  /control/control_evaluator/input/behavior_path: { external: both, type: autoware_internal_planning_msgs/msg/PathWithLaneId }
-  /control/control_evaluator/input/objects: { external: both, type: autoware_perception_msgs/msg/PredictedObjects }
-  /control/control_evaluator/input/odometry: { external: both, type: nav_msgs/msg/Odometry }
-  /control/control_evaluator/input/route: { external: both, type: autoware_planning_msgs/msg/LaneletRoute }
-  /control/control_evaluator/input/steering_status: { external: both, type: autoware_vehicle_msgs/msg/SteeringReport }
-  /control/control_evaluator/input/trajectory: { external: both, type: autoware_planning_msgs/msg/Trajectory }
-  /control/control_evaluator/input/vector_map: { external: both, type: autoware_map_msgs/msg/LaneletMapBin }
-  /control/control_mode_report: { external: both, type: autoware_vehicle_msgs/msg/ControlModeReport }
-  /control/control_validator/input/control_cmd: { external: both, type: autoware_control_msgs/msg/Control }
-  /control/control_validator/input/kinematics: { external: both, type: nav_msgs/msg/Odometry }
-  /control/control_validator/input/measured_acceleration: { external: both, type: geometry_msgs/msg/AccelWithCovarianceStamped }
-  /control/control_validator/input/operational_mode_state: { external: both, type: autoware_adapi_v1_msgs/msg/OperationModeState }
-  /control/control_validator/input/predicted_trajectory: { external: both, type: autoware_planning_msgs/msg/Trajectory }
-  /control/control_validator/input/reference_trajectory: { external: both, type: autoware_planning_msgs/msg/Trajectory }
+  /control/autonomous_emergency_braking/input/imu: { external: sub, type: input }
+  /control/autonomous_emergency_braking/input/objects: { external: sub, type: input }
+  /control/autonomous_emergency_braking/input/pointcloud: { external: sub, type: input }
+  /control/autonomous_emergency_braking/input/predicted_trajectory: { external: sub, type: input }
+  /control/autonomous_emergency_braking/input/velocity: { external: sub, type: input }
+  /control/collision_detector/input/objects: { external: sub, type: input }
+  /control/collision_detector/input/odometry: { external: sub, type: input }
+  /control/collision_detector/input/pointcloud: { external: sub, type: input }
+  /control/control_cmd: { external: sub, type: autoware_control_msgs/msg/Control }
+  /control/control_evaluator/input/acceleration: { external: sub, type: input }
+  /control/control_evaluator/input/behavior_path: { external: sub, type: input }
+  /control/control_evaluator/input/objects: { external: sub, type: input }
+  /control/control_evaluator/input/odometry: { external: sub, type: input }
+  /control/control_evaluator/input/route: { external: sub, type: input }
+  /control/control_evaluator/input/steering_status: { external: sub, type: input }
+  /control/control_evaluator/input/trajectory: { external: sub, type: input }
+  /control/control_evaluator/input/vector_map: { external: sub, type: input }
+  /control/control_mode_report: { external: sub, type: autoware_vehicle_msgs/msg/ControlModeReport }
+  /control/control_validator/input/control_cmd: { external: sub, type: input }
+  /control/control_validator/input/kinematics: { external: sub, type: input }
+  /control/control_validator/input/measured_acceleration: { external: sub, type: input }
+  /control/control_validator/input/operational_mode_state: { external: sub, type: input }
+  /control/control_validator/input/predicted_trajectory: { external: sub, type: input }
+  /control/control_validator/input/reference_trajectory: { external: sub, type: input }
   /control/control_validator/output/validation_status: { external: sub, type: validation_status }
-  /control/external_cmd_selector/input/local/gear_cmd: { external: both, type: autoware_vehicle_msgs/msg/GearCommand }
-  /control/external_cmd_selector/input/local/hazard_lights_cmd: { external: both, type: autoware_vehicle_msgs/msg/HazardLightsCommand }
-  /control/external_cmd_selector/input/local/heartbeat: { external: both, type: autoware_adapi_v1_msgs/msg/ManualOperatorHeartbeat }
-  /control/external_cmd_selector/input/local/pedals_cmd: { external: both, type: autoware_adapi_v1_msgs/msg/PedalsCommand }
-  /control/external_cmd_selector/input/local/steering_cmd: { external: both, type: autoware_adapi_v1_msgs/msg/SteeringCommand }
-  /control/external_cmd_selector/input/local/turn_indicators_cmd: { external: both, type: autoware_vehicle_msgs/msg/TurnIndicatorsCommand }
-  /control/external_cmd_selector/input/remote/gear_cmd: { external: both, type: autoware_vehicle_msgs/msg/GearCommand }
-  /control/external_cmd_selector/input/remote/hazard_lights_cmd: { external: both, type: autoware_vehicle_msgs/msg/HazardLightsCommand }
-  /control/external_cmd_selector/input/remote/heartbeat: { external: both, type: autoware_adapi_v1_msgs/msg/ManualOperatorHeartbeat }
-  /control/external_cmd_selector/input/remote/pedals_cmd: { external: both, type: autoware_adapi_v1_msgs/msg/PedalsCommand }
-  /control/external_cmd_selector/input/remote/steering_cmd: { external: both, type: autoware_adapi_v1_msgs/msg/SteeringCommand }
-  /control/external_cmd_selector/input/remote/turn_indicators_cmd: { external: both, type: autoware_vehicle_msgs/msg/TurnIndicatorsCommand }
-  /control/external_cmd_selector/output/current_selector_mode: { external: both, type: tier4_control_msgs/msg/ExternalCommandSelectorMode }
-  /control/external_cmd_selector/output/gear_cmd: { external: both, type: autoware_vehicle_msgs/msg/GearCommand }
-  /control/external_cmd_selector/output/hazard_lights_cmd: { external: both, type: autoware_vehicle_msgs/msg/HazardLightsCommand }
-  /control/external_cmd_selector/output/heartbeat: { external: both, type: autoware_adapi_v1_msgs/msg/ManualOperatorHeartbeat }
-  /control/external_cmd_selector/output/pedals_cmd: { external: both, type: autoware_adapi_v1_msgs/msg/PedalsCommand }
-  /control/external_cmd_selector/output/steering_cmd: { external: both, type: autoware_adapi_v1_msgs/msg/SteeringCommand }
-  /control/external_cmd_selector/output/turn_indicators_cmd: { external: both, type: autoware_vehicle_msgs/msg/TurnIndicatorsCommand }
-  /control/gate_operation_mode: { external: both, type: autoware_adapi_v1_msgs/msg/OperationModeState }
-  /control/in/current_gate_mode: { external: both, type: tier4_control_msgs/msg/GateMode }
-  /control/in/gear_cmd: { external: both, type: autoware_vehicle_msgs/msg/GearCommand }
-  /control/in/heartbeat: { external: both, type: autoware_adapi_v1_msgs/msg/ManualOperatorHeartbeat }
-  /control/in/odometry: { external: both, type: nav_msgs/msg/Odometry }
-  /control/in/pedals_cmd: { external: both, type: autoware_adapi_v1_msgs/msg/PedalsCommand }
-  /control/in/steering_cmd: { external: both, type: autoware_adapi_v1_msgs/msg/SteeringCommand }
+  /control/external_cmd_selector/input/local/gear_cmd: { external: sub, type: input }
+  /control/external_cmd_selector/input/local/hazard_lights_cmd: { external: sub, type: input }
+  /control/external_cmd_selector/input/local/heartbeat: { external: sub, type: input }
+  /control/external_cmd_selector/input/local/pedals_cmd: { external: sub, type: input }
+  /control/external_cmd_selector/input/local/steering_cmd: { external: sub, type: input }
+  /control/external_cmd_selector/input/local/turn_indicators_cmd: { external: sub, type: input }
+  /control/external_cmd_selector/input/remote/gear_cmd: { external: sub, type: input }
+  /control/external_cmd_selector/input/remote/hazard_lights_cmd: { external: sub, type: input }
+  /control/external_cmd_selector/input/remote/heartbeat: { external: sub, type: input }
+  /control/external_cmd_selector/input/remote/pedals_cmd: { external: sub, type: input }
+  /control/external_cmd_selector/input/remote/steering_cmd: { external: sub, type: input }
+  /control/external_cmd_selector/input/remote/turn_indicators_cmd: { external: sub, type: input }
+  /control/external_cmd_selector/output/current_selector_mode: { external: sub, type: output }
+  /control/external_cmd_selector/output/gear_cmd: { external: sub, type: output }
+  /control/external_cmd_selector/output/hazard_lights_cmd: { external: sub, type: output }
+  /control/external_cmd_selector/output/heartbeat: { external: sub, type: output }
+  /control/external_cmd_selector/output/pedals_cmd: { external: sub, type: output }
+  /control/external_cmd_selector/output/steering_cmd: { external: sub, type: output }
+  /control/external_cmd_selector/output/turn_indicators_cmd: { external: sub, type: output }
+  /control/gate_operation_mode: { external: sub, type: autoware_adapi_v1_msgs/msg/OperationModeState }
+  /control/in/current_gate_mode: { external: sub, type: tier4_control_msgs/msg/GateMode }
+  /control/in/gear_cmd: { external: sub, type: autoware_vehicle_msgs/msg/GearCommand }
+  /control/in/heartbeat: { external: sub, type: autoware_adapi_v1_msgs/msg/ManualOperatorHeartbeat }
+  /control/in/odometry: { external: sub, type: nav_msgs/msg/Odometry }
+  /control/in/pedals_cmd: { external: sub, type: autoware_adapi_v1_msgs/msg/PedalsCommand }
+  /control/in/steering_cmd: { external: sub, type: autoware_adapi_v1_msgs/msg/SteeringCommand }
   /control/input/acceleration: { external: both, type: geometry_msgs/msg/AccelWithCovarianceStamped }
   /control/input/auto/control_cmd: { external: both, type: autoware_control_msgs/msg/Control }
   /control/input/auto/gear_cmd: { external: both, type: autoware_vehicle_msgs/msg/GearCommand }
@@ -692,7 +689,7 @@ external_topics:
   /control/input/state: { external: both, type: autoware_system_msgs/msg/AutowareState }
   /control/input/steering: { external: both, type: autoware_vehicle_msgs/msg/SteeringReport }
   /control/kinematics: { external: both, type: nav_msgs/msg/Odometry }
-  /control/out/control_cmd: { external: both, type: autoware_control_msgs/msg/Control }
+  /control/out/control_cmd: { external: sub, type: autoware_control_msgs/msg/Control }
   /control/output/control_cmd: { external: both, type: autoware_control_msgs/msg/Control }
   /control/output/engage: { external: both, type: autoware_vehicle_msgs/msg/Engage }
   /control/output/external_emergency: { external: both, type: tier4_external_api_msgs/msg/Emergency }
@@ -703,21 +700,21 @@ external_topics:
   /control/output/turn_indicators_cmd: { external: both, type: autoware_vehicle_msgs/msg/TurnIndicatorsCommand }
   /control/output/vehicle_cmd_emergency: { external: both, type: tier4_vehicle_msgs/msg/VehicleEmergencyStamped }
   /control/trajectory: { external: both, type: autoware_planning_msgs/msg/Trajectory }
-  /control/trajectory_follower/controller_node_exe/input/current_accel: { external: both, type: geometry_msgs/msg/AccelWithCovarianceStamped }
-  /control/trajectory_follower/controller_node_exe/input/current_odometry: { external: both, type: nav_msgs/msg/Odometry }
-  /control/trajectory_follower/controller_node_exe/input/current_operation_mode: { external: both, type: autoware_adapi_v1_msgs/msg/OperationModeState }
-  /control/trajectory_follower/controller_node_exe/input/current_steering: { external: both, type: autoware_vehicle_msgs/msg/SteeringReport }
-  /control/trajectory_follower/controller_node_exe/input/reference_trajectory: { external: both, type: autoware_planning_msgs/msg/Trajectory }
-  /control/trajectory_follower/controller_node_exe/output/control_cmd: { external: both, type: autoware_control_msgs/msg/Control }
-  /control/trajectory_follower/controller_node_exe/output/lateral_diagnostic: { external: both, type: autoware_internal_debug_msgs/msg/Float32MultiArrayStamped }
-  /control/trajectory_follower/controller_node_exe/output/longitudinal_diagnostic: { external: both, type: autoware_internal_debug_msgs/msg/Float32MultiArrayStamped }
-  /control/trajectory_follower/controller_node_exe/output/predicted_trajectory: { external: both, type: autoware_planning_msgs/msg/Trajectory }
+  /control/trajectory_follower/controller_node_exe/input/current_accel: { external: sub, type: input }
+  /control/trajectory_follower/controller_node_exe/input/current_odometry: { external: sub, type: input }
+  /control/trajectory_follower/controller_node_exe/input/current_operation_mode: { external: sub, type: input }
+  /control/trajectory_follower/controller_node_exe/input/current_steering: { external: sub, type: input }
+  /control/trajectory_follower/controller_node_exe/input/reference_trajectory: { external: sub, type: input }
+  /control/trajectory_follower/controller_node_exe/output/control_cmd: { external: sub, type: output }
+  /control/trajectory_follower/controller_node_exe/output/lateral_diagnostic: { external: sub, type: output }
+  /control/trajectory_follower/controller_node_exe/output/longitudinal_diagnostic: { external: sub, type: output }
+  /control/trajectory_follower/controller_node_exe/output/predicted_trajectory: { external: sub, type: output }
   /control/trajectory_follower/controller_node_exe/output/slope_angle: { external: sub, type: slope_angle }
-  /control/trajectory_follower/lane_departure_checker_node/input/lanelet_map_bin: { external: both, type: autoware_map_msgs/msg/LaneletMapBin }
-  /control/trajectory_follower/lane_departure_checker_node/input/odometry: { external: both, type: nav_msgs/msg/Odometry }
-  /control/trajectory_follower/lane_departure_checker_node/input/predicted_trajectory: { external: both, type: autoware_planning_msgs/msg/Trajectory }
-  /control/trajectory_follower/lane_departure_checker_node/input/reference_trajectory: { external: both, type: autoware_planning_msgs/msg/Trajectory }
-  /control/trajectory_follower/lane_departure_checker_node/input/route: { external: both, type: autoware_planning_msgs/msg/LaneletRoute }
+  /control/trajectory_follower/lane_departure_checker_node/input/lanelet_map_bin: { external: sub, type: input }
+  /control/trajectory_follower/lane_departure_checker_node/input/odometry: { external: sub, type: input }
+  /control/trajectory_follower/lane_departure_checker_node/input/predicted_trajectory: { external: sub, type: input }
+  /control/trajectory_follower/lane_departure_checker_node/input/reference_trajectory: { external: sub, type: input }
+  /control/trajectory_follower/lane_departure_checker_node/input/route: { external: sub, type: input }
   /control/trajectory_follower_control_cmd: { external: both, type: autoware_control_msgs/msg/Control }
   # ── /default_adapi (round 2) ──
   /default_adapi/helpers/autoware_initial_pose_adaptor/initialpose: { external: both, type: geometry_msgs/msg/PoseWithCovarianceStamped }
@@ -731,140 +728,140 @@ external_topics:
   /map/output/lanelet2_map_marker: { external: sub, type: visualization_msgs/msg/MarkerArray }
   /map/output/pointcloud_map: { external: sub, type: sensor_msgs/msg/PointCloud2 }
   # ── /occupancy_grid_map (round 2) ──
-  /occupancy_grid_map/occupancy_grid_map_node/input/laserscan: { external: both, type: sensor_msgs/msg/LaserScan }
-  /occupancy_grid_map/occupancy_grid_map_node/input/obstacle_pointcloud: { external: both, type: sensor_msgs/msg/PointCloud2 }
-  /occupancy_grid_map/occupancy_grid_map_node/input/raw_pointcloud: { external: both, type: sensor_msgs/msg/PointCloud2 }
-  /occupancy_grid_map/occupancy_grid_map_node/output/occupancy_grid_map: { external: both, type: nav_msgs/msg/OccupancyGrid }
-  /occupancy_grid_map/pointcloud_to_laserscan_node/input/pointcloud: { external: both, type: sensor_msgs/msg/PointCloud2 }
-  /occupancy_grid_map/pointcloud_to_laserscan_node/output/laserscan: { external: both, type: sensor_msgs/msg/LaserScan }
-  /occupancy_grid_map/pointcloud_to_laserscan_node/output/pointcloud: { external: both, type: sensor_msgs/msg/PointCloud2 }
-  /occupancy_grid_map/pointcloud_to_laserscan_node/output/ray: { external: both, type: visualization_msgs/msg/Marker }
-  /occupancy_grid_map/pointcloud_to_laserscan_node/output/stixel: { external: both, type: visualization_msgs/msg/MarkerArray }
+  /occupancy_grid_map/occupancy_grid_map_node/input/laserscan: { external: sub, type: sensor_msgs/msg/LaserScan }
+  /occupancy_grid_map/occupancy_grid_map_node/input/obstacle_pointcloud: { external: sub, type: sensor_msgs/msg/PointCloud2 }
+  /occupancy_grid_map/occupancy_grid_map_node/input/raw_pointcloud: { external: sub, type: sensor_msgs/msg/PointCloud2 }
+  /occupancy_grid_map/occupancy_grid_map_node/output/occupancy_grid_map: { external: sub, type: nav_msgs/msg/OccupancyGrid }
+  /occupancy_grid_map/pointcloud_to_laserscan_node/input/pointcloud: { external: sub, type: sensor_msgs/msg/PointCloud2 }
+  /occupancy_grid_map/pointcloud_to_laserscan_node/output/laserscan: { external: sub, type: sensor_msgs/msg/LaserScan }
+  /occupancy_grid_map/pointcloud_to_laserscan_node/output/pointcloud: { external: sub, type: sensor_msgs/msg/PointCloud2 }
+  /occupancy_grid_map/pointcloud_to_laserscan_node/output/ray: { external: sub, type: visualization_msgs/msg/Marker }
+  /occupancy_grid_map/pointcloud_to_laserscan_node/output/stixel: { external: sub, type: visualization_msgs/msg/MarkerArray }
   # ── /perception (round 2) ──
   /perception/object_recognition/prediction/map_based_prediction/input/objects: { external: pub, type: autoware_perception_msgs/msg/TrackedObjects }
   /perception/object_recognition/prediction/map_based_prediction/output/objects: { external: sub, type: autoware_perception_msgs/msg/PredictedObjects }
   /perception/object_recognition/tracking/output/objects: { external: sub, type: autoware_perception_msgs/msg/TrackedObjects }
-  /perception/perception_analytics_publisher/input/objects: { external: both, type: autoware_perception_msgs/msg/PredictedObjects }
+  /perception/perception_analytics_publisher/input/objects: { external: sub, type: autoware_perception_msgs/msg/PredictedObjects }
   # ── /planning (round 2) ──
-  /planning/debug/objects_of_interest/motion_velocity_planner_common: { external: both, type: visualization_msgs/msg/MarkerArray }
-  /planning/mission_planning/input/route: { external: both, type: autoware_planning_msgs/msg/LaneletRoute }
-  /planning/mission_planning/manual_lane_change_handler/input/odometry: { external: both, type: nav_msgs/msg/Odometry }
-  /planning/mission_planning/manual_lane_change_handler/input/vector_map: { external: both, type: autoware_map_msgs/msg/LaneletMapBin }
+  /planning/debug/objects_of_interest/motion_velocity_planner_common: { external: sub, type: visualization_msgs/msg/MarkerArray }
+  /planning/mission_planning/input/route: { external: pub, type: autoware_planning_msgs/msg/LaneletRoute }
+  /planning/mission_planning/manual_lane_change_handler/input/odometry: { external: pub, type: nav_msgs/msg/Odometry }
+  /planning/mission_planning/manual_lane_change_handler/input/vector_map: { external: pub, type: autoware_map_msgs/msg/LaneletMapBin }
   /planning/mission_planning/mission_planner/debug/route_marker: { external: sub, type: visualization_msgs/msg/MarkerArray }
-  /planning/mission_planning/mission_planner/input/modified_goal: { external: both, type: autoware_planning_msgs/msg/PoseWithUuidStamped }
-  /planning/mission_planning/mission_planner/input/odometry: { external: both, type: nav_msgs/msg/Odometry }
-  /planning/mission_planning/mission_planner/input/operation_mode_state: { external: both, type: autoware_adapi_v1_msgs/msg/OperationModeState }
-  /planning/mission_planning/mission_planner/input/reroute_availability: { external: both, type: tier4_planning_msgs/msg/RerouteAvailability }
-  /planning/mission_planning/mission_planner/input/vector_map: { external: both, type: autoware_map_msgs/msg/LaneletMapBin }
+  /planning/mission_planning/mission_planner/input/modified_goal: { external: pub, type: autoware_planning_msgs/msg/PoseWithUuidStamped }
+  /planning/mission_planning/mission_planner/input/odometry: { external: pub, type: nav_msgs/msg/Odometry }
+  /planning/mission_planning/mission_planner/input/operation_mode_state: { external: pub, type: autoware_adapi_v1_msgs/msg/OperationModeState }
+  /planning/mission_planning/mission_planner/input/reroute_availability: { external: pub, type: tier4_planning_msgs/msg/RerouteAvailability }
+  /planning/mission_planning/mission_planner/input/vector_map: { external: pub, type: autoware_map_msgs/msg/LaneletMapBin }
   /planning/mission_planning/mission_planner/route: { external: both, type: autoware_planning_msgs/msg/LaneletRoute }
   /planning/mission_planning/mission_planner/state: { external: both, type: autoware_planning_msgs/msg/RouteState }
   /planning/mission_planning/output/goal_pose: { external: both, type: geometry_msgs/msg/PoseStamped }
-  /planning/mission_planning/route_selector/main/route: { external: both, type: autoware_planning_msgs/msg/LaneletRoute }
-  /planning/mission_planning/route_selector/main/state: { external: both, type: autoware_planning_msgs/msg/RouteState }
-  /planning/mission_planning/route_selector/planner/route: { external: both, type: autoware_planning_msgs/msg/LaneletRoute }
-  /planning/mission_planning/route_selector/planner/state: { external: both, type: autoware_planning_msgs/msg/RouteState }
-  /planning/planning_evaluator/input/acceleration: { external: both, type: geometry_msgs/msg/AccelWithCovarianceStamped }
-  /planning/planning_evaluator/input/modified_goal: { external: both, type: autoware_planning_msgs/msg/PoseWithUuidStamped }
-  /planning/planning_evaluator/input/objects: { external: both, type: autoware_perception_msgs/msg/PredictedObjects }
-  /planning/planning_evaluator/input/odometry: { external: both, type: nav_msgs/msg/Odometry }
-  /planning/planning_evaluator/input/reference_trajectory: { external: both, type: autoware_planning_msgs/msg/Trajectory }
-  /planning/planning_evaluator/input/route: { external: both, type: autoware_planning_msgs/msg/LaneletRoute }
-  /planning/planning_evaluator/input/steering_status: { external: both, type: autoware_vehicle_msgs/msg/SteeringReport }
-  /planning/planning_evaluator/input/trajectory: { external: both, type: autoware_planning_msgs/msg/Trajectory }
-  /planning/planning_evaluator/input/turn_indicators_status: { external: both, type: autoware_vehicle_msgs/msg/TurnIndicatorsReport }
-  /planning/planning_evaluator/input/vector_map: { external: both, type: autoware_map_msgs/msg/LaneletMapBin }
-  /planning/planning_validator/input/acceleration: { external: both, type: geometry_msgs/msg/AccelWithCovarianceStamped }
-  /planning/planning_validator/input/kinematics: { external: both, type: nav_msgs/msg/Odometry }
-  /planning/planning_validator/input/lanelet_map_bin: { external: both, type: autoware_map_msgs/msg/LaneletMapBin }
-  /planning/planning_validator/input/operational_mode_state: { external: both, type: autoware_adapi_v1_msgs/msg/OperationModeState }
-  /planning/planning_validator/input/pointcloud: { external: both, type: sensor_msgs/msg/PointCloud2 }
-  /planning/planning_validator/input/route: { external: both, type: autoware_planning_msgs/msg/LaneletRoute }
-  /planning/planning_validator/input/traffic_signals: { external: both, type: autoware_perception_msgs/msg/TrafficLightGroupArray }
-  /planning/planning_validator/input/trajectory: { external: both, type: autoware_planning_msgs/msg/Trajectory }
+  /planning/mission_planning/route_selector/main/route: { external: sub, type: autoware_planning_msgs/msg/LaneletRoute }
+  /planning/mission_planning/route_selector/main/state: { external: sub, type: autoware_planning_msgs/msg/RouteState }
+  /planning/mission_planning/route_selector/planner/route: { external: sub, type: autoware_planning_msgs/msg/LaneletRoute }
+  /planning/mission_planning/route_selector/planner/state: { external: sub, type: autoware_planning_msgs/msg/RouteState }
+  /planning/planning_evaluator/input/acceleration: { external: pub, type: geometry_msgs/msg/AccelWithCovarianceStamped }
+  /planning/planning_evaluator/input/modified_goal: { external: pub, type: autoware_planning_msgs/msg/PoseWithUuidStamped }
+  /planning/planning_evaluator/input/objects: { external: pub, type: autoware_perception_msgs/msg/PredictedObjects }
+  /planning/planning_evaluator/input/odometry: { external: pub, type: nav_msgs/msg/Odometry }
+  /planning/planning_evaluator/input/reference_trajectory: { external: pub, type: autoware_planning_msgs/msg/Trajectory }
+  /planning/planning_evaluator/input/route: { external: pub, type: autoware_planning_msgs/msg/LaneletRoute }
+  /planning/planning_evaluator/input/steering_status: { external: pub, type: autoware_vehicle_msgs/msg/SteeringReport }
+  /planning/planning_evaluator/input/trajectory: { external: pub, type: autoware_planning_msgs/msg/Trajectory }
+  /planning/planning_evaluator/input/turn_indicators_status: { external: pub, type: autoware_vehicle_msgs/msg/TurnIndicatorsReport }
+  /planning/planning_evaluator/input/vector_map: { external: pub, type: autoware_map_msgs/msg/LaneletMapBin }
+  /planning/planning_validator/input/acceleration: { external: pub, type: geometry_msgs/msg/AccelWithCovarianceStamped }
+  /planning/planning_validator/input/kinematics: { external: pub, type: nav_msgs/msg/Odometry }
+  /planning/planning_validator/input/lanelet_map_bin: { external: pub, type: autoware_map_msgs/msg/LaneletMapBin }
+  /planning/planning_validator/input/operational_mode_state: { external: pub, type: autoware_adapi_v1_msgs/msg/OperationModeState }
+  /planning/planning_validator/input/pointcloud: { external: pub, type: sensor_msgs/msg/PointCloud2 }
+  /planning/planning_validator/input/route: { external: pub, type: autoware_planning_msgs/msg/LaneletRoute }
+  /planning/planning_validator/input/traffic_signals: { external: pub, type: autoware_perception_msgs/msg/TrafficLightGroupArray }
+  /planning/planning_validator/input/trajectory: { external: pub, type: autoware_planning_msgs/msg/Trajectory }
   /planning/planning_validator/output/trajectory: { external: both, type: autoware_planning_msgs/msg/Trajectory }
   /planning/planning_validator/output/validation_status: { external: both, type: autoware_planning_validator/msg/PlanningValidatorStatus }
-  /planning/remaining_distance_time_calculator/input/map: { external: both, type: autoware_map_msgs/msg/LaneletMapBin }
-  /planning/remaining_distance_time_calculator/input/odometry: { external: both, type: nav_msgs/msg/Odometry }
-  /planning/remaining_distance_time_calculator/input/route: { external: both, type: autoware_planning_msgs/msg/LaneletRoute }
-  /planning/remaining_distance_time_calculator/input/scenario: { external: both, type: autoware_internal_planning_msgs/msg/Scenario }
+  /planning/remaining_distance_time_calculator/input/map: { external: pub, type: autoware_map_msgs/msg/LaneletMapBin }
+  /planning/remaining_distance_time_calculator/input/odometry: { external: pub, type: nav_msgs/msg/Odometry }
+  /planning/remaining_distance_time_calculator/input/route: { external: pub, type: autoware_planning_msgs/msg/LaneletRoute }
+  /planning/remaining_distance_time_calculator/input/scenario: { external: pub, type: autoware_internal_planning_msgs/msg/Scenario }
   /planning/remaining_distance_time_calculator/output/mission_remaining_distance_time: { external: both, type: autoware_internal_msgs/msg/MissionRemainingDistanceTime }
-  /planning/scenario_planning/input/lane_driving/trajectory: { external: both, type: autoware_planning_msgs/msg/Trajectory }
-  /planning/scenario_planning/input/lanelet_map: { external: both, type: autoware_map_msgs/msg/LaneletMapBin }
-  /planning/scenario_planning/input/odometry: { external: both, type: nav_msgs/msg/Odometry }
-  /planning/scenario_planning/input/operation_mode_state: { external: both, type: autoware_adapi_v1_msgs/msg/OperationModeState }
-  /planning/scenario_planning/input/parking/trajectory: { external: both, type: autoware_planning_msgs/msg/Trajectory }
-  /planning/scenario_planning/input/planning/hazard_lights_command: { external: both, type: autoware_vehicle_msgs/msg/HazardLightsCommand }
-  /planning/scenario_planning/input/route: { external: both, type: autoware_planning_msgs/msg/LaneletRoute }
-  /planning/scenario_planning/input/system/hazard_lights_command: { external: both, type: autoware_vehicle_msgs/msg/HazardLightsCommand }
-  /planning/scenario_planning/input/velocity_limit_clear_command_from_internal: { external: both, type: autoware_internal_planning_msgs/msg/VelocityLimitClearCommand }
-  /planning/scenario_planning/input/velocity_limit_from_api: { external: both, type: autoware_internal_planning_msgs/msg/VelocityLimit }
-  /planning/scenario_planning/input/velocity_limit_from_internal: { external: both, type: autoware_internal_planning_msgs/msg/VelocityLimit }
+  /planning/scenario_planning/input/lane_driving/trajectory: { external: pub, type: autoware_planning_msgs/msg/Trajectory }
+  /planning/scenario_planning/input/lanelet_map: { external: pub, type: autoware_map_msgs/msg/LaneletMapBin }
+  /planning/scenario_planning/input/odometry: { external: pub, type: nav_msgs/msg/Odometry }
+  /planning/scenario_planning/input/operation_mode_state: { external: pub, type: autoware_adapi_v1_msgs/msg/OperationModeState }
+  /planning/scenario_planning/input/parking/trajectory: { external: pub, type: autoware_planning_msgs/msg/Trajectory }
+  /planning/scenario_planning/input/planning/hazard_lights_command: { external: pub, type: autoware_vehicle_msgs/msg/HazardLightsCommand }
+  /planning/scenario_planning/input/route: { external: pub, type: autoware_planning_msgs/msg/LaneletRoute }
+  /planning/scenario_planning/input/system/hazard_lights_command: { external: pub, type: autoware_vehicle_msgs/msg/HazardLightsCommand }
+  /planning/scenario_planning/input/velocity_limit_clear_command_from_internal: { external: pub, type: autoware_internal_planning_msgs/msg/VelocityLimitClearCommand }
+  /planning/scenario_planning/input/velocity_limit_from_api: { external: pub, type: autoware_internal_planning_msgs/msg/VelocityLimit }
+  /planning/scenario_planning/input/velocity_limit_from_internal: { external: pub, type: autoware_internal_planning_msgs/msg/VelocityLimit }
   /planning/scenario_planning/is_parking_completed: { external: both, type: std_msgs/msg/Bool }
-  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/input/accel: { external: both, type: geometry_msgs/msg/AccelWithCovarianceStamped }
-  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/input/costmap: { external: both, type: nav_msgs/msg/OccupancyGrid }
-  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/input/occupancy_grid_map: { external: both, type: nav_msgs/msg/OccupancyGrid }
-  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/input/odometry: { external: both, type: nav_msgs/msg/Odometry }
-  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/input/perception: { external: both, type: autoware_perception_msgs/msg/PredictedObjects }
-  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/input/route: { external: both, type: autoware_planning_msgs/msg/LaneletRoute }
-  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/input/scenario: { external: both, type: autoware_internal_planning_msgs/msg/Scenario }
-  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/input/traffic_signals: { external: both, type: autoware_perception_msgs/msg/TrafficLightGroupArray }
-  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/input/vector_map: { external: both, type: autoware_map_msgs/msg/LaneletMapBin }
-  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/output/hazard_lights_cmd: { external: both, type: autoware_vehicle_msgs/msg/HazardLightsCommand }
-  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/output/modified_goal: { external: both, type: autoware_planning_msgs/msg/PoseWithUuidStamped }
-  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/output/path: { external: both, type: autoware_internal_planning_msgs/msg/PathWithLaneId }
-  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/output/turn_indicators_cmd: { external: both, type: autoware_vehicle_msgs/msg/TurnIndicatorsCommand }
-  /planning/scenario_planning/lane_driving/behavior_planning/behavior_velocity_planner/input/accel: { external: both, type: geometry_msgs/msg/AccelWithCovarianceStamped }
-  /planning/scenario_planning/lane_driving/behavior_planning/behavior_velocity_planner/input/dynamic_objects: { external: both, type: autoware_perception_msgs/msg/PredictedObjects }
-  /planning/scenario_planning/lane_driving/behavior_planning/behavior_velocity_planner/input/external_velocity_limit_mps: { external: both, type: autoware_internal_planning_msgs/msg/VelocityLimit }
-  /planning/scenario_planning/lane_driving/behavior_planning/behavior_velocity_planner/input/no_ground_pointcloud: { external: both, type: sensor_msgs/msg/PointCloud2 }
-  /planning/scenario_planning/lane_driving/behavior_planning/behavior_velocity_planner/input/occupancy_grid: { external: both, type: nav_msgs/msg/OccupancyGrid }
-  /planning/scenario_planning/lane_driving/behavior_planning/behavior_velocity_planner/input/path_with_lane_id: { external: both, type: autoware_internal_planning_msgs/msg/PathWithLaneId }
-  /planning/scenario_planning/lane_driving/behavior_planning/behavior_velocity_planner/input/traffic_signals: { external: both, type: autoware_perception_msgs/msg/TrafficLightGroupArray }
-  /planning/scenario_planning/lane_driving/behavior_planning/behavior_velocity_planner/input/vector_map: { external: both, type: autoware_map_msgs/msg/LaneletMapBin }
-  /planning/scenario_planning/lane_driving/behavior_planning/behavior_velocity_planner/input/vehicle_odometry: { external: both, type: nav_msgs/msg/Odometry }
-  /planning/scenario_planning/lane_driving/behavior_planning/behavior_velocity_planner/input/virtual_traffic_light_states: { external: both, type: tier4_v2x_msgs/msg/VirtualTrafficLightStateArray }
-  /planning/scenario_planning/lane_driving/behavior_planning/behavior_velocity_planner/output/infrastructure_commands: { external: both, type: tier4_v2x_msgs/msg/InfrastructureCommandArray }
-  /planning/scenario_planning/lane_driving/behavior_planning/behavior_velocity_planner/output/path: { external: both, type: autoware_planning_msgs/msg/Path }
-  /planning/scenario_planning/lane_driving/behavior_planning/behavior_velocity_planner/output/traffic_signal: { external: both, type: autoware_perception_msgs/msg/TrafficLightGroup }
-  /planning/scenario_planning/lane_driving/motion_planning/elastic_band_smoother/input/odometry: { external: both, type: nav_msgs/msg/Odometry }
-  /planning/scenario_planning/lane_driving/motion_planning/elastic_band_smoother/input/path: { external: both, type: autoware_planning_msgs/msg/Path }
-  /planning/scenario_planning/lane_driving/motion_planning/elastic_band_smoother/output/path: { external: both, type: autoware_planning_msgs/msg/Path }
-  /planning/scenario_planning/lane_driving/motion_planning/motion_velocity_planner/input/accel: { external: both, type: geometry_msgs/msg/AccelWithCovarianceStamped }
-  /planning/scenario_planning/lane_driving/motion_planning/motion_velocity_planner/input/dynamic_objects: { external: both, type: autoware_perception_msgs/msg/PredictedObjects }
-  /planning/scenario_planning/lane_driving/motion_planning/motion_velocity_planner/input/no_ground_pointcloud: { external: both, type: sensor_msgs/msg/PointCloud2 }
-  /planning/scenario_planning/lane_driving/motion_planning/motion_velocity_planner/input/occupancy_grid: { external: both, type: nav_msgs/msg/OccupancyGrid }
-  /planning/scenario_planning/lane_driving/motion_planning/motion_velocity_planner/input/traffic_signals: { external: both, type: autoware_perception_msgs/msg/TrafficLightGroupArray }
-  /planning/scenario_planning/lane_driving/motion_planning/motion_velocity_planner/input/trajectory: { external: both, type: autoware_planning_msgs/msg/Trajectory }
-  /planning/scenario_planning/lane_driving/motion_planning/motion_velocity_planner/input/vector_map: { external: both, type: autoware_map_msgs/msg/LaneletMapBin }
-  /planning/scenario_planning/lane_driving/motion_planning/motion_velocity_planner/input/vehicle_odometry: { external: both, type: nav_msgs/msg/Odometry }
-  /planning/scenario_planning/lane_driving/motion_planning/motion_velocity_planner/output/clear_velocity_limit: { external: both, type: autoware_internal_planning_msgs/msg/VelocityLimitClearCommand }
-  /planning/scenario_planning/lane_driving/motion_planning/motion_velocity_planner/output/trajectory: { external: both, type: autoware_planning_msgs/msg/Trajectory }
-  /planning/scenario_planning/lane_driving/motion_planning/motion_velocity_planner/output/velocity_limit: { external: both, type: autoware_internal_planning_msgs/msg/VelocityLimit }
-  /planning/scenario_planning/lane_driving/motion_planning/path_optimizer/input/odometry: { external: both, type: nav_msgs/msg/Odometry }
-  /planning/scenario_planning/lane_driving/motion_planning/path_optimizer/input/path: { external: both, type: autoware_planning_msgs/msg/Path }
-  /planning/scenario_planning/lane_driving/motion_planning/path_optimizer/output/path: { external: both, type: autoware_planning_msgs/msg/Trajectory }
+  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/input/accel: { external: pub, type: geometry_msgs/msg/AccelWithCovarianceStamped }
+  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/input/costmap: { external: pub, type: nav_msgs/msg/OccupancyGrid }
+  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/input/occupancy_grid_map: { external: pub, type: nav_msgs/msg/OccupancyGrid }
+  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/input/odometry: { external: pub, type: nav_msgs/msg/Odometry }
+  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/input/perception: { external: pub, type: autoware_perception_msgs/msg/PredictedObjects }
+  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/input/route: { external: pub, type: autoware_planning_msgs/msg/LaneletRoute }
+  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/input/scenario: { external: pub, type: autoware_internal_planning_msgs/msg/Scenario }
+  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/input/traffic_signals: { external: pub, type: autoware_perception_msgs/msg/TrafficLightGroupArray }
+  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/input/vector_map: { external: pub, type: autoware_map_msgs/msg/LaneletMapBin }
+  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/output/hazard_lights_cmd: { external: sub, type: autoware_vehicle_msgs/msg/HazardLightsCommand }
+  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/output/modified_goal: { external: sub, type: autoware_planning_msgs/msg/PoseWithUuidStamped }
+  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/output/path: { external: sub, type: autoware_internal_planning_msgs/msg/PathWithLaneId }
+  /planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/output/turn_indicators_cmd: { external: sub, type: autoware_vehicle_msgs/msg/TurnIndicatorsCommand }
+  /planning/scenario_planning/lane_driving/behavior_planning/behavior_velocity_planner/input/accel: { external: pub, type: geometry_msgs/msg/AccelWithCovarianceStamped }
+  /planning/scenario_planning/lane_driving/behavior_planning/behavior_velocity_planner/input/dynamic_objects: { external: pub, type: autoware_perception_msgs/msg/PredictedObjects }
+  /planning/scenario_planning/lane_driving/behavior_planning/behavior_velocity_planner/input/external_velocity_limit_mps: { external: pub, type: autoware_internal_planning_msgs/msg/VelocityLimit }
+  /planning/scenario_planning/lane_driving/behavior_planning/behavior_velocity_planner/input/no_ground_pointcloud: { external: pub, type: sensor_msgs/msg/PointCloud2 }
+  /planning/scenario_planning/lane_driving/behavior_planning/behavior_velocity_planner/input/occupancy_grid: { external: pub, type: nav_msgs/msg/OccupancyGrid }
+  /planning/scenario_planning/lane_driving/behavior_planning/behavior_velocity_planner/input/path_with_lane_id: { external: pub, type: autoware_internal_planning_msgs/msg/PathWithLaneId }
+  /planning/scenario_planning/lane_driving/behavior_planning/behavior_velocity_planner/input/traffic_signals: { external: pub, type: autoware_perception_msgs/msg/TrafficLightGroupArray }
+  /planning/scenario_planning/lane_driving/behavior_planning/behavior_velocity_planner/input/vector_map: { external: pub, type: autoware_map_msgs/msg/LaneletMapBin }
+  /planning/scenario_planning/lane_driving/behavior_planning/behavior_velocity_planner/input/vehicle_odometry: { external: pub, type: nav_msgs/msg/Odometry }
+  /planning/scenario_planning/lane_driving/behavior_planning/behavior_velocity_planner/input/virtual_traffic_light_states: { external: pub, type: tier4_v2x_msgs/msg/VirtualTrafficLightStateArray }
+  /planning/scenario_planning/lane_driving/behavior_planning/behavior_velocity_planner/output/infrastructure_commands: { external: sub, type: tier4_v2x_msgs/msg/InfrastructureCommandArray }
+  /planning/scenario_planning/lane_driving/behavior_planning/behavior_velocity_planner/output/path: { external: sub, type: autoware_planning_msgs/msg/Path }
+  /planning/scenario_planning/lane_driving/behavior_planning/behavior_velocity_planner/output/traffic_signal: { external: sub, type: autoware_perception_msgs/msg/TrafficLightGroup }
+  /planning/scenario_planning/lane_driving/motion_planning/elastic_band_smoother/input/odometry: { external: pub, type: nav_msgs/msg/Odometry }
+  /planning/scenario_planning/lane_driving/motion_planning/elastic_band_smoother/input/path: { external: pub, type: autoware_planning_msgs/msg/Path }
+  /planning/scenario_planning/lane_driving/motion_planning/elastic_band_smoother/output/path: { external: sub, type: autoware_planning_msgs/msg/Path }
+  /planning/scenario_planning/lane_driving/motion_planning/motion_velocity_planner/input/accel: { external: pub, type: geometry_msgs/msg/AccelWithCovarianceStamped }
+  /planning/scenario_planning/lane_driving/motion_planning/motion_velocity_planner/input/dynamic_objects: { external: pub, type: autoware_perception_msgs/msg/PredictedObjects }
+  /planning/scenario_planning/lane_driving/motion_planning/motion_velocity_planner/input/no_ground_pointcloud: { external: pub, type: sensor_msgs/msg/PointCloud2 }
+  /planning/scenario_planning/lane_driving/motion_planning/motion_velocity_planner/input/occupancy_grid: { external: pub, type: nav_msgs/msg/OccupancyGrid }
+  /planning/scenario_planning/lane_driving/motion_planning/motion_velocity_planner/input/traffic_signals: { external: pub, type: autoware_perception_msgs/msg/TrafficLightGroupArray }
+  /planning/scenario_planning/lane_driving/motion_planning/motion_velocity_planner/input/trajectory: { external: pub, type: autoware_planning_msgs/msg/Trajectory }
+  /planning/scenario_planning/lane_driving/motion_planning/motion_velocity_planner/input/vector_map: { external: pub, type: autoware_map_msgs/msg/LaneletMapBin }
+  /planning/scenario_planning/lane_driving/motion_planning/motion_velocity_planner/input/vehicle_odometry: { external: pub, type: nav_msgs/msg/Odometry }
+  /planning/scenario_planning/lane_driving/motion_planning/motion_velocity_planner/output/clear_velocity_limit: { external: sub, type: autoware_internal_planning_msgs/msg/VelocityLimitClearCommand }
+  /planning/scenario_planning/lane_driving/motion_planning/motion_velocity_planner/output/trajectory: { external: sub, type: autoware_planning_msgs/msg/Trajectory }
+  /planning/scenario_planning/lane_driving/motion_planning/motion_velocity_planner/output/velocity_limit: { external: sub, type: autoware_internal_planning_msgs/msg/VelocityLimit }
+  /planning/scenario_planning/lane_driving/motion_planning/path_optimizer/input/odometry: { external: pub, type: nav_msgs/msg/Odometry }
+  /planning/scenario_planning/lane_driving/motion_planning/path_optimizer/input/path: { external: pub, type: autoware_planning_msgs/msg/Path }
+  /planning/scenario_planning/lane_driving/motion_planning/path_optimizer/output/path: { external: sub, type: autoware_planning_msgs/msg/Trajectory }
   /planning/scenario_planning/output/debug: { external: sub, type: autoware_internal_debug_msgs/msg/StringStamped }
   /planning/scenario_planning/output/external_velocity_limit: { external: both, type: autoware_internal_planning_msgs/msg/VelocityLimit }
   /planning/scenario_planning/output/hazard_lights_command: { external: both, type: autoware_vehicle_msgs/msg/HazardLightsCommand }
   /planning/scenario_planning/output/scenario: { external: both, type: autoware_internal_planning_msgs/msg/Scenario }
   /planning/scenario_planning/output/trajectory: { external: both, type: autoware_planning_msgs/msg/Trajectory }
-  /planning/scenario_planning/parking/costmap_generator/input/objects: { external: both, type: autoware_perception_msgs/msg/PredictedObjects }
-  /planning/scenario_planning/parking/costmap_generator/input/points_no_ground: { external: both, type: sensor_msgs/msg/PointCloud2 }
-  /planning/scenario_planning/parking/costmap_generator/input/scenario: { external: both, type: autoware_internal_planning_msgs/msg/Scenario }
-  /planning/scenario_planning/parking/costmap_generator/input/vector_map: { external: both, type: autoware_map_msgs/msg/LaneletMapBin }
-  /planning/scenario_planning/parking/costmap_generator/output/grid_map: { external: both, type: grid_map_msgs/msg/GridMap }
-  /planning/scenario_planning/parking/costmap_generator/output/occupancy_grid: { external: both, type: nav_msgs/msg/OccupancyGrid }
-  /planning/scenario_planning/parking/freespace_planner/input/occupancy_grid: { external: both, type: nav_msgs/msg/OccupancyGrid }
-  /planning/scenario_planning/parking/freespace_planner/input/odometry: { external: both, type: nav_msgs/msg/Odometry }
-  /planning/scenario_planning/parking/freespace_planner/input/route: { external: both, type: autoware_planning_msgs/msg/LaneletRoute }
-  /planning/scenario_planning/parking/freespace_planner/input/scenario: { external: both, type: autoware_internal_planning_msgs/msg/Scenario }
-  /planning/scenario_planning/parking/freespace_planner/output/trajectory: { external: both, type: autoware_planning_msgs/msg/Trajectory }
-  /planning/scenario_planning/velocity_smoother/input/acceleration: { external: both, type: geometry_msgs/msg/AccelWithCovarianceStamped }
-  /planning/scenario_planning/velocity_smoother/input/external_velocity_limit_mps: { external: both, type: autoware_internal_planning_msgs/msg/VelocityLimit }
-  /planning/scenario_planning/velocity_smoother/input/operation_mode_state: { external: both, type: autoware_adapi_v1_msgs/msg/OperationModeState }
-  /planning/scenario_planning/velocity_smoother/input/trajectory: { external: both, type: autoware_planning_msgs/msg/Trajectory }
-  /planning/scenario_planning/velocity_smoother/output/current_velocity_limit_mps: { external: both, type: autoware_internal_planning_msgs/msg/VelocityLimit }
-  /planning/scenario_planning/velocity_smoother/output/trajectory: { external: both, type: autoware_planning_msgs/msg/Trajectory }
+  /planning/scenario_planning/parking/costmap_generator/input/objects: { external: pub, type: autoware_perception_msgs/msg/PredictedObjects }
+  /planning/scenario_planning/parking/costmap_generator/input/points_no_ground: { external: pub, type: sensor_msgs/msg/PointCloud2 }
+  /planning/scenario_planning/parking/costmap_generator/input/scenario: { external: pub, type: autoware_internal_planning_msgs/msg/Scenario }
+  /planning/scenario_planning/parking/costmap_generator/input/vector_map: { external: pub, type: autoware_map_msgs/msg/LaneletMapBin }
+  /planning/scenario_planning/parking/costmap_generator/output/grid_map: { external: sub, type: grid_map_msgs/msg/GridMap }
+  /planning/scenario_planning/parking/costmap_generator/output/occupancy_grid: { external: sub, type: nav_msgs/msg/OccupancyGrid }
+  /planning/scenario_planning/parking/freespace_planner/input/occupancy_grid: { external: pub, type: nav_msgs/msg/OccupancyGrid }
+  /planning/scenario_planning/parking/freespace_planner/input/odometry: { external: pub, type: nav_msgs/msg/Odometry }
+  /planning/scenario_planning/parking/freespace_planner/input/route: { external: pub, type: autoware_planning_msgs/msg/LaneletRoute }
+  /planning/scenario_planning/parking/freespace_planner/input/scenario: { external: pub, type: autoware_internal_planning_msgs/msg/Scenario }
+  /planning/scenario_planning/parking/freespace_planner/output/trajectory: { external: sub, type: autoware_planning_msgs/msg/Trajectory }
+  /planning/scenario_planning/velocity_smoother/input/acceleration: { external: pub, type: geometry_msgs/msg/AccelWithCovarianceStamped }
+  /planning/scenario_planning/velocity_smoother/input/external_velocity_limit_mps: { external: pub, type: autoware_internal_planning_msgs/msg/VelocityLimit }
+  /planning/scenario_planning/velocity_smoother/input/operation_mode_state: { external: pub, type: autoware_adapi_v1_msgs/msg/OperationModeState }
+  /planning/scenario_planning/velocity_smoother/input/trajectory: { external: pub, type: autoware_planning_msgs/msg/Trajectory }
+  /planning/scenario_planning/velocity_smoother/output/current_velocity_limit_mps: { external: sub, type: autoware_internal_planning_msgs/msg/VelocityLimit }
+  /planning/scenario_planning/velocity_smoother/output/trajectory: { external: sub, type: autoware_planning_msgs/msg/Trajectory }
   # ── /pose_reset (round 2) ──
   /pose_reset: { external: both, type: geometry_msgs/msg/PoseWithCovarianceStamped }
   # ── /simulation (round 2) ──

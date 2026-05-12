@@ -27,10 +27,10 @@ the promoted topics, instead of just the type check that
 | Metric | Count |
 |--------|------:|
 | Leaf-declared topics (`topics:`) | **163** |
-| `external: both` orphans | **481** |
-| `external: pub` (half) | **51** |
-| `external: sub` (half) | **287** |
-| Total `external_topics:` entries | **819** |
+| `external: both` orphans | **155** |
+| `external: pub` (half) | **136** |
+| `external: sub` (half) | **531** |
+| Total `external_topics:` entries | **822** |
 
 Static `play_launch check`: 63 manifests, 0 errors, 0 warnings.
 Runtime `play_launch ... --enforce-rules=warn` on planning_simulator:
@@ -108,6 +108,34 @@ Source: `autoware_mrm_comfortable_stop_operator/`,
 - [x] `/system/velocity_limit/clear` — same, `VelocityLimitClearCommand`
 - [x] `/system/hazard_status` — hazard_status_converter, `autoware_system_msgs/msg/HazardStatusStamped`
 - [ ] `/system/mrm/pull_over_manager/status` — needs leaf manifest for pull_over_manager package (not present in this Autoware install)
+
+### Round 10 — Bulk planning/control/perception/occupancy half-external (302)
+
+Continues the round-9 pattern. Most remaining `external: both`
+entries under `/planning`, `/control`, `/perception` and
+`/occupancy_grid_map` are pre-remap aliases, RTC outputs, scenario
+controller channels, validator/evaluator publishers, or node-namespace
+input/output forms — each clearly one-sided (in-tree pub, external
+sub, or vice versa).
+
+Major buckets (counts approximate per regex match):
+
+- `/planning/auto_mode_status/*` + `/planning/cooperate_status/*` +
+  `/planning/cooperate_commands/*` — RTC scenario outputs (60)
+- `/planning/<node>/output/*`, `/planning/<node>/input/*` —
+  pre-remap node-namespace forms (85 pub + 60 sub)
+- `/planning/debug/objects_of_interest/*` — visualization markers (19)
+- `/planning/mission_planning/route_marker`, `/route_selector/*`,
+  `/state` — mission planner outputs (~8)
+- `/planning/mission_planning/{checkpoint,goal}` — operator inputs (2)
+- `/planning/scenario_planning/{lane_driving,cruise_planner_type,scenario,...}/markers,footprint,distance,stop_reason,...` — scenario controller outputs (~30)
+- `/control/<node>/output/*`, `/input/*`, `/markers`, `/marker`,
+  `/published_time` — pre-remap + viz (~80)
+- `/perception/<node>/published_time`, `/cyclic_time_ms`,
+  `/maneuver`, `/objects_with_feature`, `/perception_analytics_publisher/*` (~10)
+- `/occupancy_grid_map/*` debug/metrics/input/output/concatenated (~14)
+
+Total flipped: 302 (60 sub + 85 pub + 71 sub + 3 pub + 83 sub).
 
 ### Round 9 — Bulk half-external annotation (199)
 
