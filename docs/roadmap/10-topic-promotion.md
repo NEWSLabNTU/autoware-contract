@@ -26,11 +26,11 @@ the promoted topics, instead of just the type check that
 
 | Metric | Count |
 |--------|------:|
-| Leaf-declared topics (`topics:`) | **165** |
-| `external: both` orphans | **689** |
-| `external: pub` (half) | **36** |
-| `external: sub` (half) | **80** |
-| Total `external_topics:` entries | **805** |
+| Leaf-declared topics (`topics:`) | **163** |
+| `external: both` orphans | **481** |
+| `external: pub` (half) | **51** |
+| `external: sub` (half) | **287** |
+| Total `external_topics:` entries | **819** |
 
 Static `play_launch check`: 63 manifests, 0 errors, 0 warnings.
 Runtime `play_launch ... --enforce-rules=warn` on planning_simulator:
@@ -108,6 +108,25 @@ Source: `autoware_mrm_comfortable_stop_operator/`,
 - [x] `/system/velocity_limit/clear` — same, `VelocityLimitClearCommand`
 - [x] `/system/hazard_status` — hazard_status_converter, `autoware_system_msgs/msg/HazardStatusStamped`
 - [ ] `/system/mrm/pull_over_manager/status` — needs leaf manifest for pull_over_manager package (not present in this Autoware install)
+
+### Round 9 — Bulk half-external annotation (199)
+
+Most remaining `external: both` topics under `/simulation`, `/external`,
+`/control`, `/planning` are NOT genuine orphans — they're side-channel
+outputs (debug/metrics/markers/virtual_wall) from in-tree nodes that
+flow to external monitoring (rviz/rqt/dashboards), or simulator
+inputs from in-tree publishers, or selector outputs consumed by
+external operator tooling. Bulk-flip these to half-external so the
+runtime engine knows which side is in-tree.
+
+Pattern flips (no leaf manifest changes needed — the publisher /
+subscriber is already known via the side annotation):
+
+- [x] `/simulation/input/*` → `external: pub` (13 topics, upstream is autoware control)
+- [x] `/simulation/output/*` → `external: sub` (13 topics, simulator pubs to external consumers)
+- [x] `/external/selected/*` → `external: sub` (4 topics, external_cmd_selector pubs already leaf-declared)
+- [x] `/control/*/debug/*` + `/metrics` + `/virtual_wall` + `/markers` + `/is_filter_activated*` + `/is_paused` + `/is_start_requested` + `/control_component_latency` → `external: sub` (40 topics)
+- [x] `/planning/*/debug/*` + `/metrics` + `/virtual_wall(s)` + `/markers` + `/processing_time_ms` etc. → `external: sub` (156 topics)
 
 ### Round 8 — Map loader aliases + localization (5 / 5)
 
