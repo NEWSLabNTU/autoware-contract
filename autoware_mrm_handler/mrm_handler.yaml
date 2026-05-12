@@ -77,7 +77,7 @@ topics:
 
   # relative → /system/fail_safe/mrm_state
   fail_safe/mrm_state:
-    type: tier4_system_msgs/msg/MrmState  # TODO verify
+    type: autoware_adapi_v1_msgs/msg/MrmState  # confirmed by Phase 36 runtime enforcement
     pub: [mrm_handler/mrm_state]
     qos:
       reliability: reliable           # QoS(1)

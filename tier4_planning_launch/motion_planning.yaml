@@ -180,7 +180,7 @@ topics:
 
   # Velocity limit candidates / clear command — consumed by external_velocity_limit_selector
   /planning/scenario_planning/max_velocity_candidates:
-    type: tier4_planning_msgs/msg/VelocityLimit
+    type: autoware_internal_planning_msgs/msg/VelocityLimit
     pub: [motion_velocity_planner/velocity_limit]
     qos:
       reliability: reliable
@@ -188,7 +188,7 @@ topics:
       depth: 1
 
   /planning/scenario_planning/clear_velocity_limit:
-    type: tier4_planning_msgs/msg/VelocityLimitClearCommand
+    type: autoware_internal_planning_msgs/msg/VelocityLimitClearCommand
     pub: [motion_velocity_planner/clear_velocity_limit]
     qos:
       reliability: reliable

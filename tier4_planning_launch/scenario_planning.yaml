@@ -77,7 +77,7 @@ topics:
 
   # External velocity limit (output of external_velocity_limit_selector)
   /planning/scenario_planning/max_velocity:
-    type: tier4_planning_msgs/msg/VelocityLimit
+    type: autoware_internal_planning_msgs/msg/VelocityLimit  # confirmed by Phase 36 runtime enforcement
     sub: [velocity_smoother/external_velocity_limit]
     qos:
       reliability: reliable           # QoS(1)
@@ -96,7 +96,7 @@ topics:
       depth: 1
 
   /planning/scenario_planning/current_max_velocity:
-    type: tier4_planning_msgs/msg/VelocityLimit
+    type: autoware_internal_planning_msgs/msg/VelocityLimit  # confirmed by Phase 36 runtime enforcement
     pub: [velocity_smoother/current_max_velocity]
     qos:
       reliability: reliable           # QoS(1)

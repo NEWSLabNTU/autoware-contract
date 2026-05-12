@@ -20,7 +20,7 @@ nodes:
 topics:
   # relative → /planning/scenario_planning/max_velocity_default
   max_velocity_default:
-    type: tier4_planning_msgs/msg/VelocityLimit
+    type: autoware_internal_planning_msgs/msg/VelocityLimit
     sub: [external_velocity_limit_selector/velocity_limit_from_api]
     qos:
       reliability: reliable
@@ -37,7 +37,7 @@ topics:
   # Source: src/universe/autoware_universe/planning/autoware_external_velocity_limit_selector/src/external_velocity_limit_selector_node.cpp:127
   # relative → /planning/scenario_planning/max_velocity_candidates
   max_velocity_candidates:
-    type: tier4_planning_msgs/msg/VelocityLimit
+    type: autoware_internal_planning_msgs/msg/VelocityLimit
     sub: [external_velocity_limit_selector/velocity_limit_from_internal]
     qos:
       reliability: reliable
@@ -49,7 +49,7 @@ topics:
   # Source: src/universe/autoware_universe/planning/autoware_external_velocity_limit_selector/src/external_velocity_limit_selector_node.cpp:131
   # relative → /planning/scenario_planning/clear_velocity_limit
   clear_velocity_limit:
-    type: tier4_planning_msgs/msg/VelocityLimitClearCommand
+    type: autoware_internal_planning_msgs/msg/VelocityLimitClearCommand
     sub: [external_velocity_limit_selector/velocity_limit_clear_command_from_internal]
     qos:
       reliability: reliable
@@ -58,7 +58,7 @@ topics:
 
   # relative → /planning/scenario_planning/max_velocity
   max_velocity:
-    type: tier4_planning_msgs/msg/VelocityLimit
+    type: autoware_internal_planning_msgs/msg/VelocityLimit
     pub: [external_velocity_limit_selector/external_velocity_limit]
     qos:
       reliability: reliable           # QoS(1)

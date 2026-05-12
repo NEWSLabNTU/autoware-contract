@@ -13,5 +13,5 @@ nodes:
 topics:
   # relative — resolves via scope ns (e.g. /map/map_projector_info)
   map_projector_info:
-    type: tier4_map_msgs/msg/MapProjectorInfo  # TODO verify
+    type: autoware_map_msgs/msg/MapProjectorInfo  # confirmed by Phase 36 runtime enforcement
     pub: [map_projection_loader/map_projector_info]

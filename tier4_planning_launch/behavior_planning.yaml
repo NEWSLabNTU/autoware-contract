@@ -203,7 +203,7 @@ topics:
 
   # External velocity limit — QoS(1).transient_local()
   /planning/scenario_planning/max_velocity_default:
-    type: tier4_planning_msgs/msg/VelocityLimit
+    type: autoware_internal_planning_msgs/msg/VelocityLimit
     sub: [behavior_velocity_planner/external_velocity_limit]
     qos:
       reliability: reliable
