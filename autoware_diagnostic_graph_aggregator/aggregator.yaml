@@ -82,6 +82,31 @@ topics:
       reliability: reliable           # QoS(1)
       depth: 1
 
+  # Pre-remap aliases — Autoware 1.5.0 publishes the unremapped
+  # `~/struct`, `~/status`, `~/unknowns`, `~/availability` topics
+  # under the node's own namespace (`/system/aggregator/...`)
+  # alongside the remapped `/diagnostics_graph/*` and
+  # `/system/command_mode/*` outputs. Same types and QoS as the
+  # remapped sides (single rclcpp create_publisher call, two visible
+  # DDS topics because rclcpp's expand path runs once but DDS sees
+  # both before and after remap resolution in this build).
+  /system/aggregator/struct:
+    type: tier4_system_msgs/msg/DiagGraphStruct
+    pub: [aggregator_node/diag_graph_struct]
+    qos: { reliability: reliable, durability: transient_local, depth: 1 }
+  /system/aggregator/status:
+    type: tier4_system_msgs/msg/DiagGraphStatus
+    pub: [aggregator_node/diag_graph_status]
+    qos: { reliability: reliable, depth: 1 }
+  /system/aggregator/unknowns:
+    type: diagnostic_msgs/msg/DiagnosticArray
+    pub: [aggregator_node/unknowns]
+    qos: { reliability: reliable, depth: 1 }
+  /system/aggregator/availability:
+    type: tier4_system_msgs/msg/CommandModeAvailability
+    pub: [aggregator_node/command_mode_availability]
+    qos: { reliability: reliable, depth: 1 }
+
 services:
   # absolute — remap: ~/reset → /diagnostics_graph/reset
   /diagnostics_graph/reset:

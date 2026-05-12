@@ -21,6 +21,10 @@ nodes:
         state: true
       operation_mode_state:                     # ~/input/api/operation_mode/state — polling
         state: true
+      pull_over_status:                         # ~/input/mrm/pull_over/status — polling
+        state: true
+      gear_input:                               # ~/input/gear — polling
+        state: true
     pub:
       mrm_state: {}                             # ~/output/mrm/state — QoS(1)
       turn_indicators: {}                       # ~/output/turn_indicators — QoS(1)
@@ -111,6 +115,64 @@ topics:
   gear_cmd:
     type: TODO/msg/TODO
     pub: [mrm_handler/gear_cmd]
+
+  # Pre-remap aliases — Autoware 1.5.0 publishes/subscribes the
+  # unremapped `~/input/*` and `~/output/*` topics under the node's
+  # own namespace (`/system/mrm_handler/...`) alongside any remapped
+  # canonical equivalents. Declared here so the runtime engine can
+  # type-check and namespace-attribute them.
+  /system/mrm_handler/input/api/operation_mode/state:
+    type: autoware_adapi_v1_msgs/msg/OperationModeState
+    sub: [mrm_handler/operation_mode_state]
+    qos: { reliability: reliable, durability: transient_local, depth: 1 }
+  /system/mrm_handler/input/control_mode:
+    type: autoware_vehicle_msgs/msg/ControlModeReport
+    sub: [mrm_handler/control_mode]
+    qos: { reliability: reliable, depth: 1 }
+  /system/mrm_handler/input/gear:
+    type: autoware_vehicle_msgs/msg/GearCommand
+    sub: [mrm_handler/gear_input]
+    qos: { reliability: reliable, depth: 1 }
+  /system/mrm_handler/input/mrm/comfortable_stop/status:
+    type: tier4_system_msgs/msg/MrmBehaviorStatus
+    sub: [mrm_handler/comfortable_stop_status]
+    qos: { reliability: reliable, depth: 1 }
+  /system/mrm_handler/input/mrm/emergency_stop/status:
+    type: tier4_system_msgs/msg/MrmBehaviorStatus
+    sub: [mrm_handler/emergency_stop_status]
+    qos: { reliability: reliable, depth: 1 }
+  /system/mrm_handler/input/mrm/pull_over/status:
+    type: tier4_system_msgs/msg/MrmBehaviorStatus
+    sub: [mrm_handler/pull_over_status]
+    qos: { reliability: reliable, depth: 1 }
+  /system/mrm_handler/input/odometry:
+    type: nav_msgs/msg/Odometry
+    sub: [mrm_handler/odometry]
+    qos: { reliability: reliable, depth: 1 }
+  /system/mrm_handler/input/operation_mode_availability:
+    type: tier4_system_msgs/msg/OperationModeAvailability
+    sub: [mrm_handler/operation_mode_availability]
+    qos: { reliability: reliable, depth: 1 }
+  /system/mrm_handler/output/emergency_holding:
+    type: tier4_system_msgs/msg/EmergencyHoldingState
+    pub: [mrm_handler/emergency_holding]
+    qos: { reliability: reliable, depth: 1 }
+  /system/mrm_handler/output/gear:
+    type: autoware_vehicle_msgs/msg/GearCommand
+    pub: [mrm_handler/gear_cmd]
+    qos: { reliability: reliable, depth: 1 }
+  /system/mrm_handler/output/hazard:
+    type: autoware_vehicle_msgs/msg/HazardLightsCommand
+    pub: [mrm_handler/hazard_lights]
+    qos: { reliability: reliable, depth: 1 }
+  /system/mrm_handler/output/mrm/state:
+    type: autoware_adapi_v1_msgs/msg/MrmState
+    pub: [mrm_handler/mrm_state]
+    qos: { reliability: reliable, depth: 1 }
+  /system/mrm_handler/output/turn_indicators:
+    type: autoware_vehicle_msgs/msg/TurnIndicatorsCommand
+    pub: [mrm_handler/turn_indicators]
+    qos: { reliability: reliable, depth: 1 }
 
 # Service wiring: cli: targets are in other scopes (cross-scope)
 #   pull_over_operate → mrm_pull_over_operator (not in planning_simulator)

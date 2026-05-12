@@ -904,10 +904,10 @@ external_topics:
   /simulation/output/turn_indicators_report: { external: both, type: autoware_vehicle_msgs/msg/TurnIndicatorsReport }
   /simulation/output/twist: { external: both, type: autoware_vehicle_msgs/msg/VelocityReport }
   # ── /system (round 2) ──
-  /system/aggregator/availability: { external: both, type: tier4_system_msgs/msg/CommandModeAvailability }
-  /system/aggregator/status: { external: both, type: tier4_system_msgs/msg/DiagGraphStatus }
-  /system/aggregator/struct: { external: both, type: tier4_system_msgs/msg/DiagGraphStruct }
-  /system/aggregator/unknowns: { external: both, type: diagnostic_msgs/msg/DiagnosticArray }
+  /system/aggregator/availability: { external: sub, type: tier4_system_msgs/msg/CommandModeAvailability }
+  /system/aggregator/status: { external: sub, type: tier4_system_msgs/msg/DiagGraphStatus }
+  /system/aggregator/struct: { external: sub, type: tier4_system_msgs/msg/DiagGraphStruct }
+  /system/aggregator/unknowns: { external: sub, type: diagnostic_msgs/msg/DiagnosticArray }
   /system/converter/command_mode/availability: { external: both, type: tier4_system_msgs/msg/CommandModeAvailability }
   /system/converter/operation_mode/availability: { external: both, type: tier4_system_msgs/msg/OperationModeAvailability }
   /system/hazard_status_converter/hazard_status: { external: both, type: autoware_system_msgs/msg/HazardStatusStamped }
@@ -918,19 +918,19 @@ external_topics:
   /system/mrm_emergency_stop_operator/input/control/control_cmd: { external: both, type: autoware_control_msgs/msg/Control }
   /system/mrm_emergency_stop_operator/output/mrm/emergency_stop/control_cmd: { external: both, type: autoware_control_msgs/msg/Control }
   /system/mrm_emergency_stop_operator/output/mrm/emergency_stop/status: { external: both, type: tier4_system_msgs/msg/MrmBehaviorStatus }
-  /system/mrm_handler/input/api/operation_mode/state: { external: both, type: autoware_adapi_v1_msgs/msg/OperationModeState }
-  /system/mrm_handler/input/control_mode: { external: both, type: autoware_vehicle_msgs/msg/ControlModeReport }
-  /system/mrm_handler/input/gear: { external: both, type: autoware_vehicle_msgs/msg/GearCommand }
-  /system/mrm_handler/input/mrm/comfortable_stop/status: { external: both, type: tier4_system_msgs/msg/MrmBehaviorStatus }
-  /system/mrm_handler/input/mrm/emergency_stop/status: { external: both, type: tier4_system_msgs/msg/MrmBehaviorStatus }
-  /system/mrm_handler/input/mrm/pull_over/status: { external: both, type: tier4_system_msgs/msg/MrmBehaviorStatus }
-  /system/mrm_handler/input/odometry: { external: both, type: nav_msgs/msg/Odometry }
-  /system/mrm_handler/input/operation_mode_availability: { external: both, type: tier4_system_msgs/msg/OperationModeAvailability }
-  /system/mrm_handler/output/emergency_holding: { external: both, type: tier4_system_msgs/msg/EmergencyHoldingState }
-  /system/mrm_handler/output/gear: { external: both, type: autoware_vehicle_msgs/msg/GearCommand }
-  /system/mrm_handler/output/hazard: { external: both, type: autoware_vehicle_msgs/msg/HazardLightsCommand }
-  /system/mrm_handler/output/mrm/state: { external: both, type: autoware_adapi_v1_msgs/msg/MrmState }
-  /system/mrm_handler/output/turn_indicators: { external: both, type: autoware_vehicle_msgs/msg/TurnIndicatorsCommand }
+  /system/mrm_handler/input/api/operation_mode/state: { external: pub, type: autoware_adapi_v1_msgs/msg/OperationModeState }
+  /system/mrm_handler/input/control_mode: { external: pub, type: autoware_vehicle_msgs/msg/ControlModeReport }
+  /system/mrm_handler/input/gear: { external: pub, type: autoware_vehicle_msgs/msg/GearCommand }
+  /system/mrm_handler/input/mrm/comfortable_stop/status: { external: pub, type: tier4_system_msgs/msg/MrmBehaviorStatus }
+  /system/mrm_handler/input/mrm/emergency_stop/status: { external: pub, type: tier4_system_msgs/msg/MrmBehaviorStatus }
+  /system/mrm_handler/input/mrm/pull_over/status: { external: pub, type: tier4_system_msgs/msg/MrmBehaviorStatus }
+  /system/mrm_handler/input/odometry: { external: pub, type: nav_msgs/msg/Odometry }
+  /system/mrm_handler/input/operation_mode_availability: { external: pub, type: tier4_system_msgs/msg/OperationModeAvailability }
+  /system/mrm_handler/output/emergency_holding: { external: sub, type: tier4_system_msgs/msg/EmergencyHoldingState }
+  /system/mrm_handler/output/gear: { external: sub, type: autoware_vehicle_msgs/msg/GearCommand }
+  /system/mrm_handler/output/hazard: { external: sub, type: autoware_vehicle_msgs/msg/HazardLightsCommand }
+  /system/mrm_handler/output/mrm/state: { external: sub, type: autoware_adapi_v1_msgs/msg/MrmState }
+  /system/mrm_handler/output/turn_indicators: { external: sub, type: autoware_vehicle_msgs/msg/TurnIndicatorsCommand }
   # ── /traffic_signals (round 2) ──
   /traffic_signals: { external: both, type: autoware_perception_msgs/msg/TrafficLightGroupArray }
   # ── /vehicle_door_simulator_node (round 2) ──
