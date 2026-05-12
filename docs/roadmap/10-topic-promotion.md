@@ -27,10 +27,10 @@ the promoted topics, instead of just the type check that
 | Metric | Count |
 |--------|------:|
 | Leaf-declared topics (`topics:`) | **163** |
-| `external: both` orphans | **155** |
-| `external: pub` (half) | **136** |
-| `external: sub` (half) | **531** |
-| Total `external_topics:` entries | **822** |
+| `external: both` orphans | **0** |
+| `external: pub` (half) | **163** |
+| `external: sub` (half) | **652** |
+| Total `external_topics:` entries | **815** |
 
 Static `play_launch check`: 63 manifests, 0 errors, 0 warnings.
 Runtime `play_launch ... --enforce-rules=warn` on planning_simulator:
@@ -108,6 +108,59 @@ Source: `autoware_mrm_comfortable_stop_operator/`,
 - [x] `/system/velocity_limit/clear` — same, `VelocityLimitClearCommand`
 - [x] `/system/hazard_status` — hazard_status_converter, `autoware_system_msgs/msg/HazardStatusStamped`
 - [ ] `/system/mrm/pull_over_manager/status` — needs leaf manifest for pull_over_manager package (not present in this Autoware install)
+
+### Round 11 — Source-reviewed mop-up (155, all remaining)
+
+Last batch. Per-cluster source review for the 155 topics that didn't
+match earlier regex patterns. After this round **every** topic
+observed by the runtime interceptor is annotated with the correct
+side (in-tree vs external) — zero `external: both` remain.
+
+`/control` (35) — vehicle_cmd_gate pre-remap input/output aliases:
+
+- `/control/input/*` (24, upstream from planning/mrm/operator) → `external: pub`
+- `/control/output/*` + `/control/gate_mode_cmd` + `/control/trajectory_follower_control_cmd` (11, vehicle_cmd_gate pubs) → `external: sub`
+- `/control/kinematics`, `/control/trajectory` → `external: pub`
+
+`/system` (19):
+
+- `/system/pipeline_latency_monitor/*` (7) + `/system/processing_time_checker/metrics` (1) → `external: sub`
+- `/system/converter/*` (2) → `external: sub`
+- `/system/hazard_status_converter/{hazard_status, input/emergency_holding}` (2) → flip both sides
+- `/system/mrm_comfortable_stop_operator/output/*` (3) + `/system/mrm_emergency_stop_operator/output/*` (2) → `external: sub`
+- `/system/mrm_emergency_stop_operator/input/control/control_cmd` (1) → `external: pub`
+
+`/api` (8):
+
+- `/api/control/command/*` (4) + `/api/external/get/rtc_*` (2) → `external: sub`
+- `/api/autoware/get/*` (2) → `external: pub`
+
+`/default_adapi` (6) — adaptor pre-remap sub aliases:
+
+- `/default_adapi/helpers/autoware_initial_pose_adaptor/*` (2) → `external: pub`
+- `/default_adapi/helpers/autoware_routing_adaptor/input/*` (4) → `external: pub`
+
+`/simulation` (8):
+
+- `/simulation/debug/*` + `/simulation/dummy_perception_publisher/*` + `/simulation/shape_estimation/*` (5) → `external: sub`
+- `/simulation/detected_object_feature_remover/{input,output}` + `/simulation/{input,objects}` (4) → mixed pub/sub
+
+`/perception` (5) — debug processing_time → `external: sub`
+
+`/occupancy_grid_map` (5) — virtual_scan + pointcloud → `external: sub`
+
+`/planning` (66) — all remaining behavior pubs:
+
+- `/planning/path_reference/*` (8) → `external: sub`
+- `/planning/planning_factors/*` (~40, every behavior module) → `external: sub`
+- `/planning/steering_factor/*` + `/planning/velocity_factor/*` → `external: sub`
+- `/planning/scenario_selector/*`, `/planning/scenario_planning/*`, `/planning/mission_planning/*`, `/planning/turn_signal_decider/*` → `external: sub`
+- `/planning/planning_validator/*` + `/planning/route_state` + `/planning/remaining_distance_time_calculator/*` (5) → `external: sub`
+
+Infrastructure (~20):
+
+- `/rosout`, `/parameter_events`, `/robot_description`, `/joint_states`, `/service_log`, `/logging_diag_graph/*`, `/system/emergency/*`, `/vehicle_door_simulator_node/*` → `external: sub`
+- `/initialpose`, `/pose_reset`, `/traffic_signals`, `/rviz/routing/*`, `/awapi/tmp/*`, `/system/mrm/pull_over_manager/status` → `external: pub`
 
 ### Round 10 — Bulk planning/control/perception/occupancy half-external (302)
 
