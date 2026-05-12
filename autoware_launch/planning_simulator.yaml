@@ -204,14 +204,12 @@ external_topics:
   /joint_states: { external: both, type: sensor_msgs/msg/JointState }
 
   # ── /localization ──
-  /localization/initialization_state: { external: both, type: autoware_adapi_v1_msgs/msg/LocalizationInitializationState }
-
+  /localization/initialization_state: { external: pub, type: autoware_adapi_v1_msgs/msg/LocalizationInitializationState }
   # ── /logging_diag_graph ──
   /logging_diag_graph/debug/error_graph_text: { external: both, type: autoware_internal_debug_msgs/msg/StringStamped }
 
   # ── /map ──
-  /map/vector_map_marker: { external: both, type: visualization_msgs/msg/MarkerArray }
-
+  /map/vector_map_marker: { external: sub, type: visualization_msgs/msg/MarkerArray }
   # ── /occupancy_grid_map ──
   /occupancy_grid_map/no_ground/oneshot/pointcloud: { external: both, type: sensor_msgs/msg/PointCloud2 }
   /occupancy_grid_map/virtual_scan/laserscan: { external: both, type: sensor_msgs/msg/LaserScan }
@@ -731,9 +729,9 @@ external_topics:
   /default_adapi/helpers/autoware_routing_adaptor/input/rough_goal: { external: both, type: geometry_msgs/msg/PoseStamped }
   /default_adapi/helpers/autoware_routing_adaptor/input/waypoint: { external: both, type: geometry_msgs/msg/PoseStamped }
   # ── /map (round 2) ──
-  /map/input/lanelet2_map: { external: both, type: autoware_map_msgs/msg/LaneletMapBin }
-  /map/output/lanelet2_map_marker: { external: both, type: visualization_msgs/msg/MarkerArray }
-  /map/output/pointcloud_map: { external: both, type: sensor_msgs/msg/PointCloud2 }
+  /map/input/lanelet2_map: { external: pub, type: autoware_map_msgs/msg/LaneletMapBin }
+  /map/output/lanelet2_map_marker: { external: sub, type: visualization_msgs/msg/MarkerArray }
+  /map/output/pointcloud_map: { external: sub, type: sensor_msgs/msg/PointCloud2 }
   # ── /occupancy_grid_map (round 2) ──
   /occupancy_grid_map/occupancy_grid_map_node/input/laserscan: { external: both, type: sensor_msgs/msg/LaserScan }
   /occupancy_grid_map/occupancy_grid_map_node/input/obstacle_pointcloud: { external: both, type: sensor_msgs/msg/PointCloud2 }

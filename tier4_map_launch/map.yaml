@@ -70,6 +70,28 @@ topics:
     type: visualization_msgs/msg/MarkerArray  # TODO verify
     pub: [lanelet2_map_visualization/visualization]
 
+  # Pre-remap and additional published aliases. lanelet2_map_loader,
+  # pointcloud_map_loader and lanelet2_map_visualization expose their
+  # endpoints on their own node namespaces as well as the
+  # /map/<canonical> remapped form. Declared so the runtime engine
+  # type-checks them.
+  /map/vector_map_marker:
+    type: visualization_msgs/msg/MarkerArray
+    pub: [lanelet2_map_visualization/visualization]
+    qos: { reliability: reliable, durability: transient_local, depth: 1 }
+  /map/input/lanelet2_map:
+    type: autoware_map_msgs/msg/LaneletMapBin
+    sub: [lanelet2_map_visualization/vector_map]
+    qos: { reliability: reliable, durability: transient_local, depth: 1 }
+  /map/output/lanelet2_map_marker:
+    type: visualization_msgs/msg/MarkerArray
+    pub: [lanelet2_map_visualization/visualization]
+    qos: { reliability: reliable, durability: transient_local, depth: 1 }
+  /map/output/pointcloud_map:
+    type: sensor_msgs/msg/PointCloud2
+    pub: [pointcloud_map_loader/pointcloud_map]
+    qos: { reliability: reliable, durability: transient_local, depth: 1 }
+
 services:
   # /map/get_partial_pcd_map — pcd map slice retrieval
   get_partial_pcd_map:

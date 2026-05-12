@@ -26,11 +26,11 @@ the promoted topics, instead of just the type check that
 
 | Metric | Count |
 |--------|------:|
-| Leaf-declared topics (`topics:`) | **161** |
-| `external: both` orphans | **697** |
-| `external: pub` (half) | **34** |
-| `external: sub` (half) | **77** |
-| Total `external_topics:` entries | **808** |
+| Leaf-declared topics (`topics:`) | **165** |
+| `external: both` orphans | **689** |
+| `external: pub` (half) | **36** |
+| `external: sub` (half) | **80** |
+| Total `external_topics:` entries | **805** |
 
 Static `play_launch check`: 63 manifests, 0 errors, 0 warnings.
 Runtime `play_launch ... --enforce-rules=warn` on planning_simulator:
@@ -108,6 +108,19 @@ Source: `autoware_mrm_comfortable_stop_operator/`,
 - [x] `/system/velocity_limit/clear` — same, `VelocityLimitClearCommand`
 - [x] `/system/hazard_status` — hazard_status_converter, `autoware_system_msgs/msg/HazardStatusStamped`
 - [ ] `/system/mrm/pull_over_manager/status` — needs leaf manifest for pull_over_manager package (not present in this Autoware install)
+
+### Round 8 — Map loader aliases + localization (5 / 5)
+
+Map loader pre-remap + auxiliary outputs (4 — declared in `tier4_map_launch/map.yaml`):
+
+- [x] `/map/vector_map_marker` — lanelet2_map_visualization marker stream
+- [x] `/map/input/lanelet2_map` — lanelet2_map_visualization sub alias
+- [x] `/map/output/lanelet2_map_marker` — lanelet2_map_visualization pub alias
+- [x] `/map/output/pointcloud_map` — pointcloud_map_loader pub alias
+
+Localization (1 — flipped to half-external, source package outside tree):
+
+- [x] `/localization/initialization_state` — pose_initializer pub (external)
 
 ### Round 7 — Vehicle + perception (7 / 7)
 
