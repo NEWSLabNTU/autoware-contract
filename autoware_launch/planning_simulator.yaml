@@ -120,21 +120,21 @@ external_topics:
   /api/control/command/velocity: { external: both, type: autoware_adapi_v1_msgs/msg/VelocityCommand }
   /api/external/get/rtc_auto_mode: { external: both, type: tier4_rtc_msgs/msg/AutoModeStatusArray }
   /api/external/get/rtc_status: { external: both, type: tier4_rtc_msgs/msg/CooperateStatusArray }
-  /api/fail_safe/mrm_request/list: { external: both, type: autoware_adapi_v1_msgs/msg/MrmRequestList }
+  /api/fail_safe/mrm_request/list: { external: sub, type: autoware_adapi_v1_msgs/msg/MrmRequestList }
   /api/fail_safe/mrm_state: { external: sub, type: autoware_adapi_v1_msgs/msg/MrmState }
   /api/localization/initialization_state: { external: sub, type: autoware_adapi_v1_msgs/msg/LocalizationInitializationState }
   /api/manual/remote/control_mode/status: { external: both, type: autoware_adapi_v1_msgs/msg/ManualControlModeStatus }
   /api/motion/state: { external: sub, type: autoware_adapi_v1_msgs/msg/MotionState }
-  /api/perception/objects: { external: both, type: autoware_adapi_v1_msgs/msg/DynamicObjectArray }
-  /api/planning/steering_factors: { external: both, type: autoware_adapi_v1_msgs/msg/SteeringFactorArray }
-  /api/planning/velocity_factors: { external: both, type: autoware_adapi_v1_msgs/msg/VelocityFactorArray }
-  /api/routing/route: { external: both, type: autoware_adapi_v1_msgs/msg/Route }
+  /api/perception/objects: { external: sub, type: autoware_adapi_v1_msgs/msg/DynamicObjectArray }
+  /api/planning/steering_factors: { external: sub, type: autoware_adapi_v1_msgs/msg/SteeringFactorArray }
+  /api/planning/velocity_factors: { external: sub, type: autoware_adapi_v1_msgs/msg/VelocityFactorArray }
+  /api/routing/route: { external: sub, type: autoware_adapi_v1_msgs/msg/Route }
   /api/routing/state: { external: sub, type: autoware_adapi_v1_msgs/msg/RouteState }
-  /api/system/diagnostics/status: { external: both, type: autoware_adapi_v1_msgs/msg/DiagGraphStatus }
-  /api/system/diagnostics/struct: { external: both, type: autoware_adapi_v1_msgs/msg/DiagGraphStruct }
+  /api/system/diagnostics/status: { external: sub, type: autoware_adapi_v1_msgs/msg/DiagGraphStatus }
+  /api/system/diagnostics/struct: { external: sub, type: autoware_adapi_v1_msgs/msg/DiagGraphStruct }
   /api/system/heartbeat: { external: sub, type: autoware_adapi_v1_msgs/msg/Heartbeat }
   /api/vehicle/doors/status: { external: sub, type: autoware_adapi_v1_msgs/msg/DoorStatusArray }
-  /api/vehicle/kinematics: { external: both, type: autoware_adapi_v1_msgs/msg/VehicleKinematics }
+  /api/vehicle/kinematics: { external: sub, type: autoware_adapi_v1_msgs/msg/VehicleKinematics }
   /api/vehicle/metrics: { external: sub, type: autoware_adapi_v1_msgs/msg/VehicleMetrics }
   /api/vehicle/status: { external: sub, type: autoware_adapi_v1_msgs/msg/VehicleStatus }
   # ── /autoware ──

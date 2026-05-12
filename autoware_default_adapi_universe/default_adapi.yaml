@@ -10,7 +10,7 @@ nodes:
     pub: [localization_state]
   routing_node:
     sub: { route: { state: true } }
-    pub: [routing_state]
+    pub: [routing_state, routing_route]
   autoware_state_node:
     sub:
       localization_state: { state: true }
@@ -20,7 +20,7 @@ nodes:
     pub: [autoware_state]
   diagnostics_node:
     sub: { diagnostic_graph: { state: true } }
-    pub: [diagnostics_status]
+    pub: [diagnostics_status, diagnostics_struct]
   fail_safe_node:
     sub: { mrm_state: { state: true } }
     pub: [fail_safe_state]
@@ -37,7 +37,7 @@ nodes:
     pub: [perception_state]
   planning_node:
     sub: { trajectory: { state: true } }
-    pub: [planning_state]
+    pub: [planning_state, steering_factors, velocity_factors]
   vehicle_status_node:
     sub:
       velocity_status: { state: true }
@@ -51,7 +51,7 @@ nodes:
     pub: [vehicle_command]
   vehicle_metrics_node:
     sub: { kinematic_state: { state: true } }
-    pub: [vehicle_metrics]
+    pub: [vehicle_metrics, vehicle_kinematics]
   vehicle_info_node:
     pub: [vehicle_info]
   vehicle_door_node:
@@ -59,7 +59,7 @@ nodes:
     pub: [door_state]
   mrm_request_node:
     sub: { mrm_request: { state: true } }
-    pub: [mrm_state]
+    pub: [mrm_state, mrm_request_list]
   manual_local_node:
     sub: { operation_mode: { state: true } }
     pub: []
@@ -147,6 +147,70 @@ topics:
   /api/vehicle/doors/status:
     type: autoware_adapi_v1_msgs/msg/DoorStatusArray
     pub: [vehicle_door_node/door_state]
+    qos:
+      reliability: reliable
+      durability: transient_local
+      depth: 1
+
+  /api/routing/route:
+    type: autoware_adapi_v1_msgs/msg/Route
+    pub: [routing_node/routing_route]
+    qos:
+      reliability: reliable
+      durability: transient_local
+      depth: 1
+
+  /api/system/diagnostics/status:
+    type: autoware_adapi_v1_msgs/msg/DiagGraphStatus
+    pub: [diagnostics_node/diagnostics_status]
+    qos:
+      reliability: reliable
+      durability: transient_local
+      depth: 1
+
+  /api/system/diagnostics/struct:
+    type: autoware_adapi_v1_msgs/msg/DiagGraphStruct
+    pub: [diagnostics_node/diagnostics_struct]
+    qos:
+      reliability: reliable
+      durability: transient_local
+      depth: 1
+
+  /api/planning/steering_factors:
+    type: autoware_adapi_v1_msgs/msg/SteeringFactorArray
+    pub: [planning_node/steering_factors]
+    qos:
+      reliability: reliable
+      durability: transient_local
+      depth: 1
+
+  /api/planning/velocity_factors:
+    type: autoware_adapi_v1_msgs/msg/VelocityFactorArray
+    pub: [planning_node/velocity_factors]
+    qos:
+      reliability: reliable
+      durability: transient_local
+      depth: 1
+
+  /api/vehicle/kinematics:
+    type: autoware_adapi_v1_msgs/msg/VehicleKinematics
+    pub: [vehicle_metrics_node/vehicle_kinematics]
+    qos:
+      reliability: reliable
+      durability: transient_local
+      depth: 1
+
+  /api/perception/objects:
+    type: autoware_adapi_v1_msgs/msg/DynamicObjectArray
+    pub: [perception_node/perception_state]
+    qos:
+      reliability: reliable
+      durability: transient_local
+      depth: 1
+
+  /api/fail_safe/mrm_request/list:
+    type: autoware_adapi_v1_msgs/msg/MrmRequestList
+    pub: [mrm_request_node/mrm_request_list]
     qos:
       reliability: reliable
       durability: transient_local
