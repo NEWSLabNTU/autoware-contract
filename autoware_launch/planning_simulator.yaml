@@ -910,14 +910,14 @@ external_topics:
   /system/aggregator/unknowns: { external: sub, type: diagnostic_msgs/msg/DiagnosticArray }
   /system/converter/command_mode/availability: { external: both, type: tier4_system_msgs/msg/CommandModeAvailability }
   /system/converter/operation_mode/availability: { external: both, type: tier4_system_msgs/msg/OperationModeAvailability }
-  /system/hazard_status_converter/hazard_status: { external: both, type: autoware_system_msgs/msg/HazardStatusStamped }
-  /system/hazard_status_converter/input/emergency_holding: { external: both, type: tier4_system_msgs/msg/EmergencyHoldingState }
-  /system/mrm_comfortable_stop_operator/output/mrm/comfortable_stop/status: { external: both, type: tier4_system_msgs/msg/MrmBehaviorStatus }
-  /system/mrm_comfortable_stop_operator/output/velocity_limit: { external: both, type: autoware_internal_planning_msgs/msg/VelocityLimit }
-  /system/mrm_comfortable_stop_operator/output/velocity_limit/clear: { external: both, type: autoware_internal_planning_msgs/msg/VelocityLimitClearCommand }
-  /system/mrm_emergency_stop_operator/input/control/control_cmd: { external: both, type: autoware_control_msgs/msg/Control }
-  /system/mrm_emergency_stop_operator/output/mrm/emergency_stop/control_cmd: { external: both, type: autoware_control_msgs/msg/Control }
-  /system/mrm_emergency_stop_operator/output/mrm/emergency_stop/status: { external: both, type: tier4_system_msgs/msg/MrmBehaviorStatus }
+  /system/hazard_status_converter/hazard_status: { external: sub, type: autoware_system_msgs/msg/HazardStatusStamped }
+  /system/hazard_status_converter/input/emergency_holding: { external: pub, type: tier4_system_msgs/msg/EmergencyHoldingState }
+  /system/mrm_comfortable_stop_operator/output/mrm/comfortable_stop/status: { external: sub, type: tier4_system_msgs/msg/MrmBehaviorStatus }
+  /system/mrm_comfortable_stop_operator/output/velocity_limit: { external: sub, type: autoware_internal_planning_msgs/msg/VelocityLimit }
+  /system/mrm_comfortable_stop_operator/output/velocity_limit/clear: { external: sub, type: autoware_internal_planning_msgs/msg/VelocityLimitClearCommand }
+  /system/mrm_emergency_stop_operator/input/control/control_cmd: { external: pub, type: autoware_control_msgs/msg/Control }
+  /system/mrm_emergency_stop_operator/output/mrm/emergency_stop/control_cmd: { external: sub, type: autoware_control_msgs/msg/Control }
+  /system/mrm_emergency_stop_operator/output/mrm/emergency_stop/status: { external: sub, type: tier4_system_msgs/msg/MrmBehaviorStatus }
   /system/mrm_handler/input/api/operation_mode/state: { external: pub, type: autoware_adapi_v1_msgs/msg/OperationModeState }
   /system/mrm_handler/input/control_mode: { external: pub, type: autoware_vehicle_msgs/msg/ControlModeReport }
   /system/mrm_handler/input/gear: { external: pub, type: autoware_vehicle_msgs/msg/GearCommand }

@@ -48,7 +48,17 @@ topics:
       depth: 1
 
   # relative → /system/hazard_status
-  # TODO: type — HazardStatusStamped
   hazard_status:
-    type: TODO/msg/TODO
+    type: autoware_system_msgs/msg/HazardStatusStamped
     pub: [hazard_status_converter/hazard_status]
+    qos: { reliability: reliable, depth: 1 }
+
+  # Pre-remap aliases — node-namespace forms observed at runtime.
+  /system/hazard_status_converter/hazard_status:
+    type: autoware_system_msgs/msg/HazardStatusStamped
+    pub: [hazard_status_converter/hazard_status]
+    qos: { reliability: reliable, depth: 1 }
+  /system/hazard_status_converter/input/emergency_holding:
+    type: tier4_system_msgs/msg/EmergencyHoldingState
+    sub: [hazard_status_converter/emergency_holding]
+    qos: { reliability: reliable, depth: 1 }
