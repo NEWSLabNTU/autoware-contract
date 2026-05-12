@@ -611,13 +611,10 @@ external_topics:
   /system/processing_time_checker/metrics: { external: both, type: tier4_metric_msgs/msg/MetricArray }
 
   # ── /vehicle ──
-  /vehicle/command/manual_control_cmd: { external: both, type: autoware_control_msgs/msg/Control }
-  /vehicle/command/manual_gear_command: { external: both, type: autoware_vehicle_msgs/msg/GearCommand }
-  /vehicle/status/actuation_status: { external: both, type: tier4_vehicle_msgs/msg/ActuationStatusStamped }
-  /vehicle/status/battery_charge: { external: both, type: tier4_vehicle_msgs/msg/BatteryStatus }
-
-
-
+  /vehicle/command/manual_control_cmd: { external: pub, type: autoware_control_msgs/msg/Control }
+  /vehicle/command/manual_gear_command: { external: pub, type: autoware_vehicle_msgs/msg/GearCommand }
+  /vehicle/status/actuation_status: { external: pub, type: tier4_vehicle_msgs/msg/ActuationStatusStamped }
+  /vehicle/status/battery_charge: { external: pub, type: tier4_vehicle_msgs/msg/BatteryStatus }
   # ───────────────────────────────────────────────────────────
   # Round 2: topics observed by interception that ros2 topic list
   # didn't surface (DDS endpoints created but not joined to a
@@ -748,9 +745,9 @@ external_topics:
   /occupancy_grid_map/pointcloud_to_laserscan_node/output/ray: { external: both, type: visualization_msgs/msg/Marker }
   /occupancy_grid_map/pointcloud_to_laserscan_node/output/stixel: { external: both, type: visualization_msgs/msg/MarkerArray }
   # ── /perception (round 2) ──
-  /perception/object_recognition/prediction/map_based_prediction/input/objects: { external: both, type: autoware_perception_msgs/msg/TrackedObjects }
-  /perception/object_recognition/prediction/map_based_prediction/output/objects: { external: both, type: autoware_perception_msgs/msg/PredictedObjects }
-  /perception/object_recognition/tracking/output/objects: { external: both, type: autoware_perception_msgs/msg/TrackedObjects }
+  /perception/object_recognition/prediction/map_based_prediction/input/objects: { external: pub, type: autoware_perception_msgs/msg/TrackedObjects }
+  /perception/object_recognition/prediction/map_based_prediction/output/objects: { external: sub, type: autoware_perception_msgs/msg/PredictedObjects }
+  /perception/object_recognition/tracking/output/objects: { external: sub, type: autoware_perception_msgs/msg/TrackedObjects }
   /perception/perception_analytics_publisher/input/objects: { external: both, type: autoware_perception_msgs/msg/PredictedObjects }
   # ── /planning (round 2) ──
   /planning/debug/objects_of_interest/motion_velocity_planner_common: { external: both, type: visualization_msgs/msg/MarkerArray }

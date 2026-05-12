@@ -48,7 +48,10 @@ topics:
       depth: 1
 
   # relative → /system/hazard_status
-  # TODO: type — HazardStatusStamped
+  # Source: autoware_universe/system/autoware_hazard_status_converter/src/converter.cpp
   hazard_status:
-    type: TODO/msg/TODO
+    type: autoware_system_msgs/msg/HazardStatusStamped
     pub: [hazard_status_converter/hazard_status]
+    qos:
+      reliability: reliable
+      depth: 1

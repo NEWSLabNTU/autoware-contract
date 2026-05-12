@@ -53,3 +53,11 @@ topics:
     qos:
       reliability: reliable           # QoS(1)
       depth: 1
+
+  # Pre-remap alias — the tracker also publishes on its own namespace
+  # (`/perception/.../tracking/output/objects`) alongside the remapped
+  # `/perception/object_recognition/tracking/objects`.
+  /perception/object_recognition/tracking/output/objects:
+    type: autoware_perception_msgs/msg/TrackedObjects
+    pub: [multi_object_tracker/tracked_objects]
+    qos: { reliability: reliable, depth: 1 }

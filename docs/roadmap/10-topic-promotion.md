@@ -26,11 +26,11 @@ the promoted topics, instead of just the type check that
 
 | Metric | Count |
 |--------|------:|
-| Leaf-declared topics (`topics:`) | **156** |
-| `external: both` orphans | **707** |
-| `external: pub` (half) | **30** |
-| `external: sub` (half) | **74** |
-| Total `external_topics:` entries | **811** |
+| Leaf-declared topics (`topics:`) | **161** |
+| `external: both` orphans | **697** |
+| `external: pub` (half) | **34** |
+| `external: sub` (half) | **77** |
+| Total `external_topics:` entries | **808** |
 
 Static `play_launch check`: 63 manifests, 0 errors, 0 warnings.
 Runtime `play_launch ... --enforce-rules=warn` on planning_simulator:
@@ -94,7 +94,7 @@ Source: `autoware_mrm_handler/mrm_handler.yaml`. 8 inputs + 5 outputs.
 - [x] inputs: `/system/mrm_handler/input/{api/operation_mode/state, control_mode, gear, mrm/{comfortable_stop,emergency_stop,pull_over}/status, odometry, operation_mode_availability}`
 - [x] outputs: `/system/mrm_handler/output/{emergency_holding, gear, hazard, mrm/state, turn_indicators}`
 
-### Round 6 — MRM operators + hazard_status_converter (in progress)
+### Round 6 — MRM operators + hazard_status_converter (8 / 9)
 
 Source: `autoware_mrm_comfortable_stop_operator/`,
 `autoware_mrm_emergency_stop_operator/`, `autoware_hazard_status_converter/`.
@@ -104,10 +104,28 @@ Source: `autoware_mrm_comfortable_stop_operator/`,
 - [x] `/system/mrm/emergency_stop/control_cmd` — emergency_stop_operator pub
 - [x] `/system/emergency_holding` — mrm_handler pub + hazard_status_converter sub
 - [x] `/control/command/control_cmd` (sub side wired in emergency_stop_operator)
-- [ ] `/system/velocity_limit` — comfortable_stop_operator (TODO type field)
-- [ ] `/system/velocity_limit/clear` — same (TODO type)
-- [ ] `/system/hazard_status` — hazard_status_converter (TODO type)
-- [ ] `/system/mrm/pull_over_manager/status` — needs leaf manifest for pull_over_manager package
+- [x] `/system/velocity_limit` — comfortable_stop_operator, `autoware_internal_planning_msgs/msg/VelocityLimit` reliable+transient_local+1
+- [x] `/system/velocity_limit/clear` — same, `VelocityLimitClearCommand`
+- [x] `/system/hazard_status` — hazard_status_converter, `autoware_system_msgs/msg/HazardStatusStamped`
+- [ ] `/system/mrm/pull_over_manager/status` — needs leaf manifest for pull_over_manager package (not present in this Autoware install)
+
+### Round 7 — Vehicle + perception (7 / 7)
+
+Vehicle interface package outputs (4 — package is outside the contract
+tree; entries flipped to `external: pub` to declare the upstream as
+external):
+
+- [x] `/vehicle/command/manual_control_cmd`
+- [x] `/vehicle/command/manual_gear_command`
+- [x] `/vehicle/status/actuation_status`
+- [x] `/vehicle/status/battery_charge`
+
+Perception pre-remap aliases (3 — declared alongside the canonical
+remapped topics in the respective leaf manifests):
+
+- [x] `/perception/object_recognition/prediction/map_based_prediction/input/objects`
+- [x] `/perception/object_recognition/prediction/map_based_prediction/output/objects`
+- [x] `/perception/object_recognition/tracking/output/objects`
 
 ### Pending clusters
 
