@@ -32,9 +32,10 @@ source-annotated diagnostics.
 
 This repository is a **user overlay**: point `--contracts <dir>` at a checkout
 of this repo to supply contracts for packages that ship none of their own.
-play_launch resolves contracts per scope in overlay → provider sidecar →
-legacy order, so this repo only fills coverage gaps rather than replacing
-contracts a package already ships.
+play_launch resolves contracts per scope in overlay → provider sidecar
+order: a file in this repo takes precedence over a sidecar the package
+ships, and fills the gap when the package ships none (the common case —
+Autoware packages ship no contracts today).
 
 ## Repository Layout
 
