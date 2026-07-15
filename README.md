@@ -16,11 +16,11 @@ cycles are caught at authoring time.
 pip install play_launch
 
 # Check contracts against Autoware planning_simulator
-play_launch check --manifest-dir . \
+play_launch check --contracts . \
     autoware_launch planning_simulator.launch.xml
 
 # With launch arguments
-play_launch check --manifest-dir . \
+play_launch check --contracts . \
     autoware_launch planning_simulator.launch.xml \
     vehicle_model:=sample_vehicle sensor_model:=sample_sensor_kit
 ```
@@ -30,17 +30,23 @@ includes which, under what namespace), loads manifest files for each scope,
 applies namespace prefixes, and runs 15 static validation rules with
 source-annotated diagnostics.
 
+This repository is a **user overlay**: point `--contracts <dir>` at a checkout
+of this repo to supply contracts for packages that ship none of their own.
+play_launch resolves contracts per scope in overlay → provider sidecar →
+legacy order, so this repo only fills coverage gaps rather than replacing
+contracts a package already ships.
+
 ## Repository Layout
 
 ```
-<package_name>/<stem>.yaml
+<package_name>/launch/<stem>.contract.yaml
 ```
 
 Each manifest corresponds to one Autoware launch file. `<stem>` is the launch
 file name with `.launch.xml` or `.launch.py` stripped. For example:
 
-- `tier4_control_launch/control.yaml` ← `control.launch.xml`
-- `tier4_planning_launch/motion_planning.yaml` ← `motion_planning.launch.xml`
+- `tier4_control_launch/launch/control.contract.yaml` ← `control.launch.xml`
+- `tier4_planning_launch/launch/motion_planning.contract.yaml` ← `motion_planning.launch.xml`
 
 Scopes without entities (pass-through includes, parameter loaders) don't need
 manifest files — they are silently skipped by the checker.

@@ -4,13 +4,13 @@ play_launch := env("PLAY_LAUNCH", "play_launch")
 
 # Check all manifests against Autoware planning_simulator
 check:
-    {{play_launch}} check --manifest-dir . \
+    {{play_launch}} check --contracts . \
         autoware_launch planning_simulator.launch.xml \
         map_path:=/tmp/dummy_map
 
 # Check with explicit vehicle/sensor args
 check-with-args:
-    {{play_launch}} check --manifest-dir . \
+    {{play_launch}} check --contracts . \
         autoware_launch planning_simulator.launch.xml \
         map_path:=/tmp/dummy_map \
         vehicle_model:=sample_vehicle \
@@ -19,7 +19,7 @@ check-with-args:
 # Check satisfiability — verifies all typed-arg combinations are valid
 # Requires: control.yaml has type: bool on 4 launch flags (16 configs)
 check-sat:
-    {{play_launch}} check --manifest-dir . \
+    {{play_launch}} check --contracts . \
         autoware_launch planning_simulator.launch.xml \
         map_path:=/tmp/dummy_map 2>&1 \
         | grep -E "satisfiability|unreachable" || echo "No satisfiability issues found"
