@@ -20,6 +20,7 @@ nodes:
     sub:
       control_cmd:                              # /control/command/control_cmd — QoS(1)
         min_rate_hz: 30
+        state: true                               # polled: lambda-store + 40 Hz timer read (simple_planning_simulator.cpp); same pattern as gear_cmd et al. Breaks the vehicle_cmd_gate→sim→controller cycle (play_launch Phase 42 study Q1).
       gear_cmd:                                 # /control/command/gear_cmd — QoS(1)
         state: true
       turn_indicators_cmd:                      # /control/command/turn_indicators_cmd — QoS(1)
