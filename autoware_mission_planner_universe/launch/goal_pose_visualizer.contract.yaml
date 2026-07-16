@@ -7,6 +7,9 @@ version: 1
 
 nodes:
   goal_pose_visualizer:
+    # Phase 41.5 mapper hint: low — pure visualization echo (route -> RViz
+    # goal-pose marker), no actuation or planning consequence if delayed.
+    criticality: low
     sub:
       input_route:                              # input/route → /planning/mission_planning/route
         state: true                             # QoS transient_local

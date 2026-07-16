@@ -7,6 +7,10 @@ version: 1
 
 nodes:
   pipeline_latency_monitor:
+    # Phase 41.5 mapper hint: low — observability/diagnostics only; monitors
+    # the pipeline, does not participate in it, so it has no control-loop
+    # deadline of its own.
+    criticality: low
     sub:
       topics_to_monitor:
         state: true

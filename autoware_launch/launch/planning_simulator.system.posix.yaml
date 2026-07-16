@@ -1,37 +1,55 @@
-# TEMPORARY platform overlay for P44 W6 chain_aware-at-scale validation.
-# Root-scope posix platform file for planning_simulator.launch.xml, same
-# layout convention as the contract overlay: <pkg>/launch/<stem>.system.
-# <target>.yaml, same <stem> as autoware_launch/launch/
-# planning_simulator.contract.yaml.
+# User overlay platform file for the ROOT scope of planning_simulator.launch.xml
+# (vocabulary-v2 / chain-aware scheduling — see the play_launch repo's
+# rt-config-v2-design.md and chain-aware-mapper-design.md). Path matches the
+# contract overlay layout: <pkg>/launch/<stem>.system.<target>.yaml, same
+# <stem> as autoware_launch/launch/planning_simulator.contract.yaml.
 #
-# Supersedes (for this validation run only) the Phase 41 `rate_monotonic`
-# platform file recorded on the unmerged `rt/v2-platform` branch of this
-# repo (never merged to main) — this file is NOT meant to replace that
-# work; it exists to exercise `chain_aware` end-to-end against a real,
-# large (75+ contract) corpus per Phase 44 W6. `mapper: chain_aware` is the
-# only functional change from that branch's platform file; band widened to
-# 5-45 per the W6 task brief (was 5-45 already on rt/v2-platform — kept
-# unchanged) and the two Phase 41.5 overrides are carried forward verbatim
-# (same FQNs, confirmed against a real `play_launch dump` of this launch
-# file — see W6 report).
+# This repo ships no provider sidecar platform files (Autoware packages ship
+# no sched config today, same as contracts — see README "Quick Start"), so
+# this overlay is the only posix platform file on the resolution chain; it
+# wins via the overlay channel when invoked with
+# `--contracts <this repo> --target posix`.
+#
+# mapper: chain_aware — the contracts in this repo now declare explicit path
+# triggers and end-to-end `chains:` (planning_to_trajectory,
+# control_to_actuation, planning_to_actuation — see
+# planning_simulator.contract.yaml), so chain-aware scheduling is the right
+# model: it segments each chain at clock boundaries, ranks event segments
+# drain-toward-sink, and orders chains by criticality then controllable slack.
+# Nodes not on any chain fall back to criticality-bucketed rate/deadline
+# monotonic; nodes with no timing facts land on SCHED_OTHER (reported as
+# `default (no timing facts)` by --explain). Switch `mapper: rate_monotonic`
+# here for the simpler flat per-node rate ordering if chains are not wanted.
 target: posix
 mapper: chain_aware
 
 resources:
-  # Same band as the (unmerged) Phase 41 rt/v2-platform platform file:
-  # widened at the bottom (5, not rt_workspace demo's 10) because Autoware's
-  # derived rate/chain spread is wide across 119 entities.
+  # Priority band widened at the bottom (5, not the rt_workspace demo's 10)
+  # because Autoware's derived rate/chain spread is wide (10 Hz planning
+  # nodes up to 100 Hz-class sensor/perception nodes) and 119 entities is
+  # enough ranked competition that a narrow band forces many nodes onto the
+  # same priority. isolated_cpus intentionally omitted: this is a generic
+  # developer-machine platform file, not pinned to a specific core layout
+  # (contrast the rt_workspace demo's `isolated_cpus: [0]`) — a real
+  # vehicle-computer deployment would add it back.
   rt_priority_band: { min: 5, max: 45 }
 
 overrides:
-  # Phase 41 overrides, carried forward unchanged (confirmed against
-  # `play_launch dump`'s load_node FQNs: namespace=/control/
+  # Control-loop nodes on the actuation path, confirmed against a real
+  # `play_launch dump`'s load_node FQNs (namespace=/control/
   # trajectory_follower, node_name=controller_node_exe; namespace=/control,
-  # node_name=vehicle_cmd_gate — see tests/fixtures/autoware, W6 report).
-  # Both are `criticality: high` where declared in their own contracts
-  # (control.contract.yaml) — not consumed by chain_aware's ranking today
-  # (chain_aware ranks by chain membership + criticality-desc chain
-  # ordering, not per-node override input) but these overrides still win
-  # downstream of the mapper, same as under rate_monotonic.
+  # node_name=vehicle_cmd_gate). Both are `criticality: high` in their own
+  # contracts (control.contract.yaml) — which chain_aware DOES consume for
+  # chain ordering — but these explicit pins additionally guarantee their
+  # absolute band position and always win downstream of the mapper.
+
+  # Trajectory-tracking controller (~33 Hz control_cmd timer). Pinned rather
+  # than left to the derived rank so it can never tie with or rank below
+  # sensor-side nodes whose deadlines are far looser in practice.
   /control/trajectory_follower/controller_node_exe: { priority: 40 }
+
+  # Vehicle command gate — last node before the vehicle interface; arbitrates
+  # auto/external/emergency control commands. Pinned one below the controller:
+  # it must run above everything derived, but it is a fast pass-through
+  # arbiter, not the control-law computation itself.
   /control/vehicle_cmd_gate: { priority: 39 }

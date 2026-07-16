@@ -30,6 +30,12 @@ nodes:
   # plugin: autoware::motion::control::trajectory_follower_node::Controller
   # ns: trajectory_follower (in control.launch.xml line 159)
   controller_node_exe:
+    # Phase 41.5 mapper hint (rt-config-v2-design.md §2.1): high — this is the
+    # trajectory-tracking control loop; a late/dropped control_cmd cycle
+    # directly degrades vehicle tracking. No numbers here, just a rank hint
+    # for future criticality-aware mappers (rate_monotonic/deadline_monotonic
+    # don't consume it yet — see autoware-v2-report.md).
+    criticality: high
     sub:
       # All 5 subs below (incl. operation_mode) are InterProcessPollingSubscriber
       # — take-latest, read only via createInputData() at the top of each
@@ -203,6 +209,12 @@ nodes:
   # Source: autoware_universe/control/autoware_vehicle_cmd_gate/src/vehicle_cmd_gate.cpp
   # See also detached reference manifest: autoware_vehicle_cmd_gate/vehicle_cmd_gate.yaml
   vehicle_cmd_gate:
+    # Phase 41.5 mapper hint: high — last-mile arbiter/gate between planning
+    # and the vehicle interface; it is the single point where auto/external/
+    # emergency control commands are selected before actuation. Source:
+    # autoware_vehicle_cmd_gate/src/vehicle_cmd_gate.cpp (safety-relevant
+    # filtering + emergency override logic lives here).
+    criticality: high
     sub:
       auto_control_cmd:                          # input/auto/control_cmd → /control/trajectory_follower/control_cmd
         min_rate_hz: 30
