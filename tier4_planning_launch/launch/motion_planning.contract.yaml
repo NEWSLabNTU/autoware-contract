@@ -37,7 +37,9 @@ nodes:
       output_path:              # path_smoother/path — remap ~/output/path
         min_rate_hz: 10
     paths:
-      main:
+      smooth_path:              # P44 W6: renamed from `main` — unique path name
+                                 # required for chain `{scope, path}` resolution
+                                 # (this scope hosts 3 nodes that all used `main`).
         input: input_path
         output: [output_path]
         max_latency_ms: 10      # elastic band optimization is iterative but fast
@@ -56,7 +58,7 @@ nodes:
       output_trajectory:        # path_optimizer/trajectory — remap ~/output/path (note: Path→Trajectory)
         min_rate_hz: 10
     paths:
-      main:
+      optimize_path:            # P44 W6: renamed from `main` — see smooth_path comment
         input: input_path
         output: [output_trajectory]
         max_latency_ms: 15      # quadratic optimization
@@ -90,7 +92,7 @@ nodes:
       velocity_limit: {}        # /planning/scenario_planning/max_velocity_candidates — QoS(1).transient_local()
       clear_velocity_limit: {}  # /planning/scenario_planning/clear_velocity_limit — QoS(1).transient_local()
     paths:
-      main:
+      plan_velocity:            # P44 W6: renamed from `main` — see smooth_path comment
         input: input_trajectory
         output: [output_trajectory]
         max_latency_ms: 20      # includes velocity planning + collision avoidance modules

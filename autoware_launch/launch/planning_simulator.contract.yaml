@@ -57,7 +57,9 @@ external_topics:
 
   # Out-of-tree producers (Autoware nodes whose leaf manifests are not
   # yet authored in this repo)
-  /planning/trajectory: { external: pub }
+  # /planning/trajectory: now declared in-tree (P44 W6 gap closure) —
+  # produced by planning_validator, see
+  # autoware_planning_validator/launch/planning_validator.contract.yaml.
   /planning/scenario_planning/max_velocity_default: { external: pub }
   /occupancy_grid_map/concatenated/pointcloud: { external: pub }
 
@@ -67,6 +69,10 @@ external_topics:
   #
   # Visualization / debug
   /visualization: { external: sub }
+  # planning_validator's validation_status (P44 W6 new contract) — consumed
+  # by external monitoring/dashboards, same pattern as
+  # /control/control_validator/validation_status below.
+  /planning_validator/validation_status: { external: sub, type: autoware_planning_validator/msg/PlanningValidatorStatus }
   /planning/mission_planning/manual_lane_change_handler/debug/processing_time_ms: { external: sub }
   /planning/mission_planning/manual_lane_change_handler/debug/shift_number: { external: sub }
   /planning/mission_planning/echo_back_goal_pose: { external: sub }
@@ -96,7 +102,9 @@ external_topics:
   /planning/turn_indicators_cmd: { external: sub }
   /planning/scenario_planning/current_max_velocity: { external: sub }
   /planning/scenario_planning/parking/costmap_generator/grid_map: { external: sub }
-  /planning/scenario_planning/velocity_smoother/trajectory: { external: sub }
+  # /planning/scenario_planning/velocity_smoother/trajectory: now consumed
+  # in-tree by planning_validator (P44 W6 gap closure) — no longer an
+  # external consumer.
   /map/map_projector_info: { external: sub }
   /map_hash: { external: sub }
   /pointcloud_map: { external: sub }
@@ -933,3 +941,107 @@ includes:
     manifest: autoware_launch/tier4_map_component.yaml
   api:
     manifest: autoware_launch/tier4_autoware_api_component.yaml
+
+# ───────────────────────────────────────────────────────────
+# P44 W6: end-to-end chains, root-scope owned (same owner as the platform
+# file). Two chains, not one `sensing_to_actuation` — for two independent
+# reasons, both discovered empirically by running `check` and iterating
+# (as instructed), not by reading the spec alone:
+#
+# 1. **No sensing in this launch tree.** planning_simulator.launch.xml runs
+#    with launch_sensing=false and launch_perception=false by default
+#    (autoware_launch/autoware_launch/launch/planning_simulator.launch.xml:
+#    65,67 — confirmed by this scope's own launch tree: no /perception or
+#    /sensing scope appears in `play_launch context --tree` for this launch
+#    file at all). A real sensor→actuation chain does not exist in THIS
+#    launch file's running topology. What DOES run closed-loop regardless
+#    of the sensing/perception flags is the full planning+control loop,
+#    driven by the simulated vehicle model (autoware_simple_planning_
+#    simulator) standing in for localization+vehicle feedback.
+#    What's still missing for a real sensing_to_actuation chain: the
+#    perception pipeline (pointcloud preprocessing/concatenation,
+#    detection, tracking, prediction — CropBoxFilter,
+#    concatenate_and_time_sync_node, CalibrationStatusClassifierNode from
+#    the P42/P44 W3 census) has zero authored contracts in this repo and
+#    is not part of planning_simulator's default launch tree — extending
+#    either chain below to a real sensor origin requires authoring
+#    tier4_perception_launch/tier4_sensing_launch contracts against a
+#    launch file that actually enables them (out of this wave's scope).
+#
+# 2. **A `chain-link`-enforced topology constraint** (discovered running
+#    `check`, not documented in the vocabulary-v2/chain-aware-mapper design
+#    docs): a `trigger: { timer: ... }` (Boundary) path segment can only
+#    ever be the FIRST element of a chain. `chain_checks::check_one_chain`
+#    validates every `via:` against `next.input_topics`, which is built
+#    ONLY from `EffectiveTrigger::Input` (`chain_checks.rs:306-309`) — a
+#    Timer-triggered segment always resolves to `input_topics: []`, so ANY
+#    via placed before a non-first Timer segment is a guaranteed
+#    `chain-link` error ("via topic ... is not consumed by the following
+#    segment ... inputs: []"). A Boundary CAN be the source of an outgoing
+#    via (its `output_topics` are populated unconditionally from
+#    `path.output`), so `Boundary → via → Segment → via → Segment → ...`
+#    works (this is exactly rt_workspace's W5 fixture shape, and this
+#    repo's `planning_to_trajectory` chain below), but
+#    `... → Segment → via → Boundary → via → Segment → ...` — i.e. a
+#    SECOND boundary anywhere but first position — cannot be expressed.
+#    This blocked the originally-planned single 10-hop chain crossing
+#    behavior_path_planner (Boundary) → ... → controller_node_exe
+#    (Boundary) → vehicle_cmd_gate → simple_planning_simulator (Boundary):
+#    two of those three Boundaries are non-first and are therefore
+#    impossible to declare. Reported as a genuine implementation gap in
+#    the W6 report (not a schema gap — `EffectiveTrigger::Timer` simply
+#    has no declared "input" by design; the checker would need a
+#    documented, deliberate rule for what a boundary "consumes" before a
+#    non-first Timer segment could ever satisfy `chain-link`).
+#
+# So: the LONGEST chain fully supported by now-declared paths is the
+# 8-hop, single-boundary-first `planning_to_trajectory` chain (closes
+# exactly at the P44 W6 gap-closure point, /planning/trajectory). A
+# second, independent 2-hop `control_to_actuation` chain demonstrates the
+# chain_aware mapper against real vehicle-actuation output
+# (/control/command/control_cmd) — it cannot be merged into the first
+# chain per the constraint above.
+chains:
+  planning_to_trajectory:
+    semantics: reaction
+    max_latency_ms: 300
+    # Budget derivation (chain-budget's declared arithmetic): sampling_cost
+    # = boundary periods + their own max_latency_ms — only one boundary
+    # (behavior_path_planner is first; every other segment is
+    # `trigger: input`, per constraint #2 above):
+    #   behavior_path_planner: 1000/10 + 50 = 150ms
+    # + non-boundary (event) segments' own declared max_latency_ms:
+    #   behavior_velocity_planner 30 + smooth_path 10 + optimize_path 15
+    #   + plan_velocity 20 + select_scenario 5 + smooth_velocity 15
+    #   + validate 10                                          = 105ms
+    # total = 150 + 105 = 255ms ≤ 300ms declared budget (45ms honest
+    # slack) — passes both `chain-budget` and `chain-sampling-feasibility`
+    # cleanly; verified via `check --explain` (see W6 report).
+    segments:
+      - { scope: /planning/scenario_planning/lane_driving/behavior_planning, path: periodic }
+      - { via: /planning/scenario_planning/lane_driving/behavior_planning/path_with_lane_id }
+      - { scope: /planning/scenario_planning/lane_driving/behavior_planning, path: main }
+      - { via: /planning/scenario_planning/lane_driving/behavior_planning/path }
+      - { scope: /planning/scenario_planning/lane_driving/motion_planning, path: smooth_path }
+      - { via: /planning/scenario_planning/lane_driving/motion_planning/smoothed_path }
+      - { scope: /planning/scenario_planning/lane_driving/motion_planning, path: optimize_path }
+      - { via: /planning/scenario_planning/lane_driving/motion_planning/optimized_trajectory }
+      - { scope: /planning/scenario_planning/lane_driving/motion_planning, path: plan_velocity }
+      - { via: /planning/scenario_planning/lane_driving/trajectory }
+      - { scope: /planning/scenario_planning, path: select_scenario }
+      - { via: /planning/scenario_planning/scenario_selector/trajectory }
+      - { scope: /planning/scenario_planning, path: smooth_velocity }
+      - { via: /planning/scenario_planning/velocity_smoother/trajectory }
+      - { scope: /planning, path: validate }
+
+  control_to_actuation:
+    semantics: reaction
+    max_latency_ms: 60
+    # sampling_cost (controller_node_exe, first/only boundary):
+    #   1000/33.3 + 10 = 40.03ms
+    # + vehicle_cmd_gate.command's own declared max_latency_ms: 10ms
+    # total ≈ 50.03ms ≤ 60ms declared budget (~10ms honest slack).
+    segments:
+      - { scope: /, path: main }
+      - { via: /control/trajectory_follower/control_cmd }
+      - { scope: /, path: command }
