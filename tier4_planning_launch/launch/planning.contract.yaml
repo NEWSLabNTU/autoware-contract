@@ -21,7 +21,8 @@ includes:
     manifest: tier4_planning_launch/mission_planning.yaml
   scenario_planning:
     manifest: tier4_planning_launch/scenario_planning.yaml
-  # planning_validator: no manifest yet (leaf node)
+  planning_validator:
+    manifest: autoware_planning_validator/planning_validator.yaml
   # planning_evaluator: no manifest yet (leaf node)
   remaining_distance_time_calculator:
     if: $(var launch_remaining_distance_time_calculator)

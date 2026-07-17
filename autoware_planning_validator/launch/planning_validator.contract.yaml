@@ -1,0 +1,130 @@
+# autoware_planning_validator/planning_validator.launch.xml
+# Namespace: /planning (composable in planning_validator_container)
+#
+# Closes the P44 W6 `/planning/trajectory` gap (play_launch Phase 42 Q3 study,
+# docs/research/autoware-system-model.md §5): the declared graph had 5 subs of
+# /planning/trajectory and 0 declared pubs anywhere in this repo. Source
+# inspection (this file) found the actual bridge: NOT scenario_selector or
+# velocity_smoother directly (both already end at
+# /planning/scenario_planning/velocity_smoother/trajectory — see
+# tier4_planning_launch/scenario_planning.contract.yaml) — it is
+# `planning_validator`, republishing under /planning/trajectory after
+# validation. This contract was previously unauthored ("planning_validator: no
+# manifest yet (leaf node)" — see tier4_planning_launch/planning.contract.yaml,
+# now wired in).
+#
+# Sources:
+#   launch:  /opt/autoware/1.5.0/share/autoware_planning_validator/launch/planning_validator.launch.xml
+#   parent:  /opt/autoware/1.5.0/share/tier4_planning_launch/launch/planning.launch.xml (lines 48-61:
+#            input_trajectory = /planning/scenario_planning/velocity_smoother/trajectory,
+#            output_trajectory = /planning/trajectory)
+#   source:  autoware_universe/planning/planning_validator/autoware_planning_validator/src/node.cpp
+
+args:
+  input_objects_topic_name:
+  input_pointcloud_topic_name:
+
+version: 1
+
+nodes:
+  # Event-driven, triggered by trajectory arrival — the same junction shape as
+  # VelocitySmootherNode (P44 W3 census): sub_trajectory_ is the sole
+  # create_subscription-bound trigger (node.cpp:34-36), calling onTrajectory()
+  # directly; publishTrajectory() runs synchronously inside that callback
+  # (node.cpp:108-146, publish at :166-172) — 1:1 with the trajectory input,
+  # not self-clocked. 6 auxiliary inputs (route, lanelet_map, pointcloud,
+  # kinematics, acceleration, operation_mode, traffic_signals) are all
+  # InterProcessPollingSubscriber, polled via .take_data() inside
+  # onTrajectory()/setData() (node.cpp:99-105,117), not independent triggers.
+  planning_validator:
+    sub:
+      trajectory:                    # ~/input/trajectory ← /planning/scenario_planning/velocity_smoother/trajectory — QoS(1), node.cpp:34-36
+        min_rate_hz: 10
+      route:                         # ~/input/route ← /planning/mission_planning/route — QoS(1).transient_local(), node.hpp:83
+        state: true
+      lanelet_map:                   # ~/input/lanelet_map_bin ← /map/vector_map — QoS(1).transient_local(), node.hpp:86
+        state: true
+      pointcloud:                    # ~/input/pointcloud ← $(input_pointcloud_topic_name) — polled, node.hpp:87
+        state: true
+      kinematics:                    # ~/input/kinematics ← /localization/kinematic_state — polled, node.hpp:89
+        state: true
+      acceleration:                  # ~/input/acceleration ← /localization/acceleration — polled, node.hpp:91
+        state: true
+      operation_mode:                # ~/input/operational_mode_state ← /system/operation_mode/state — polled, node.hpp:93
+        state: true
+      traffic_signals:               # ~/input/traffic_signals ← $(input_traffic_light_topic_name) — polled, node.hpp:95
+        state: true
+      # ~/input/objects ← $(input_objects_topic_name) — remapped in the launch
+      # file (planning_validator.launch.xml:47) but not read by node.cpp
+      # itself; consumed by an optional validator plugin module (selected via
+      # the `launch_modules` param, e.g. an intersection/rear collision
+      # checker) not traced in this study. Declared external here rather than
+      # guessed as a node sub.
+    pub:
+      output_trajectory:             # ~/output/trajectory → /planning/trajectory — QoS(1), node.cpp:39
+        min_rate_hz: 10
+      validation_status: {}          # ~/output/validation_status (renamed ~/validation_status by launch remap) — QoS(1)
+    paths:
+      validate:
+        trigger: { input: [trajectory] }
+        output: [output_trajectory]
+        max_latency_ms: 10           # validation checks + republish; P44 W6 estimate (no direct source WCET)
+
+topics:
+  /planning/scenario_planning/velocity_smoother/trajectory:
+    type: autoware_planning_msgs/msg/Trajectory
+    sub: [planning_validator/trajectory]
+    qos:
+      reliability: reliable
+      depth: 1
+
+  # The gap-closing pub: previously declared only as
+  # `external_topics: { /planning/trajectory: { external: pub } }` in
+  # autoware_launch/planning_simulator.contract.yaml with no producer anywhere
+  # in this repo (P44 Q3 finding). Now declared here.
+  /planning/trajectory:
+    type: autoware_planning_msgs/msg/Trajectory
+    pub: [planning_validator/output_trajectory]
+    rate_hz: 10
+    qos:
+      reliability: reliable
+      depth: 1
+
+  /planning/mission_planning/route:
+    type: autoware_planning_msgs/msg/LaneletRoute
+    sub: [planning_validator/route]
+    qos:
+      reliability: reliable
+      durability: transient_local
+      depth: 1
+
+  /map/vector_map:
+    type: autoware_map_msgs/msg/LaneletMapBin
+    sub: [planning_validator/lanelet_map]
+    qos:
+      reliability: reliable
+      durability: transient_local
+      depth: 1
+
+  /localization/kinematic_state:
+    type: nav_msgs/msg/Odometry
+    sub: [planning_validator/kinematics]
+    qos:
+      reliability: reliable
+      depth: 1
+
+  /localization/acceleration:
+    type: geometry_msgs/msg/AccelWithCovarianceStamped
+    sub: [planning_validator/acceleration]
+
+  /system/operation_mode/state:
+    type: autoware_adapi_v1_msgs/msg/OperationModeState
+    sub: [planning_validator/operation_mode]
+    qos:
+      reliability: reliable
+      durability: transient_local
+      depth: 1
+
+  /planning_validator/validation_status:
+    type: autoware_planning_validator/msg/PlanningValidatorStatus
+    pub: [planning_validator/validation_status]
