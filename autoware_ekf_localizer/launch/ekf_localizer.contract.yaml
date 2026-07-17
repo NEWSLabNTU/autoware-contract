@@ -15,11 +15,20 @@ version: 1
 nodes:
   ekf_localizer:
     sub:
+      # Bounded queue-drain (P44 W3 census), not take-latest: callback_pose_
+      # with_covariance/callback_twist_with_covariance PUSH into
+      # pose_queue_/twist_queue_ (ekf_localizer.cpp:286-309); timer_callback()
+      # DRAINS the entire queue each tick via pop_increment_age()
+      # (ekf_localizer.cpp:137-215) — multiple measurements between ticks are
+      # all consumed (not just the newest), unlike every other sub in this
+      # census. Backlog growth (not staleness) is the failure mode here.
       in_pose_with_covariance:                  # ~/in_pose_with_covariance ← pose estimator
         state: true
+        buffer: queue
       in_twist_with_covariance:                 # ~/in_twist_with_covariance ← twist estimator
         state: true
-      initialpose:                              # ~/initialpose ← pose_initializer
+        buffer: queue
+      initialpose:                              # ~/initialpose ← pose_initializer — plain lambda take-latest, not queued
         state: true
     pub:
       kinematic_state:                          # ~/kinematic_state → /localization/kinematic_state — QoS(1)
@@ -40,7 +49,11 @@ nodes:
         state: true
     paths:
       main:
-        input: in_pose_with_covariance
+        # Timer at ekf_dt_ (fixed period; predict_frequency 50 Hz default —
+        # autoware_launch/config/localization/ekf_localizer.param.yaml:6),
+        # created ekf_localizer.cpp:61-63. Self-clocked predict/update publish
+        # every tick, draining both queue subs above. P44 W3 census.
+        trigger: { timer: { rate_hz: 50 } }
         output: [kinematic_state, pose, twist]
         max_latency_ms: 20                      # ekf step + publish
 

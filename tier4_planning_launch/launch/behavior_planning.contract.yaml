@@ -55,8 +55,14 @@ nodes:
       hazard_lights_cmd: {}         # /planning/behavior_path_planner/hazard_lights_cmd — QoS(1)
       modified_goal: {}             # /planning/scenario_planning/modified_goal — QoS(1).transient_local()
     paths:
-      periodic:                     # timer-driven — rate independent of upstream
-        input: []
+      periodic:
+        # Timer at planning_hz (10 Hz default;
+        # autoware_behavior_path_planner/config/behavior_path_planner.param.yaml:5),
+        # created behavior_path_planner_node.cpp:140-145; all 9 subs above are
+        # InterProcessPollingSubscriber / lambda take-latest, sampled in
+        # takeData() at the top of run() (behavior_path_planner_node.cpp:
+        # 174-261), gated by isDataReady(). P44 W3 census.
+        trigger: { timer: { rate_hz: 10 } }
         output: [path_with_lane_id]
         max_latency_ms: 50          # planning cycle budget
 

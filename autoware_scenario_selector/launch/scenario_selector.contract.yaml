@@ -55,7 +55,14 @@ nodes:
         min_rate_hz: 10
       scenario: {}                  # output/scenario — QoS(1)
     paths:
-      main:
+      select_scenario:               # P44 W6: renamed from `main` — this node
+                                      # shares its scope namespace
+                                      # (/planning/scenario_planning) with
+                                      # velocity_smoother (scenario_planning.
+                                      # contract.yaml), which also used `main`;
+                                      # chain `{scope, path}` resolution matches
+                                      # by name across every node in the scope,
+                                      # so both needed unique names.
         input: lane_driving_trajectory
         output: [output_trajectory]
         max_latency_ms: 5           # simple selection, no computation

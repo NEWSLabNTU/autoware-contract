@@ -57,8 +57,13 @@ nodes:
       set_pose:                                 # /api/simulator/set/pose — tier4_external_api_msgs/srv/InitializePose — SERVER
         # simulation only — no response time requirement
     paths:
-      periodic:                                 # timer-driven — rate independent of upstream
-        input: []
+      periodic:
+        # Timer at timer_sampling_time_ms (25ms default -> 40Hz), self-clocked;
+        # all 9 subs are lambda take-latest, read only inside on_timer().
+        # simple_planning_simulator_core.cpp:192-194 (timer), :464-529 (on_timer
+        # publishes). P44 W3 census. Default period confirmed:
+        # autoware_simple_planning_simulator/param/simple_planning_simulator_default.param.yaml:7.
+        trigger: { timer: { rate_hz: 40 } }
         output: [odometry, velocity_status, steering_status, acceleration]
         max_latency_ms: 5
 

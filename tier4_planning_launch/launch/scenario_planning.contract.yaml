@@ -38,8 +38,19 @@ nodes:
         min_rate_hz: 10
       current_max_velocity: {}    # ~/output/current_velocity_limit_mps → /planning/scenario_planning/current_max_velocity
     paths:
-      main:
-        input: input_trajectory
+      # Event-driven, triggered by trajectory arrival (sub_current_trajectory_,
+      # bound to onCurrentTrajectory — node.cpp:65-66); the other 3 subs
+      # (external_velocity_limit, acceleration, operation_mode) are polled via
+      # .take_data() *inside* that callback (node.cpp:463-466), not
+      # independent triggers. Output published inside onCurrentTrajectory
+      # itself (node.cpp:452-511) — 1:1 with the trajectory input; rate is
+      # inherited from the trajectory publisher (scenario_selector), not
+      # self-clocked. P44 W3 census.
+      smooth_velocity:            # P44 W6: renamed from `main` — shares scope
+                                   # namespace (/planning/scenario_planning)
+                                   # with scenario_selector's `select_scenario`
+                                   # path; see that file's comment.
+        trigger: { input: [input_trajectory] }
         output: [output_trajectory]
         max_latency_ms: 15        # smoothing optimization
 

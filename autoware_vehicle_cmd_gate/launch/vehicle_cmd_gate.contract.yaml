@@ -39,7 +39,14 @@ nodes:
       # ~/input/external_emergency_stop_heartbeat → /external/selected/heartbeat
       external_emergency_stop_heartbeat: {}
       # ~/input/gate_mode → /control/gate_mode_cmd
-      gate_mode: {}
+      # Lambda take-latest (onGateMode, vehicle_cmd_gate.cpp:792-800): stores
+      # current_gate_mode_, read only by the update_rate timer (onTimer,
+      # vehicle_cmd_gate.cpp:410-411, publish at :691). Not causal — P44
+      # W3 census / vocabulary-v2 fix (was missing `state: true`, mirroring
+      # the same authoring-consistency bug found in Q1 for
+      # simple_planning_simulator's control_cmd sub).
+      gate_mode:
+        state: true
       # ~/input/emergency/control_cmd → /system/emergency/control_cmd
       emergency_control_cmd: {}
       # ~/input/emergency/turn_indicators_cmd → /system/emergency/turn_indicators_cmd (polling)
@@ -97,12 +104,23 @@ nodes:
       # ~/service/clear_external_emergency_stop → ~/clear_external_emergency_stop (deprecated; node-relative)
       clear_external_emergency_stop: {}
     paths:
+      # Hybrid node (P44 W3 census): dominant control_cmd output is
+      # event-driven (bound directly to onAutoCtrlCmd, publishes
+      # synchronously — vehicle_cmd_gate.cpp:364-370/391), bypassing the
+      # timer entirely; gate_status and the other output/* topics
+      # (gear/turn/hazard/engage/operation_mode) are timer-paced at
+      # update_rate (vehicle_cmd_gate.cpp:225-229 create_timer,
+      # onTimer():410-.. publishes at update_rate; default 10 Hz —
+      # autoware_launch/config/control/vehicle_cmd_gate/vehicle_cmd_gate.param.yaml:3).
+      # A single node-level rate_hz cannot describe this node — this is
+      # exactly why paths carry the trigger, not the node (vocabulary-v2
+      # design doc §1).
       command:
-        input: auto_control_cmd
+        trigger: { input: [auto_control_cmd] }   # onAutoCtrlCmd, direct bind — vehicle_cmd_gate.cpp:364-370
         output: [control_cmd]
-        max_latency_ms: 10                       # filter + publish at controller rate
+        max_latency_ms: 10                       # filter + publish, causal (no timer involved)
       gate_status:
-        input: gate_mode
+        trigger: { timer: { rate_hz: 10 } }       # onTimer — vehicle_cmd_gate.cpp:410-411,691; gate_mode is polled state, not the trigger
         output: [gate_mode_out]
         max_latency_ms: 50                       # status timer ~ update_rate (10 Hz default)
 
