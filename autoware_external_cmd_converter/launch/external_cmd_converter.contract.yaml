@@ -25,7 +25,7 @@ nodes:
       main:
         input: pedals_cmd
         output: [control_cmd]
-        max_latency_ms: 5                       # simple conversion, no heavy computation
+        max_latency: 5ms                       # simple conversion, no heavy computation
 
 topics:
   # Cross-scope absolute paths after launch remaps

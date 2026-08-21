@@ -30,7 +30,7 @@ nodes:
       route:                        # /planning/mission_planning/route — QoS(1).transient_local()
         state: true
         required: true
-        max_age_ms: 300             # E2E freshness incl. upstream route + perception latency
+        max_age: 300ms             # E2E freshness incl. upstream route + perception latency
       vector_map:                   # /map/vector_map — QoS(1).transient_local()
         state: true
         required: true
@@ -64,7 +64,7 @@ nodes:
         # 174-261), gated by isDataReady(). P44 W3 census.
         trigger: { timer: { rate_hz: 10 } }
         output: [path_with_lane_id]
-        max_latency_ms: 50          # planning cycle budget
+        max_latency: 50ms          # planning cycle budget
 
   # --- Behavior Velocity Planner ---
   # plugin: autoware::behavior_velocity_planner::experimental::BehaviorVelocityPlannerNode
@@ -97,7 +97,7 @@ nodes:
       main:                         # event-driven: triggered by path_with_lane_id arrival
         input: path_with_lane_id
         output: [output_path]
-        max_latency_ms: 30          # velocity planning + scene module processing
+        max_latency: 30ms          # velocity planning + scene module processing
 
 topics:
   # Path Planner → Velocity Planner (intra-container)
@@ -258,5 +258,5 @@ paths:
   behavior:
     input: /planning/mission_planning/route
     output: [path]                  # relative → /planning/scenario_planning/lane_driving/behavior_planning/path
-    max_latency_ms: 100             # path planner (50ms) + velocity planner (30ms) + margin
+    max_latency: 100ms             # path planner (50ms) + velocity planner (30ms) + margin
     # max_age_ms relocated to behavior_velocity_planner.sub.external_velocity_limit (consumer-side)

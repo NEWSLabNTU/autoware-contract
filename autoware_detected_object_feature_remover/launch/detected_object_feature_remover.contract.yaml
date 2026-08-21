@@ -17,7 +17,7 @@ nodes:
       main:
         input: input
         output: [output]
-        max_latency_ms: 5                       # simple field removal, no computation
+        max_latency: 5ms                       # simple field removal, no computation
 
 topics:
   # absolute — input from shape_estimation (remap: ~/input → /perception/object_recognition/detection/objects_with_feature)

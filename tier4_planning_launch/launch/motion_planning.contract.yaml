@@ -30,7 +30,7 @@ nodes:
     sub:
       input_path:               # behavior_planning/path — remap ~/input/path
         min_rate_hz: 10         # triggered by upstream behavior planner
-        max_age_ms: 200         # E2E freshness incl. upstream behavior planning latency
+        max_age: 200ms         # E2E freshness incl. upstream behavior planning latency
       odometry:                 # /localization/kinematic_state — InterProcessPollingSubscriber
         state: true
     pub:
@@ -42,7 +42,7 @@ nodes:
                                  # (this scope hosts 3 nodes that all used `main`).
         input: input_path
         output: [output_path]
-        max_latency_ms: 10      # elastic band optimization is iterative but fast
+        max_latency: 10ms      # elastic band optimization is iterative but fast
 
   # --- Path Optimizer ---
   # plugin: autoware::path_optimizer::PathOptimizer
@@ -66,7 +66,7 @@ nodes:
       optimize_path:            # P44 W6: renamed from `main` — see smooth_path comment
         input: input_path
         output: [output_trajectory]
-        max_latency_ms: 15      # quadratic optimization
+        max_latency: 15ms      # quadratic optimization
 
   # --- Motion Velocity Planner ---
   # plugin: autoware::motion_velocity_planner::MotionVelocityPlannerNode
@@ -106,7 +106,7 @@ nodes:
       plan_velocity:            # P44 W6: renamed from `main` — see smooth_path comment
         input: input_trajectory
         output: [output_trajectory]
-        max_latency_ms: 20      # includes velocity planning + collision avoidance modules
+        max_latency: 20ms      # includes velocity planning + collision avoidance modules
 
 topics:
   # Smoother → Optimizer (intra-container)
@@ -214,5 +214,5 @@ paths:
   motion_planning:
     input: /planning/scenario_planning/lane_driving/behavior_planning/path
     output: [/planning/scenario_planning/lane_driving/trajectory]
-    max_latency_ms: 50          # sum: 10 (smooth) + 15 (optimize) + 20 (velocity) = 45ms + margin
+    max_latency: 50ms          # sum: 10 (smooth) + 15 (optimize) + 20 (velocity) = 45ms + margin
     # max_age_ms relocated to elastic_band_smoother.sub.input_path (consumer-side)

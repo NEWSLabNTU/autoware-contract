@@ -17,7 +17,7 @@ nodes:
       main:
         input: input
         output: [objects_with_shape]
-        max_latency_ms: 10                      # shape fitting per object
+        max_latency: 10ms                      # shape fitting per object
 
 topics:
   # absolute — input from upstream perception (remap: input → /perception/object_recognition/detection/labeled_clusters)

@@ -999,7 +999,7 @@ includes:
 chains:
   planning_to_trajectory:
     semantics: reaction
-    max_latency_ms: 300
+    max_latency: 300ms
     # Budget derivation (chain-budget's declared arithmetic): sampling_cost
     # = boundary periods + their own max_latency_ms — only one boundary
     # (behavior_path_planner is first; every other segment is
@@ -1031,7 +1031,7 @@ chains:
 
   control_to_actuation:
     semantics: reaction
-    max_latency_ms: 60
+    max_latency: 60ms
     # sampling_cost (controller_node_exe, first/only boundary):
     #   1000/33.3 + 10 = 40.03ms
     # + vehicle_cmd_gate.command's own declared max_latency_ms: 10ms
@@ -1082,7 +1082,7 @@ chains:
   # `check --explain` (P44 W6 re-validation report).
   planning_to_actuation:
     semantics: reaction
-    max_latency_ms: 320
+    max_latency: 320ms
     segments:
       - { scope: /planning/scenario_planning/lane_driving/behavior_planning, path: periodic }
       - { via: /planning/scenario_planning/lane_driving/behavior_planning/path_with_lane_id }

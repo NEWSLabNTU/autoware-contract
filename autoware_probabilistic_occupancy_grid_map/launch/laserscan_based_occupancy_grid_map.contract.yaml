@@ -16,7 +16,7 @@ nodes:
       main:
         input: pointcloud
         output: [laserscan]
-        max_latency_ms: 5
+        max_latency: 5ms
 
   occupancy_grid_map:
     sub:
@@ -29,7 +29,7 @@ nodes:
       main:
         input: laserscan
         output: [occupancy_grid]
-        max_latency_ms: 20                      # ExactTime sync + grid computation
+        max_latency: 20ms                      # ExactTime sync + grid computation
 
 topics:
   # Intra-scope: pointcloud_to_laserscan output → occupancy_grid_map input
@@ -87,4 +87,4 @@ paths:
   grid_map:
     input: /perception/obstacle_segmentation/pointcloud
     output: [/perception/occupancy_grid_map/map]
-    max_latency_ms: 30
+    max_latency: 30ms

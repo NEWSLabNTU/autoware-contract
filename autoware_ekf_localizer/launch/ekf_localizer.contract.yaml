@@ -55,7 +55,7 @@ nodes:
         # every tick, draining both queue subs above. P44 W3 census.
         trigger: { timer: { rate_hz: 50 } }
         output: [kinematic_state, pose, twist]
-        max_latency_ms: 20                      # ekf step + publish
+        max_latency: 20ms                      # ekf step + publish
 
 topics:
   # Inputs (cross-scope from pose/twist estimators)

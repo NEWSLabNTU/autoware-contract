@@ -65,7 +65,7 @@ nodes:
                                       # so both needed unique names.
         input: lane_driving_trajectory
         output: [output_trajectory]
-        max_latency_ms: 5           # simple selection, no computation
+        max_latency: 5ms           # simple selection, no computation
 
 topics:
   # Inputs — topic names come from launch args (remappings)

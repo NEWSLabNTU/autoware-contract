@@ -8,7 +8,7 @@ nodes:
       startup:
         input: []
         output: [map_projector_info]
-        max_latency_ms: 1000
+        max_latency: 1000ms
 
 topics:
   # relative — resolves via scope ns (e.g. /map/map_projector_info)

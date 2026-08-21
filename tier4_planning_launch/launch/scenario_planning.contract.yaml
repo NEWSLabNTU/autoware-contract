@@ -52,7 +52,7 @@ nodes:
                                    # path; see that file's comment.
         trigger: { input: [input_trajectory] }
         output: [output_trajectory]
-        max_latency_ms: 15        # smoothing optimization
+        max_latency: 15ms        # smoothing optimization
 
 includes:
   scenario_selector:

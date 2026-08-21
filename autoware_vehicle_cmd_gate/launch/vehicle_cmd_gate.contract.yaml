@@ -118,11 +118,11 @@ nodes:
       command:
         trigger: { input: [auto_control_cmd] }   # onAutoCtrlCmd, direct bind — vehicle_cmd_gate.cpp:364-370
         output: [control_cmd]
-        max_latency_ms: 10                       # filter + publish, causal (no timer involved)
+        max_latency: 10ms                       # filter + publish, causal (no timer involved)
       gate_status:
         trigger: { timer: { rate_hz: 10 } }       # onTimer — vehicle_cmd_gate.cpp:410-411,691; gate_mode is polled state, not the trigger
         output: [gate_mode_out]
-        max_latency_ms: 50                       # status timer ~ update_rate (10 Hz default)
+        max_latency: 50ms                       # status timer ~ update_rate (10 Hz default)
 
 topics:
   # ── Outputs (resolved absolute names) ──

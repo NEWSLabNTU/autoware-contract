@@ -68,7 +68,7 @@ nodes:
       validate:
         trigger: { input: [trajectory] }
         output: [output_trajectory]
-        max_latency_ms: 10           # validation checks + republish; P44 W6 estimate (no direct source WCET)
+        max_latency: 10ms           # validation checks + republish; P44 W6 estimate (no direct source WCET)
 
 topics:
   /planning/scenario_planning/velocity_smoother/trajectory:

@@ -65,7 +65,7 @@ nodes:
         # autoware_simple_planning_simulator/param/simple_planning_simulator_default.param.yaml:7.
         trigger: { timer: { rate_hz: 40 } }
         output: [odometry, velocity_status, steering_status, acceleration]
-        max_latency_ms: 5
+        max_latency: 5ms
 
 topics:
   # Subscriptions — absolute ROS names (cross-scope inputs)
